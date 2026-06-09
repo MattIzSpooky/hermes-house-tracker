@@ -23,6 +23,7 @@ export class ListingsService {
   readonly currentListing = signal<ListingDetailResponse | null>(null);
   readonly report = signal<ListingReportResponse | null>(null);
   readonly summary = signal<AiSummaryResponse | null>(null);
+  readonly summaryNotFound = signal(false);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
@@ -53,7 +54,7 @@ export class ListingsService {
         this.loading.set(false);
       },
       error: err => {
-        this.error.set(err.error?.detail ?? 'Failed to load listing');
+        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load listing'));
         this.loading.set(false);
       },
     });
@@ -77,9 +78,10 @@ export class ListingsService {
 
   loadSummary(id: string): void {
     this.summary.set(null);
+    this.summaryNotFound.set(false);
     this.http.get<AiSummaryResponse>(`/api/listings/${id}/summary`).subscribe({
       next: data => this.summary.set(data),
-      error: () => this.summary.set(null),
+      error: () => this.summaryNotFound.set(true),
     });
   }
 

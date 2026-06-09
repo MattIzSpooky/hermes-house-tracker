@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -88,6 +88,8 @@ const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
                 <p class="text-xs text-gray-400 mt-2">
                   Generated {{ summary.generatedAt | date:'medium' }}
                 </p>
+              } @else if (svc.summaryNotFound()) {
+                <p class="text-sm text-gray-400 italic">No summary available.</p>
               } @else {
                 <div class="space-y-2">
                   <div class="h-3 bg-gray-100 rounded animate-pulse"></div>
@@ -135,10 +137,10 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
     return this.route.snapshot.paramMap.get('id')!;
   }
 
-  protected readonly isRescrapePolling = () => {
+  protected readonly isRescrapePolling = computed(() => {
     const s = this.rescrapeSession();
     return s !== null && !TERMINAL_STATUSES.includes(s.status);
-  };
+  });
 
   ngOnInit(): void {
     this.svc.loadListing(this.id);
