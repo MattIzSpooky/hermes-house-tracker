@@ -1,3 +1,10 @@
 include:
   - hermes-backend/docker-compose.yml
   - hermes-frontend/docker-compose.yml
+
+services:
+  frontend:
+    environment:
+      BACKEND_URL: http://backend:8080
+    depends_on:
+      - backend
