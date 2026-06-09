@@ -1,5 +1,403 @@
 openapi: 3.0.3
 info:
   title: Hermes API
+  description: Real estate tracking API backed by Funda.nl scraping
   version: 1.0.0
-paths: {}
+
+paths:
+  /api/scraping-sessions:
+    post:
+      operationId: createScrapingSession
+      tags: [ScrapingSessions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateScrapingSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapingSessionResponse'
+
+  /api/scraping-sessions/{id}:
+    get:
+      operationId: getScrapingSession
+      tags: [ScrapingSessions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Session found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapingSessionResponse'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/listings:
+    get:
+      operationId: getListings
+      tags: [Listings]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: Paginated listing results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingPage'
+
+  /api/listings/{id}:
+    get:
+      operationId: getListing
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Listing found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDetailResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/listings/{id}/rescrape:
+    post:
+      operationId: rescrapeListing
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Rescrape session enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapingSessionResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/listings/{id}/report:
+    get:
+      operationId: getListingReport
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReportResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/listings/{id}/summary:
+    get:
+      operationId: getListingSummary
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: AI summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiSummaryResponse'
+        '404':
+          description: Listing or summary not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateScrapingSessionRequest:
+      type: object
+      required: [city, pageLimit]
+      properties:
+        city:
+          type: string
+          example: amsterdam
+        minPrice:
+          type: integer
+          nullable: true
+        maxPrice:
+          type: integer
+          nullable: true
+        minArea:
+          type: integer
+          nullable: true
+        maxArea:
+          type: integer
+          nullable: true
+        pageLimit:
+          type: integer
+          minimum: 1
+          maximum: 5
+
+    ScrapingSessionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED, TIMED_OUT]
+        type:
+          type: string
+          enum: [SEARCH, RESCRAPE]
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    ListingPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingSummaryResponse'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+    ListingSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        street:
+          type: string
+        houseNumber:
+          type: string
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        askingPrice:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        firstSeenAt:
+          type: string
+          format: date-time
+
+    ListingDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fundaId:
+          type: string
+        url:
+          type: string
+        street:
+          type: string
+        houseNumber:
+          type: string
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        firstSeenAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        latestSnapshot:
+          $ref: '#/components/schemas/SnapshotResponse'
+
+    SnapshotResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        scrapedAt:
+          type: string
+          format: date-time
+        askingPrice:
+          type: integer
+          nullable: true
+        livingAreaM2:
+          type: integer
+          nullable: true
+        rooms:
+          type: integer
+          nullable: true
+        energyLabel:
+          type: string
+          nullable: true
+        listedOnFundaSince:
+          type: string
+          format: date
+          nullable: true
+        status:
+          type: string
+          enum: [FOR_SALE, UNDER_OFFER, SOLD, WITHDRAWN]
+          nullable: true
+
+    ListingReportResponse:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        daysListedOnFunda:
+          type: integer
+          format: int64
+          nullable: true
+        daysInHermes:
+          type: integer
+          format: int64
+        currentPrice:
+          type: integer
+          nullable: true
+        initialPrice:
+          type: integer
+          nullable: true
+        priceChangePct:
+          type: number
+          format: double
+          nullable: true
+        priceHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricePointResponse'
+        statusHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusPointResponse'
+        currentStatus:
+          type: string
+          nullable: true
+
+    PricePointResponse:
+      type: object
+      properties:
+        scrapedAt:
+          type: string
+          format: date-time
+        askingPrice:
+          type: integer
+          nullable: true
+
+    StatusPointResponse:
+      type: object
+      properties:
+        scrapedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+
+    AiSummaryResponse:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        summary:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        detail:
+          type: string
