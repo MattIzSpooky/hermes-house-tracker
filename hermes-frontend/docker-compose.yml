@@ -1,0 +1,7 @@
+services:
+  frontend:
+    build: .
+    ports:
+      - "4200:80"
+    environment:
+      BACKEND_URL: http://localhost:8080

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
@@ -24,7 +25,7 @@ public class ListingSummaryGenerationService {
     private final ChatClient.Builder chatClientBuilder;
 
     @ApplicationModuleListener
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onListingSnapshotsCreated(ListingSnapshotsCreated event) {
         ChatClient chatClient = chatClientBuilder.build();
 

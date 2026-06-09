@@ -1,0 +1,3 @@
+include:
+  - hermes-backend/docker-compose.yml
+  - hermes-frontend/docker-compose.yml
