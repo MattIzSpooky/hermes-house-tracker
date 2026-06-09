@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.scraping.internal;
 
 import com.kropholler.dev.hermes.scraping.RawListing;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,6 +17,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Slf4j
 @Component
 public class FundaScraperService {
 
@@ -41,15 +43,23 @@ public class FundaScraperService {
     }
 
     List<RawListing> scrapeSearchPage(String url, String city) {
+        log.info("Scraping Funda search page: {}", url);
         String html = restClient.get()
             .uri(url)
-            .header("User-Agent", "Mozilla/5.0 (compatible; HermesBot/1.0)")
+            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0")
             .retrieve()
             .body(String.class);
+        if (html != null) {
+            log.info("Received HTML content ({} bytes)", html.length());
+        } else {
+            log.info("Received HTML content (0 bytes)");
+        }
+
         return parseListings(html, city);
     }
 
     List<RawListing> parseListings(String html, String city) {
+        log.info(html);
         Document doc = Jsoup.parse(html);
         List<RawListing> results = new ArrayList<>();
 
