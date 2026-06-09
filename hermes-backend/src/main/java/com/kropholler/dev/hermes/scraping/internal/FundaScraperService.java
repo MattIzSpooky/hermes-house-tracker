@@ -1,19 +1,26 @@
 package com.kropholler.dev.hermes.scraping.internal;
 
 import com.kropholler.dev.hermes.scraping.RawListing;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserContext;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
+import com.microsoft.playwright.options.WaitUntilState;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,44 +29,74 @@ import java.util.regex.Pattern;
 public class FundaScraperService {
 
     private static final String BASE_URL = "https://www.funda.nl";
-    private static final Pattern PRICE_PATTERN = Pattern.compile("[\\d.]+");
     private static final Pattern AREA_PATTERN = Pattern.compile("(\\d+)\\s*m²");
     private static final Pattern ROOMS_PATTERN = Pattern.compile("(\\d+)\\s*kamers?");
     private static final Pattern ID_PATTERN = Pattern.compile("-(\\d+)-");
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("^(.+?)\\s+(\\d+)\\s*(\\S+)?$");
     private static final DateTimeFormatter DUTCH_DATE =
-        DateTimeFormatter.ofPattern("d MMMM yyyy", new Locale("nl", "NL"));
+        DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.forLanguageTag("nl-NL"));
 
-    private final RestClient restClient;
+    private Playwright playwright;
+    private Browser browser;
 
-    @Autowired
-    FundaScraperService(RestClient.Builder restClientBuilder) {
-        this.restClient = restClientBuilder.build();
+    // Package-private no-arg constructor for unit tests (no browser needed for parsing tests)
+    FundaScraperService() {}
+
+    @PostConstruct
+    void init() {
+        playwright = Playwright.create();
+        browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+            .setHeadless(true)
+            .setArgs(List.of(
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--disable-blink-features=AutomationControlled",
+                "--no-first-run",
+                "--no-default-browser-check"
+            )));
+        log.info("Playwright browser initialized");
     }
 
-    // Package-private no-arg constructor for unit tests (no HTTP calls needed for parsing)
-    FundaScraperService() {
-        this.restClient = null;
+    @PreDestroy
+    void destroy() {
+        if (browser != null) browser.close();
+        if (playwright != null) playwright.close();
     }
 
-    List<RawListing> scrapeSearchPage(String url, String city) {
+    synchronized List<RawListing> scrapeSearchPage(String url, String city) {
         log.info("Scraping Funda search page: {}", url);
-        String html = restClient.get()
-            .uri(url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:152.0) Gecko/20100101 Firefox/152.0")
-            .retrieve()
-            .body(String.class);
-        if (html != null) {
-            log.info("Received HTML content ({} bytes)", html.length());
-        } else {
-            log.info("Received HTML content (0 bytes)");
-        }
+        try (BrowserContext context = browser.newContext(new Browser.NewContextOptions()
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+                .setViewportSize(1920, 1080)
+                .setLocale("nl-NL")
+                .setTimezoneId("Europe/Amsterdam"))) {
 
-        return parseListings(html, city);
+            context.addInitScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
+
+            Page page = context.newPage();
+            page.setExtraHTTPHeaders(Map.of(
+                "Accept-Language", "nl-NL,nl;q=0.9,en-US;q=0.8,en;q=0.7",
+                "Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+            ));
+
+            page.navigate(url, new Page.NavigateOptions()
+                .setWaitUntil(WaitUntilState.DOMCONTENTLOADED)
+                .setTimeout(30_000));
+
+            try {
+                page.waitForSelector(".object-list-item", new Page.WaitForSelectorOptions().setTimeout(10_000));
+            } catch (Exception e) {
+                log.warn("Listing selector not found on {}, may be bot challenge or empty results", url);
+            }
+
+            String html = page.content();
+            log.info("Received HTML ({} bytes)", html.length());
+            return parseListings(html, city);
+        }
     }
 
     List<RawListing> parseListings(String html, String city) {
-        log.info(html);
         Document doc = Jsoup.parse(html);
         List<RawListing> results = new ArrayList<>();
 
@@ -93,6 +130,7 @@ public class FundaScraperService {
                 "FOR_SALE"
             ));
         }
+        log.info("Parsed {} listings from page", results.size());
         return results;
     }
 
@@ -101,7 +139,6 @@ public class FundaScraperService {
         return m.find() ? m.group(1) : null;
     }
 
-    // Returns [street, houseNumber, houseNumberAddition]
     private String[] parseAddress(String text) {
         Matcher m = ADDRESS_PATTERN.matcher(text.trim());
         if (m.matches()) {
@@ -111,7 +148,7 @@ public class FundaScraperService {
     }
 
     private Integer parsePrice(String text) {
-        String digits = text.replace(".", "").replaceAll("[^\\d]", "");
+        String digits = text.replace(".", "").replaceAll("\\D", "");
         try {
             return Integer.parseInt(digits);
         } catch (NumberFormatException e) {
