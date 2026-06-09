@@ -10,15 +10,15 @@
 | Task 2: ScrapingSession entity & repository | ✅ Done | — |
 | Task 3: FundaUrlBuilder | ✅ Done | — |
 | Task 4: FundaScraperService (JSoup parser) | ✅ Done | afb8cbf |
-| Task 5: Scraping events, queue, worker, poller, watchdog | 🔲 Todo | — |
-| Task 6: Listing entities & persistence | 🔲 Todo | — |
-| Task 7: ListingService & DTOs | 🔲 Todo | — |
-| Task 8: Report module | 🔲 Todo | — |
-| Task 9: AI module (Ollama summaries) | 🔲 Todo | — |
-| Task 10: Full OpenAPI spec | 🔲 Todo | — |
-| Task 11: API controllers | 🔲 Todo | — |
-| Task 12: Nightly rescrape scheduler | 🔲 Todo | — |
-| Task 13: Module structure verification | 🔲 Todo | — |
+| Task 5: Scraping events, queue, worker, poller, watchdog | ✅ Done | cffc940 |
+| Task 6: Listing entities & persistence | ✅ Done | ff96249 |
+| Task 7: ListingService & DTOs | ✅ Done | be85cf7 |
+| Task 8: Report module | ✅ Done | d32fa55 |
+| Task 9: AI module (Ollama summaries) | ✅ Done | 0eadd63 |
+| Task 10: Full OpenAPI spec | ✅ Done | 74406d3 |
+| Task 11: API controllers | ✅ Done | 2f95027 |
+| Task 12: Nightly rescrape scheduler | ✅ Done | fcb63d0 |
+| Task 13: Module structure verification | ✅ Done | 48eee7c |
 
 **Goal:** Implement the full Hermes backend — a Spring Modulith modular monolith that scrapes Funda.nl property listings asynchronously, persists snapshot history, and exposes a schema-first REST API.
 
