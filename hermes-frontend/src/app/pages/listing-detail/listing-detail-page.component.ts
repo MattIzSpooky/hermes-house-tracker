@@ -3,11 +3,9 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ListingsService } from '../../core/listings.service';
-import { ScrapingSessionResponse, SessionStatus } from '../../core/api.types';
+import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
-
-const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
 
 @Component({
   selector: 'app-listing-detail-page',

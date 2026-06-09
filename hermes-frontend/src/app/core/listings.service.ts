@@ -70,7 +70,7 @@ export class ListingsService {
         this.loading.set(false);
       },
       error: err => {
-        this.error.set(err.error?.detail ?? 'Failed to load report');
+        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load report'));
         this.loading.set(false);
       },
     });

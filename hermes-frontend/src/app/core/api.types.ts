@@ -98,3 +98,5 @@ export interface ErrorResponse {
   error: string;
   detail: string;
 }
+
+export const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];

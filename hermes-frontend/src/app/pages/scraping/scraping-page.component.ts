@@ -1,11 +1,9 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnDestroy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScrapingService } from '../../core/scraping.service';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
-import { CreateScrapingSessionRequest, SessionStatus } from '../../core/api.types';
-
-const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
+import { CreateScrapingSessionRequest, TERMINAL_STATUSES } from '../../core/api.types';
 
 @Component({
   selector: 'app-scraping-page',
@@ -102,7 +100,7 @@ const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
     }
   `,
 })
-export class ScrapingPageComponent {
+export class ScrapingPageComponent implements OnDestroy {
   protected readonly svc = inject(ScrapingService);
 
   city = '';
@@ -121,6 +119,10 @@ export class ScrapingPageComponent {
     const s = this.svc.session();
     return s !== null && TERMINAL_STATUSES.includes(s.status);
   });
+
+  ngOnDestroy(): void {
+    this.svc.stopPolling();
+  }
 
   submit(): void {
     if (!this.city) return;

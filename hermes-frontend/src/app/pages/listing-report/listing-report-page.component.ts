@@ -12,6 +12,9 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
   standalone: true,
   imports: [DatePipe, DecimalPipe, RouterLink, BaseChartDirective, EuroPricePipe, StatusBadgeComponent],
   template: `
+    @if (svc.error() === '404') {
+      <p class="text-gray-500">Report not found.</p>
+    } @else {
     @if (svc.error()) {
       <div class="rounded-md bg-red-50 p-4 text-sm text-red-700 mb-4">{{ svc.error() }}</div>
     }
@@ -76,6 +79,7 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           </ol>
         </div>
       }
+    }
     }
   `,
 })

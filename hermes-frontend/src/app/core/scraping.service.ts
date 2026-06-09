@@ -4,9 +4,8 @@ import {
   CreateScrapingSessionRequest,
   ScrapingSessionResponse,
   SessionStatus,
+  TERMINAL_STATUSES,
 } from './api.types';
-
-const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
 const MAX_POLL_ERRORS = 3;
 
 @Injectable({ providedIn: 'root' })
