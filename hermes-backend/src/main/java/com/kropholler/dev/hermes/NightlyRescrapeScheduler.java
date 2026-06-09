@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.scraping.internal;
+package com.kropholler.dev.hermes;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;

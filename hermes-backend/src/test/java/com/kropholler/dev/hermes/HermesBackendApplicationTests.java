@@ -1,15 +1,22 @@
 package com.kropholler.dev.hermes;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.modulith.core.ApplicationModules;
+import org.springframework.modulith.docs.Documenter;
 
-@Import(TestcontainersConfiguration.class)
-@SpringBootTest
 class HermesBackendApplicationTests {
 
+    ApplicationModules modules = ApplicationModules.of(HermesBackendApplication.class);
+
     @Test
-    void contextLoads() {
+    void verifyModuleStructure() {
+        modules.verify();
     }
 
+    @Test
+    void writeDocumentationSnippets() {
+        new Documenter(modules)
+            .writeModulesAsPlantUml()
+            .writeIndividualModulesAsPlantUml();
+    }
 }
