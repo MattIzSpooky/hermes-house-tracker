@@ -3,9 +3,9 @@ Date: 2026-06-09
 
 ## Overview
 
-A single-page Angular 17 application that provides a UI for the Hermes House Tracker backend. Users can trigger Funda.nl scraping sessions, browse saved listings, view listing detail and AI summaries, and inspect price history reports.
+A single-page Angular 22 application that provides a UI for the Hermes House Tracker backend. Users can trigger Funda.nl scraping sessions, browse saved listings, view listing detail and AI summaries, and inspect price history reports.
 
-The app uses **Angular 17 standalone components**, **signals** for reactive state, **Tailwind CSS** for styling, and **Chart.js via ng2-charts** for the price history chart. It communicates with the Spring Boot backend exclusively via `HttpClient`, proxied through Angular's dev server during development.
+The app uses **Angular 22 standalone components**, **signals** for reactive state, **Tailwind CSS** for styling, and **Chart.js via ng2-charts** for the price history chart. It communicates with the Spring Boot backend exclusively via `HttpClient`, proxied through Angular's dev server during development.
 
 ---
 
@@ -13,12 +13,19 @@ The app uses **Angular 17 standalone components**, **signals** for reactive stat
 
 | Concern | Choice |
 |---|---|
-| Framework | Angular 17, standalone components |
+| Framework | Angular 22, standalone components, zoneless |
 | Reactivity | Angular signals (`signal`, `computed`, `effect`) |
-| Styling | Tailwind CSS 3 + `@tailwindcss/forms` |
-| HTTP | Angular `HttpClient` |
+| Styling | Tailwind CSS 4 + `@tailwindcss/forms` |
+| HTTP | Angular `HttpClient` with `provideHttpClient(withFetch())` |
 | Chart | Chart.js + `ng2-charts` |
 | Dev proxy | `proxy.conf.json` → `http://localhost:8080` |
+
+### Angular 22 notes
+
+- **Zoneless by default** — `zone.js` is not included. Change detection runs via signals. `provideZonelessChangeDetection()` replaces `provideClientHydration()` + zone bootstrapping.
+- **Control flow syntax** — All templates use `@if`, `@for`, `@switch` (the structural directive syntax `*ngIf`/`*ngFor` is not used).
+- **Standalone only** — No NgModules. All components, pipes, and directives are standalone.
+- **`provideHttpClient(withFetch())`** — Standard HTTP provider; uses the Fetch API under the hood.
 
 ---
 
@@ -218,9 +225,11 @@ Referenced in `angular.json` under `serve.options.proxyConfig`.
 
 ## Tailwind Setup
 
-- Install `tailwindcss`, `postcss`, `autoprefixer`, `@tailwindcss/forms` as dev dependencies
-- `tailwind.config.js` with `content: ['./src/**/*.{html,ts}']`
-- `styles.scss` imports `@tailwind base`, `@tailwind components`, `@tailwind utilities`
+Tailwind 4 uses CSS-only configuration — no `tailwind.config.js`.
+
+- Install `tailwindcss` and `@tailwindcss/vite` (or `@tailwindcss/postcss`) as dev dependencies
+- `styles.scss` (or `styles.css`) contains a single `@import "tailwindcss"` directive
+- `@tailwindcss/forms` plugin added via `@plugin "@tailwindcss/forms"` in the CSS file
 
 ---
 
