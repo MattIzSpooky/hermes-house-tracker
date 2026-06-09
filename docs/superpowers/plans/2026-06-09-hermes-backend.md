@@ -2,6 +2,24 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: Project bootstrap | ✅ Done | initial |
+| Task 2: ScrapingSession entity & repository | ✅ Done | — |
+| Task 3: FundaUrlBuilder | ✅ Done | — |
+| Task 4: FundaScraperService (JSoup parser) | ✅ Done | afb8cbf |
+| Task 5: Scraping events, queue, worker, poller, watchdog | 🔲 Todo | — |
+| Task 6: Listing entities & persistence | 🔲 Todo | — |
+| Task 7: ListingService & DTOs | 🔲 Todo | — |
+| Task 8: Report module | 🔲 Todo | — |
+| Task 9: AI module (Ollama summaries) | 🔲 Todo | — |
+| Task 10: Full OpenAPI spec | 🔲 Todo | — |
+| Task 11: API controllers | 🔲 Todo | — |
+| Task 12: Nightly rescrape scheduler | 🔲 Todo | — |
+| Task 13: Module structure verification | 🔲 Todo | — |
+
 **Goal:** Implement the full Hermes backend — a Spring Modulith modular monolith that scrapes Funda.nl property listings asynchronously, persists snapshot history, and exposes a schema-first REST API.
 
 **Architecture:** Five Spring Modulith modules (`scraping`, `listing`, `report`, `ai`, `api`) communicate exclusively via JPA-backed application events. The scraping queue is a `ScrapingSession` JPA entity polled by an `@Async` worker. Each scrape produces immutable `ListingSnapshot` records enabling historical reports and trend analysis.
