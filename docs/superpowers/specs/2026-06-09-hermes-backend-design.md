@@ -27,62 +27,66 @@ Spring Modulith's module verification test runs at build time and fails if any m
 ### `scraping` module
 
 **`ScrapingSession`**
-| Field | Type | Notes |
-|---|---|---|
-| `id` | UUID | Primary key |
-| `status` | Enum | `PENDING`, `IN_PROGRESS`, `COMPLETED`, `FAILED`, `TIMED_OUT` |
-| `type` | Enum | `SEARCH` (new session), `RESCRAPE` (single listing) |
-| `city` | String | Search filter |
-| `minPrice` | Integer | nullable |
-| `maxPrice` | Integer | nullable |
-| `minArea` | Integer | nullable, m² |
-| `maxArea` | Integer | nullable, m² |
-| `pageLimit` | Integer | 1–5, hard-capped at 5 |
-| `fundaUrl` | String | Built from filters at session creation |
-| `targetListingUrl` | String | nullable, set when `type=RESCRAPE` |
-| `createdAt` | Instant | |
-| `startedAt` | Instant | nullable |
-| `completedAt` | Instant | nullable |
+
+| Field                | Type    | Notes                                                    |
+|----------------------|---------|----------------------------------------------------------|
+| `id`                 | UUID    | Primary key                                              |
+| `status`             | Enum    | `PENDING`, `IN_PROGRESS`, `COMPLETED`, `FAILED`, `TIMED_OUT` |
+| `type`               | Enum    | `SEARCH` (new session), `RESCRAPE` (single listing)      |
+| `city`               | String  | Search filter                                            |
+| `minPrice`           | Integer | nullable                                                 |
+| `maxPrice`           | Integer | nullable                                                 |
+| `minArea`            | Integer | nullable, m²                                             |
+| `maxArea`            | Integer | nullable, m²                                             |
+| `pageLimit`          | Integer | 1–5, hard-capped at 5                                    |
+| `fundaUrl`           | String  | Built from filters at session creation                   |
+| `targetListingUrl`   | String  | nullable, set when `type=RESCRAPE`                       |
+| `createdAt`          | Instant |                                                          |
+| `startedAt`          | Instant | nullable                                                 |
+| `completedAt`        | Instant | nullable                                                 |
 
 ### `listing` module
 
 **`Listing`**
-| Field | Type | Notes |
-|---|---|---|
-| `id` | UUID | Primary key |
-| `fundaId` | String | Funda's internal listing identifier, unique |
-| `url` | String | Canonical Funda listing URL |
-| `street` | String | |
-| `houseNumber` | String | |
-| `houseNumberAddition` | String | nullable (e.g. "A", "bis") |
-| `zipCode` | String | |
-| `city` | String | |
-| `province` | String | |
-| `firstSeenAt` | Instant | Set on first insert, never updated |
-| `lastSeenAt` | Instant | Updated on every rescrape |
+
+| Field                  | Type    | Notes                                      |
+|------------------------|---------|--------------------------------------------|
+| `id`                   | UUID    | Primary key                                |
+| `fundaId`              | String  | Funda's internal listing identifier, unique |
+| `url`                  | String  | Canonical Funda listing URL                |
+| `street`               | String  |                                            |
+| `houseNumber`          | String  |                                            |
+| `houseNumberAddition`  | String  | nullable (e.g. "A", "bis")                 |
+| `zipCode`              | String  |                                            |
+| `city`                 | String  |                                            |
+| `province`             | String  |                                            |
+| `firstSeenAt`          | Instant | Set on first insert, never updated         |
+| `lastSeenAt`           | Instant | Updated on every rescrape                  |
 
 **`ListingSnapshot`** (immutable — never updated after insert)
-| Field | Type | Notes |
-|---|---|---|
-| `id` | UUID | Primary key |
-| `listingId` | UUID | FK to `Listing` |
-| `scrapedAt` | Instant | |
-| `askingPrice` | Integer | In euros |
-| `livingAreaM2` | Integer | |
-| `rooms` | Integer | |
-| `energyLabel` | String | nullable (A+++, A++, …, G) |
-| `listedOnFundaSince` | LocalDate | nullable |
-| `status` | Enum | `FOR_SALE`, `UNDER_OFFER`, `SOLD`, `WITHDRAWN` |
+
+| Field                | Type      | Notes                                      |
+|----------------------|-----------|--------------------------------------------|
+| `id`                 | UUID      | Primary key                                |
+| `listingId`          | UUID      | FK to `Listing`                            |
+| `scrapedAt`          | Instant   |                                            |
+| `askingPrice`        | Integer   | In euros                                   |
+| `livingAreaM2`       | Integer   |                                            |
+| `rooms`              | Integer   |                                            |
+| `energyLabel`        | String    | nullable (A+++, A++, …, G)                 |
+| `listedOnFundaSince` | LocalDate | nullable                                   |
+| `status`             | Enum      | `FOR_SALE`, `UNDER_OFFER`, `SOLD`, `WITHDRAWN` |
 
 ### `ai` module
 
 **`ListingSummary`**
-| Field | Type | Notes |
-|---|---|---|
-| `id` | UUID | Primary key |
-| `listingId` | UUID | FK to `Listing` |
-| `summary` | Text | Plain-language summary from Ollama |
-| `generatedAt` | Instant | |
+
+| Field         | Type    | Notes                              |
+|---------------|---------|------------------------------------|
+| `id`          | UUID    | Primary key                        |
+| `listingId`   | UUID    | FK to `Listing`                    |
+| `summary`     | Text    | Plain-language summary from Ollama |
+| `generatedAt` | Instant |                                    |
 
 ---
 
@@ -90,11 +94,11 @@ Spring Modulith's module verification test runs at build time and fails if any m
 
 ### Cross-module events
 
-| Event | Published by | Consumed by | Payload |
-|---|---|---|---|
-| `ScrapingSessionCompleted` | `scraping` | `listing` | `sessionId`, `List<RawListing>` |
-| `ScrapingSessionFailed` | `scraping` | — (logged) | `sessionId`, `reason` |
-| `ListingSnapshotsCreated` | `listing` | `ai` | `List<listingId>` |
+| Event                      | Published by | Consumed by    | Payload                          |
+|----------------------------|--------------|----------------|----------------------------------|
+| `ScrapingSessionCompleted` | `scraping`   | `listing`      | `sessionId`, `List<RawListing>`  |
+| `ScrapingSessionFailed`    | `scraping`   | — (logged)     | `sessionId`, `reason`            |
+| `ListingSnapshotsCreated`  | `listing`    | `ai`           | `List<listingId>`                |
 
 All events are declared in the publishing module's public API package and consumed via `@ApplicationModuleListener` in the receiving module.
 
@@ -158,16 +162,16 @@ Reports are computed on-demand from snapshots — nothing is persisted.
 
 `ReportService.generateReport(listingId)` produces:
 
-| Field | Calculation |
-|---|---|
-| `daysListedOnFunda` | today − earliest `listedOnFundaSince` across all snapshots |
-| `daysInHermes` | today − `Listing.firstSeenAt` |
-| `currentPrice` | latest snapshot `askingPrice` |
-| `initialPrice` | first snapshot `askingPrice` |
-| `priceChangePct` | `(currentPrice − initialPrice) / initialPrice × 100` |
-| `priceHistory` | ordered list of `{scrapedAt, askingPrice}` |
-| `statusHistory` | ordered list of `{scrapedAt, status}`, deduplicated on status change |
-| `currentStatus` | latest snapshot `status` |
+| Field              | Calculation                                                                 |
+|--------------------|-----------------------------------------------------------------------------|
+| `daysListedOnFunda` | today − earliest `listedOnFundaSince` across all snapshots                 |
+| `daysInHermes`     | today − `Listing.firstSeenAt`                                               |
+| `currentPrice`     | latest snapshot `askingPrice`                                               |
+| `initialPrice`     | first snapshot `askingPrice`                                                |
+| `priceChangePct`   | `(currentPrice - initialPrice) / initialPrice * 100`                        |
+| `priceHistory`     | ordered list of `{scrapedAt, askingPrice}`                                  |
+| `statusHistory`    | ordered list of `{scrapedAt, status}`, deduplicated on status change        |
+| `currentStatus`    | latest snapshot `status`                                                    |
 
 ---
 
@@ -179,15 +183,15 @@ The OpenAPI 3.x spec is defined in `hermes-backend/src/main/resources/openapi/ap
 
 ### Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| `POST` | `/api/scraping-sessions` | Enqueue a new search session |
-| `GET` | `/api/scraping-sessions/{id}` | Get session status |
-| `GET` | `/api/listings` | List all listings (paginated) |
-| `GET` | `/api/listings/{id}` | Get listing with latest snapshot |
-| `POST` | `/api/listings/{id}/rescrape` | Enqueue a rescrape session |
-| `GET` | `/api/listings/{id}/report` | Get computed report |
-| `GET` | `/api/listings/{id}/summary` | Get AI-generated summary |
+| Method | Path                          | Description                          |
+|--------|-------------------------------|--------------------------------------|
+| `POST` | `/api/scraping-sessions`      | Enqueue a new search session         |
+| `GET`  | `/api/scraping-sessions/{id}` | Get session status                   |
+| `GET`  | `/api/listings`               | List all listings (paginated)        |
+| `GET`  | `/api/listings/{id}`          | Get listing with latest snapshot     |
+| `POST` | `/api/listings/{id}/rescrape` | Enqueue a rescrape session           |
+| `GET`  | `/api/listings/{id}/report`   | Get computed report                  |
+| `GET`  | `/api/listings/{id}/summary`  | Get AI-generated summary             |
 
 Error responses follow a consistent shape:
 ```json
@@ -198,10 +202,10 @@ Error responses follow a consistent shape:
 
 ## Scheduling
 
-| Job | Schedule | Action |
-|---|---|---|
-| Timeout watchdog | Every 30s | Mark IN_PROGRESS sessions older than 3 min as TIMED_OUT |
-| Nightly rescrape | `0 2 * * *` (02:00) | Enqueue a `RESCRAPE` ScrapingSession for every known Listing |
+| Job               | Schedule              | Action                                                          |
+|-------------------|-----------------------|-----------------------------------------------------------------|
+| Timeout watchdog  | Every 30s             | Mark IN_PROGRESS sessions older than 3 min as TIMED_OUT        |
+| Nightly rescrape  | `0 2 * * *` (02:00)  | Enqueue a `RESCRAPE` ScrapingSession for every known Listing    |
 
 ---
 
