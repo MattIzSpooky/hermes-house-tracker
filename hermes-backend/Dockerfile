@@ -7,7 +7,8 @@ COPY pom.xml ./
 RUN ./mvnw dependency:go-offline -B
 COPY src src
 RUN ./mvnw package -DskipTests -B
-RUN ./mvnw exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium"
+RUN ./mvnw exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install chromium" && \
+    rm -rf /root/.cache/ms-playwright/webkit-* /root/.cache/ms-playwright/firefox-*
 
 FROM eclipse-temurin:25-jdk
 # Chromium system dependencies (Ubuntu Noble / Debian Bookworm)
