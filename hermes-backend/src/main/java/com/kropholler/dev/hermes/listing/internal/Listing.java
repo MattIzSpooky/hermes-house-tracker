@@ -1,0 +1,40 @@
+package com.kropholler.dev.hermes.listing.internal;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "listings")
+@Getter
+@Setter
+@NoArgsConstructor
+public class Listing {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(unique = true, nullable = false)
+    private String fundaId;
+
+    @Column(nullable = false)
+    private String url;
+
+    private String street;
+    private String houseNumber;
+    private String houseNumberAddition;
+    private String zipCode;
+    private String city;
+    private String province;
+
+    @Column(nullable = false)
+    private Instant firstSeenAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant lastSeenAt = Instant.now();
+}
