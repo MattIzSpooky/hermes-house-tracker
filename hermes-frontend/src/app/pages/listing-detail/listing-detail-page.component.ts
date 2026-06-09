@@ -13,105 +13,117 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
   imports: [DatePipe, RouterLink, EuroPricePipe, StatusBadgeComponent],
   template: `
     @if (svc.error() === '404') {
-      <p class="text-gray-500">Listing not found.</p>
+      <div class="rounded-xl bg-white border border-slate-200 shadow-sm p-12 text-center">
+        <p class="text-slate-500 font-medium">Listing not found</p>
+        <a routerLink="/listings" class="mt-4 inline-block text-sm text-cyan-600 hover:text-cyan-500 font-medium">← Back to listings</a>
+      </div>
     } @else {
       @if (svc.error()) {
-        <div class="rounded-md bg-red-50 p-4 text-sm text-red-700 mb-4">{{ svc.error() }}</div>
+        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">{{ svc.error() }}</div>
       }
 
       @if (svc.loading()) {
-        <div class="text-sm text-gray-500">Loading...</div>
+        <div class="flex items-center gap-2 text-sm text-slate-500">
+          <span class="inline-block w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></span>
+          Loading...
+        </div>
       }
 
       @if (svc.currentListing(); as listing) {
-        <div class="mb-4">
-          <a routerLink="/listings" class="text-sm text-blue-600 hover:underline">← All listings</a>
+        <div class="mb-5">
+          <a routerLink="/listings" class="text-sm text-cyan-600 hover:text-cyan-500 font-medium">← All listings</a>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Left column: address + snapshot -->
-          <div class="space-y-6">
+          <div class="space-y-5">
             <div>
-              <h1 class="text-2xl font-bold text-gray-900">
+              <h1 class="text-2xl font-bold text-slate-900 leading-tight">
                 {{ listing.street }} {{ listing.houseNumber }}{{ listing.houseNumberAddition ?? '' }}
               </h1>
-              <p class="text-gray-600 mt-1">
+              <p class="text-slate-500 mt-1">
                 {{ listing.zipCode }} {{ listing.city }}, {{ listing.province }}
               </p>
             </div>
 
             @if (listing.latestSnapshot; as snap) {
-              <div class="rounded-lg border border-gray-200 p-4 space-y-3">
-                <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Latest snapshot</h2>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                  <span class="text-gray-500">Price</span>
-                  <span class="font-medium">{{ snap.askingPrice | euroPrice }}</span>
-                  <span class="text-gray-500">Area</span>
-                  <span class="font-medium">{{ snap.livingAreaM2 != null ? snap.livingAreaM2 + ' m²' : '—' }}</span>
-                  <span class="text-gray-500">Rooms</span>
-                  <span class="font-medium">{{ snap.rooms ?? '—' }}</span>
-                  <span class="text-gray-500">Energy label</span>
-                  <span class="font-medium">{{ snap.energyLabel ?? '—' }}</span>
-                  <span class="text-gray-500">Listed since</span>
-                  <span class="font-medium">{{ snap.listedOnFundaSince ?? '—' }}</span>
-                  <span class="text-gray-500">Status</span>
+              <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+                <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Latest snapshot</h2>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+                  <span class="text-slate-400">Price</span>
+                  <span class="font-semibold text-slate-900 tabular-nums">{{ snap.askingPrice | euroPrice }}</span>
+                  <span class="text-slate-400">Area</span>
+                  <span class="font-medium text-slate-700">{{ snap.livingAreaM2 != null ? snap.livingAreaM2 + ' m²' : '—' }}</span>
+                  <span class="text-slate-400">Rooms</span>
+                  <span class="font-medium text-slate-700">{{ snap.rooms ?? '—' }}</span>
+                  <span class="text-slate-400">Energy label</span>
+                  <span class="font-medium text-slate-700">{{ snap.energyLabel ?? '—' }}</span>
+                  <span class="text-slate-400">Listed since</span>
+                  <span class="font-medium text-slate-700">{{ snap.listedOnFundaSince ?? '—' }}</span>
+                  <span class="text-slate-400">Status</span>
                   <span>
                     @if (snap.status) {
                       <app-status-badge [status]="snap.status" />
                     } @else {
-                      —
+                      <span class="text-slate-300">—</span>
                     }
                   </span>
                 </div>
-                <div class="text-xs text-gray-400">
+                <p class="text-xs text-slate-400 pt-1 border-t border-slate-100">
                   Scraped {{ snap.scrapedAt | date:'medium' }}
-                </div>
+                </p>
               </div>
             }
 
-            <a
-              [routerLink]="['/listings', listing.id, 'report']"
-              class="inline-flex items-center text-sm text-blue-600 hover:underline"
-            >
-              View report →
+            <a [routerLink]="['/listings', listing.id, 'report']"
+              class="inline-flex items-center gap-1.5 text-sm font-medium text-cyan-600 hover:text-cyan-500 transition-colors">
+              View full report →
             </a>
           </div>
 
           <!-- Right column: AI summary + rescrape -->
-          <div class="space-y-6">
-            <div class="rounded-lg border border-gray-200 p-4">
-              <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">AI Summary</h2>
+          <div class="space-y-5">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+              <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">AI Summary</h2>
               @if (svc.summary(); as summary) {
-                <p class="text-sm text-gray-700 leading-relaxed">{{ summary.summary }}</p>
-                <p class="text-xs text-gray-400 mt-2">
+                <p class="text-sm text-slate-700 leading-relaxed">{{ summary.summary }}</p>
+                <p class="text-xs text-slate-400 mt-3">
                   Generated {{ summary.generatedAt | date:'medium' }}
                 </p>
               } @else if (svc.summaryNotFound()) {
-                <p class="text-sm text-gray-400 italic">No summary available.</p>
+                <p class="text-sm text-slate-400 italic">No summary available yet.</p>
               } @else {
-                <div class="space-y-2">
-                  <div class="h-3 bg-gray-100 rounded animate-pulse"></div>
-                  <div class="h-3 bg-gray-100 rounded animate-pulse w-4/5"></div>
-                  <div class="h-3 bg-gray-100 rounded animate-pulse w-3/5"></div>
+                <div class="space-y-2.5">
+                  <div class="h-3 bg-slate-100 rounded-full animate-pulse"></div>
+                  <div class="h-3 bg-slate-100 rounded-full animate-pulse w-4/5"></div>
+                  <div class="h-3 bg-slate-100 rounded-full animate-pulse w-3/5"></div>
                 </div>
               }
             </div>
 
-            <div class="rounded-lg border border-gray-200 p-4 space-y-3">
-              <h2 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">Rescrape</h2>
-              <button
-                (click)="triggerRescrape()"
-                [disabled]="rescrapeLoading() || isRescrapePolling()"
-                class="rounded-md bg-gray-800 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50"
-              >
-                @if (rescrapeLoading()) { Triggering... }
-                @else if (isRescrapePolling()) { In progress... }
-                @else { Trigger rescrape }
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
+              <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rescrape</h2>
+              <button (click)="triggerRescrape()" [disabled]="rescrapeLoading() || isRescrapePolling()"
+                class="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white
+                       hover:bg-slate-700 disabled:opacity-50 transition-colors">
+                @if (rescrapeLoading()) {
+                  <span class="flex items-center gap-2">
+                    <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    Triggering...
+                  </span>
+                } @else if (isRescrapePolling()) {
+                  <span class="flex items-center gap-2">
+                    <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    In progress...
+                  </span>
+                } @else {
+                  Trigger rescrape
+                }
               </button>
 
               @if (rescrapeSession(); as s) {
-                <div class="flex items-center gap-2 text-sm">
-                  <span class="text-gray-500">Session:</span>
+                <div class="flex items-center gap-2 text-sm text-slate-500">
+                  <span>Session:</span>
                   <app-status-badge [status]="s.status" />
                 </div>
               }

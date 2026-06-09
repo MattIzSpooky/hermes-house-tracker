@@ -10,91 +10,120 @@ import { CreateScrapingSessionRequest, TERMINAL_STATUSES } from '../../core/api.
   standalone: true,
   imports: [FormsModule, DatePipe, StatusBadgeComponent],
   template: `
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">New Scraping Session</h1>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900">Scraping</h1>
+      <p class="text-sm text-slate-500 mt-0.5">Start a new Funda search session</p>
+    </div>
 
     @if (svc.error()) {
-      <div class="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">{{ svc.error() }}</div>
+      <div class="mb-4 rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">{{ svc.error() }}</div>
     }
 
-    <form (ngSubmit)="submit()" class="space-y-4 max-w-lg">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">City *</label>
-        <input
-          type="text"
-          [(ngModel)]="city"
-          name="city"
-          required
-          [disabled]="isPolling()"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-        />
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 max-w-lg">
+      <form (ngSubmit)="submit()" class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Min price (€)</label>
-          <input type="number" [(ngModel)]="minPrice" name="minPrice" [disabled]="isPolling()"
-            class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" />
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            City <span class="text-cyan-500">*</span>
+          </label>
+          <input type="text" [(ngModel)]="city" name="city" required [disabled]="isPolling()"
+            placeholder="e.g. Amsterdam"
+            class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                   focus:border-cyan-500 focus:ring-cyan-500
+                   disabled:bg-slate-50 disabled:text-slate-400" />
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Max price (€)</label>
-          <input type="number" [(ngModel)]="maxPrice" name="maxPrice" [disabled]="isPolling()"
-            class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" />
-        </div>
-      </div>
 
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Min area (m²)</label>
-          <input type="number" [(ngModel)]="minArea" name="minArea" [disabled]="isPolling()"
-            class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" />
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Min price (€)</label>
+            <input type="number" [(ngModel)]="minPrice" name="minPrice" [disabled]="isPolling()"
+              placeholder="200 000"
+              class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                     focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Max price (€)</label>
+            <input type="number" [(ngModel)]="maxPrice" name="maxPrice" [disabled]="isPolling()"
+              placeholder="600 000"
+              class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                     focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-slate-50" />
+          </div>
         </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Max area (m²)</label>
-          <input type="number" [(ngModel)]="maxArea" name="maxArea" [disabled]="isPolling()"
-            class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" />
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Min area (m²)</label>
+            <input type="number" [(ngModel)]="minArea" name="minArea" [disabled]="isPolling()"
+              placeholder="60"
+              class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                     focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-slate-50" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">Max area (m²)</label>
+            <input type="number" [(ngModel)]="maxArea" name="maxArea" [disabled]="isPolling()"
+              placeholder="200"
+              class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                     focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-slate-50" />
+          </div>
         </div>
-      </div>
 
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Page limit (1–5) *</label>
-        <input type="number" [(ngModel)]="pageLimit" name="pageLimit" min="1" max="5" required
-          [disabled]="isPolling()"
-          class="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm" />
-      </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            Page limit <span class="text-cyan-500">*</span>
+          </label>
+          <input type="number" [(ngModel)]="pageLimit" name="pageLimit" min="1" max="5" required
+            [disabled]="isPolling()"
+            class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                   focus:border-cyan-500 focus:ring-cyan-500 disabled:bg-slate-50" />
+          <p class="mt-1.5 text-xs text-slate-400">1 to 5 pages per scrape</p>
+        </div>
 
-      <button
-        type="submit"
-        [disabled]="!city || svc.loading() || isPolling()"
-        class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-      >
-        @if (svc.loading()) { Starting... } @else { Start scraping }
-      </button>
-    </form>
+        <button type="submit" [disabled]="!city || svc.loading() || isPolling()"
+          class="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white
+                 hover:bg-cyan-400 disabled:opacity-50 transition-colors">
+          @if (svc.loading()) {
+            <span class="flex items-center justify-center gap-2">
+              <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Starting...
+            </span>
+          } @else {
+            Start scraping
+          }
+        </button>
+      </form>
+    </div>
 
     @if (svc.session(); as session) {
-      <div class="mt-8 max-w-lg rounded-lg border border-gray-200 p-4 space-y-3">
+      <div class="mt-6 max-w-lg bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
         <div class="flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700">Session status</span>
+          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Session</h2>
           <app-status-badge [status]="session.status" />
         </div>
-        <div class="text-xs text-gray-500 font-mono">{{ session.id }}</div>
-        <div class="text-xs text-gray-500">
-          Started: {{ session.createdAt | date:'medium' }}
+        <div class="font-mono text-xs text-slate-400 bg-slate-50 rounded-lg px-3 py-2 break-all">{{ session.id }}</div>
+        <div class="space-y-1 text-xs text-slate-500">
+          <div>Started: <span class="text-slate-700">{{ session.createdAt | date:'medium' }}</span></div>
+          @if (session.completedAt) {
+            <div>Completed: <span class="text-slate-700">{{ session.completedAt | date:'medium' }}</span></div>
+          }
         </div>
-        @if (session.completedAt) {
-          <div class="text-xs text-gray-500">
-            Completed: {{ session.completedAt | date:'medium' }}
+        @if (isPolling()) {
+          <div class="flex items-center gap-2 text-sm text-cyan-600 font-medium">
+            <span class="inline-block w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></span>
+            Scraping in progress...
           </div>
         }
         @if (isTerminal()) {
-          <p class="text-sm font-medium"
-            [class]="session.status === 'COMPLETED' ? 'text-green-600' : 'text-red-600'">
+          <div class="rounded-lg px-4 py-3 text-sm font-medium border"
+            [class]="session.status === 'COMPLETED'
+              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              : 'bg-red-50 text-red-700 border-red-200'">
             @if (session.status === 'COMPLETED') {
               Scraping completed successfully.
+            } @else if (session.status === 'TIMED_OUT') {
+              Scraping timed out.
             } @else {
-              Scraping {{ session.status.toLowerCase() }}.
+              Scraping failed.
             }
-          </p>
+          </div>
         }
       </div>
     }

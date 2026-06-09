@@ -1,17 +1,23 @@
-<nav class="bg-white border-b border-gray-200 px-6 py-3 flex items-center gap-8">
-  <span class="text-lg font-semibold text-gray-900">Hermes</span>
-  <a
-    routerLink="/listings"
-    routerLinkActive="text-blue-600 font-medium"
-    [routerLinkActiveOptions]="{ exact: false }"
-    class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-  >Listings</a>
-  <a
-    routerLink="/scraping"
-    routerLinkActive="text-blue-600 font-medium"
-    class="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-  >Scraping</a>
+<nav class="bg-slate-900 border-b border-slate-800">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center h-14 gap-1">
+      <span class="text-white font-bold tracking-tight mr-4 text-base">
+        <span class="text-cyan-400">H</span>ermes
+      </span>
+      <a
+        routerLink="/listings"
+        routerLinkActive="bg-slate-700/60 text-white"
+        [routerLinkActiveOptions]="{ exact: false }"
+        class="text-slate-300 hover:text-white hover:bg-slate-700/40 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+      >Listings</a>
+      <a
+        routerLink="/scraping"
+        routerLinkActive="bg-slate-700/60 text-white"
+        class="text-slate-300 hover:text-white hover:bg-slate-700/40 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+      >Scraping</a>
+    </div>
+  </div>
 </nav>
-<main class="max-w-7xl mx-auto px-6 py-8">
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 min-h-[calc(100vh-3.5rem)]">
   <router-outlet />
 </main>
