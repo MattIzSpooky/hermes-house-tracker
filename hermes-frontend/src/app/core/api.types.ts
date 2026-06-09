@@ -1,5 +1,6 @@
 export type SessionStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'TIMED_OUT';
-export type SessionType = 'CITY_SCRAPE' | 'RESCRAPE';
+export type SessionType = 'SEARCH' | 'RESCRAPE';
+export type ListingStatus = 'FOR_SALE' | 'UNDER_OFFER' | 'SOLD' | 'WITHDRAWN';
 
 export interface ScrapingSessionResponse {
   id: string;
@@ -35,7 +36,7 @@ export interface ListingSummaryResponse {
   city: string;
   province: string;
   askingPrice?: number;
-  status?: string;
+  status?: ListingStatus;
   firstSeenAt: string;
 }
 
@@ -47,7 +48,7 @@ export interface SnapshotResponse {
   rooms?: number;
   energyLabel?: string;
   listedOnFundaSince?: string;
-  status?: string;
+  status?: ListingStatus;
 }
 
 export interface ListingDetailResponse {
@@ -72,7 +73,7 @@ export interface PricePointResponse {
 
 export interface StatusPointResponse {
   scrapedAt: string;
-  status: string;
+  status: ListingStatus;
 }
 
 export interface ListingReportResponse {
