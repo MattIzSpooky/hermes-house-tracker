@@ -1,14 +1,18 @@
 import os
 
 from opentelemetry import metrics, trace
+from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import Resource, SERVICE_NAME
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry._logs import set_logger_provider
 
 _configured = False
 
@@ -23,21 +27,36 @@ def configure_telemetry() -> None:
     resource = Resource({SERVICE_NAME: service_name})
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
 
+    base = endpoint.rstrip("/") if endpoint else None
+
     # Traces
     tracer_provider = TracerProvider(resource=resource)
-    if endpoint:
-        span_exporter = OTLPSpanExporter(endpoint=endpoint.rstrip("/") + "/v1/traces")
-        tracer_provider.add_span_processor(BatchSpanProcessor(span_exporter))
+    if base:
+        tracer_provider.add_span_processor(
+            BatchSpanProcessor(OTLPSpanExporter(endpoint=f"{base}/v1/traces"))
+        )
     trace.set_tracer_provider(tracer_provider)
 
     # Metrics
-    if endpoint:
-        metric_exporter = OTLPMetricExporter(endpoint=endpoint.rstrip("/") + "/v1/metrics")
+    if base:
         meter_provider = MeterProvider(
             resource=resource,
-            metric_readers=[PeriodicExportingMetricReader(metric_exporter, export_interval_millis=60_000)],
+            metric_readers=[
+                PeriodicExportingMetricReader(
+                    OTLPMetricExporter(endpoint=f"{base}/v1/metrics"),
+                    export_interval_millis=60_000,
+                )
+            ],
         )
         metrics.set_meter_provider(meter_provider)
 
-    # Inject trace/span IDs into every log record
+    # Logs — export Python log records to Loki via OTLP
+    logger_provider = LoggerProvider(resource=resource)
+    if base:
+        logger_provider.add_log_record_processor(
+            BatchLogRecordProcessor(OTLPLogExporter(endpoint=f"{base}/v1/logs"))
+        )
+    set_logger_provider(logger_provider)
+
+    # Bridge Python logging → OTel: injects traceId/spanId into every log record
     LoggingInstrumentor().instrument(set_logging_format=True)

@@ -54,7 +54,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[1m]))",
+          "expr": "sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "req/s"
         }
       ]
@@ -90,7 +90,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\",outcome!=\"SUCCESS\"}[1m])) / sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[1m]))",
+          "expr": "sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\",outcome!=\"SUCCESS\"}[2m])) / sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "error rate"
         }
       ]
@@ -126,7 +126,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         }
       ]
@@ -180,7 +180,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[1m])) by (method, uri, status)",
+          "expr": "sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m])) by (method, uri, status)",
           "legendFormat": "{{method}} {{uri}} {{status}}"
         }
       ]
@@ -198,19 +198,19 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p99"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p50"
         }
       ]
@@ -323,19 +323,19 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_threads_live_threads{service_name=\"$service_name\"}",
+          "expr": "jvm_threads_live{service_name=\"$service_name\"}",
           "legendFormat": "live threads"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_threads_daemon_threads{service_name=\"$service_name\"}",
+          "expr": "jvm_threads_daemon{service_name=\"$service_name\"}",
           "legendFormat": "daemon threads"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(jvm_gc_pause_seconds_sum{service_name=\"$service_name\"}[1m]) * 1000",
+          "expr": "rate(jvm_gc_pause_milliseconds_sum{service_name=\"$service_name\"}[1m])",
           "legendFormat": "GC pause ms/s"
         }
       ]

@@ -54,7 +54,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"$service_name\"}[1m]))",
+          "expr": "sum(rate(http_server_duration_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "req/s"
         }
       ]
@@ -90,7 +90,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"$service_name\", http_response_status_code=~\"5..\"}[1m])) / sum(rate(http_server_request_duration_seconds_count{service_name=\"$service_name\"}[1m]))",
+          "expr": "sum(rate(http_server_duration_milliseconds_count{service_name=\"$service_name\", http_status_code=~\"5..\"}[2m])) / sum(rate(http_server_duration_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "5xx rate"
         }
       ]
@@ -126,7 +126,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         }
       ]
@@ -176,8 +176,8 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service_name=\"$service_name\"}[1m])) by (http_request_method, url_template, http_response_status_code)",
-          "legendFormat": "{{http_request_method}} {{url_template}} {{http_response_status_code}}"
+          "expr": "sum(rate(http_server_duration_milliseconds_count{service_name=\"$service_name\"}[2m])) by (http_method, http_status_code)",
+          "legendFormat": "{{http_method}} {{http_status_code}}"
         }
       ]
     },
@@ -194,26 +194,26 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_duration_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p99"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le)) * 1000",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_duration_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p50"
         }
       ]
     },
     {
       "id": 7,
-      "title": "Response Time — by Endpoint (p95)",
+      "title": "Response Time — by Method (p95)",
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 12 },
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
@@ -224,8 +224,8 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le, url_template, http_request_method)) * 1000",
-          "legendFormat": "{{http_request_method}} {{url_template}}"
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_duration_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le, http_method))",
+          "legendFormat": "{{http_method}}"
         }
       ]
     }

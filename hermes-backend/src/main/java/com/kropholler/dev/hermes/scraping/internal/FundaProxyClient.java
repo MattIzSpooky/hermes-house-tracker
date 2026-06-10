@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 @Component
 class FundaProxyClient {
 
-    private static final Pattern ID_PATTERN = Pattern.compile("-(\\d+)-");
+    private static final Pattern ID_PATTERN = Pattern.compile("/(\\d{7,9})(?:/|$)");
     private static final ParameterizedTypeReference<List<FundaProxyListing>> LISTING_LIST =
         new ParameterizedTypeReference<>() {};
 
@@ -71,7 +71,9 @@ class FundaProxyClient {
 
     String extractFundaId(String listingUrl) {
         Matcher m = ID_PATTERN.matcher(listingUrl);
-        return m.find() ? m.group(1) : listingUrl;
+        String last = null;
+        while (m.find()) last = m.group(1);
+        return last != null ? last : listingUrl;
     }
 
     private RawListing toRawListing(FundaProxyListing p) {
