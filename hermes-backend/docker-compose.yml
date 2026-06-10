@@ -11,7 +11,7 @@ services:
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://grafana-lgtm:4318/v1/metrics
       MANAGEMENT_OTLP_TRACING_ENDPOINT: http://grafana-lgtm:4318/v1/traces
-      FUNDA_PROXY_URL: http://funda-proxy:8001
+      FUNDA_PROXY_URL: http://funda-proxy:8000
     depends_on:
       - postgres
       - ollama
