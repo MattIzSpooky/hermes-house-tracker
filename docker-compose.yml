@@ -10,3 +10,9 @@ services:
       BACKEND_URL: http://backend:8080
     depends_on:
       - backend
+
+  funda-proxy:
+    build: ./funda-proxy
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
