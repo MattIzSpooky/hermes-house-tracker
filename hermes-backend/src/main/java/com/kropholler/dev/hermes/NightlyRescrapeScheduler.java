@@ -3,6 +3,8 @@ package com.kropholler.dev.hermes;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,9 +19,15 @@ class NightlyRescrapeScheduler {
 
     private final ListingService listingService;
     private final ScrapingQueueService queueService;
+    private final ObservationRegistry observationRegistry;
 
     @Scheduled(cron = "0 0 2 * * *")
     public void enqueueNightlyRescrapes() {
+        Observation.createNotStarted("scheduler.nightly-rescrape", observationRegistry)
+            .observe(this::doEnqueue);
+    }
+
+    private void doEnqueue() {
         log.info("Starting nightly rescrape job");
         int count = 0;
         int page = 0;

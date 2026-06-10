@@ -1,9 +1,14 @@
 from fastapi import FastAPI, HTTPException, Query
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from funda.exceptions import FundaError, ListingNotFound
 from client import lifespan, get_client
 from models import ListingResponse
+from telemetry import configure_telemetry
+
+configure_telemetry()
 
 app = FastAPI(title="funda-proxy", lifespan=lifespan)
+FastAPIInstrumentor.instrument_app(app)
 
 
 @app.get("/health")
