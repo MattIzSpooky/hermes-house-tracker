@@ -14,8 +14,13 @@ services:
       FUNDA_PROXY_URL: http://funda-proxy:8000
     depends_on:
       - postgres
-      - ollama
+      - ollama-pull
       - funda-proxy
+  ollama-pull:
+    image: 'ollama/ollama:latest'
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull qwen3.5:0.8b && wait"]
+    volumes:
+      - ollama_data:/root/.ollama
   grafana-lgtm:
     image: 'grafana/otel-lgtm:latest'
     ports:
@@ -26,6 +31,8 @@ services:
     image: 'ollama/ollama:latest'
     ports:
       - '11434'
+    volumes:
+      - ollama_data:/root/.ollama
   postgres:
     image: 'postgres:latest'
     environment:
@@ -34,3 +41,6 @@ services:
       - 'POSTGRES_USER=myuser'
     ports:
       - '5432'
+
+volumes:
+  ollama_data:
