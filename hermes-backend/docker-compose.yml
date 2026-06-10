@@ -28,6 +28,9 @@ services:
       - '3000:3000'
       - '4317'
       - '4318'
+    volumes:
+      - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/hermes.yaml:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards/hermes:ro
   ollama:
     image: 'ollama/ollama:latest'
     ports:
