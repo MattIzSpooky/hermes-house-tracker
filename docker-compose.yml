@@ -10,12 +10,3 @@ services:
       BACKEND_URL: http://backend:8080
     depends_on:
       - backend
-
-  funda-proxy:
-    build: ./funda-proxy
-    ports:
-      - "8001:8000"
-    restart: unless-stopped
-    environment:
-      OTEL_SERVICE_NAME: funda-proxy
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm:4318

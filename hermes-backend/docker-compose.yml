@@ -22,6 +22,16 @@ services:
         condition: service_started
       grafana-lgtm:
         condition: service_started
+  funda-proxy:
+    build: ../funda-proxy
+    ports:
+      - "8001:8000"
+    environment:
+      OTEL_SERVICE_NAME: funda-proxy
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm:4318
+    depends_on:
+      grafana-lgtm:
+        condition: service_started
   grafana-lgtm:
     image: 'grafana/otel-lgtm:latest'
     ports:

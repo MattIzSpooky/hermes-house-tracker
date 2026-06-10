@@ -4,15 +4,12 @@
 
     <springProperty scope="context" name="appName" source="spring.application.name"/>
 
-    <!-- Console: same as Spring Boot default but with traceId/spanId -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} %5p [${appName},%X{traceId:-},%X{spanId:-}] ${PID} --- [%15.15t] %-40.40logger{39} : %m%n%wEx</pattern>
-            <charset>UTF-8</charset>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${appName}"}</customFields>
         </encoder>
     </appender>
 
-    <!-- OTLP: ships log records to Loki via the OTel SDK configured by Spring Boot -->
     <appender name="OTLP" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
         <captureCodeAttributes>true</captureCodeAttributes>
         <captureMdcAttributes>*</captureMdcAttributes>
