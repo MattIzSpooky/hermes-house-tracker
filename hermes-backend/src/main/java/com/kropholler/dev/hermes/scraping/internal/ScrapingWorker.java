@@ -22,8 +22,7 @@ import java.util.List;
 public class ScrapingWorker {
 
     private final ScrapingSessionRepository sessionRepository;
-    private final FundaScraperService scraperService;
-    private final FundaUrlBuilder urlBuilder;
+    private final FundaProxyClient proxyClient;
     private final ApplicationEventPublisher eventPublisher;
 
     @Async
@@ -50,17 +49,18 @@ public class ScrapingWorker {
 
     private List<RawListing> scrapeAllPages(ScrapingSession session) {
         if (session.getType() == ScrapingSessionType.RESCRAPE) {
-            return scraperService.scrapeSearchPage(session.getTargetListingUrl(), session.getCity());
+            String fundaId = proxyClient.extractFundaId(session.getTargetListingUrl());
+            return proxyClient.getListing(fundaId)
+                .map(List::of)
+                .orElse(List.of());
         }
 
         List<RawListing> all = new ArrayList<>();
         int limit = Math.min(session.getPageLimit(), 5);
         for (int page = 1; page <= limit; page++) {
-            String pageUrl = urlBuilder.build(
+            List<RawListing> pageResults = proxyClient.search(
                 session.getCity(), session.getMinPrice(), session.getMaxPrice(),
-                session.getMinArea(), session.getMaxArea(), page
-            );
-            List<RawListing> pageResults = scraperService.scrapeSearchPage(pageUrl, session.getCity());
+                session.getMinArea(), session.getMaxArea(), page);
             all.addAll(pageResults);
             if (pageResults.isEmpty()) break;
         }
