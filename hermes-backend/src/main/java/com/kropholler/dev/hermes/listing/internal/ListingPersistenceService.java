@@ -5,6 +5,7 @@ import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
@@ -27,22 +28,34 @@ public class ListingPersistenceService {
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onScrapingSessionCompleted(ScrapingSessionCompleted event) {
-        List<UUID> affectedListingIds = new ArrayList<>();
+        String previousCorrelationId = MDC.get("correlationId");
+        try {
+            if (event.correlationId() != null) {
+                MDC.put("correlationId", event.correlationId());
+            }
+            List<UUID> affectedListingIds = new ArrayList<>();
 
-        for (RawListing raw : event.listings()) {
-            Listing listing = listingRepository.findByFundaId(raw.fundaId())
-                .orElseGet(() -> createListing(raw));
+            for (RawListing raw : event.listings()) {
+                Listing listing = listingRepository.findByFundaId(raw.fundaId())
+                    .orElseGet(() -> createListing(raw));
 
-            listing.setLastSeenAt(Instant.now());
-            listing = listingRepository.save(listing);
+                listing.setLastSeenAt(Instant.now());
+                listing = listingRepository.save(listing);
 
-            ListingSnapshot snapshot = createSnapshot(listing.getId(), raw);
-            snapshotRepository.save(snapshot);
-            affectedListingIds.add(listing.getId());
-        }
+                ListingSnapshot snapshot = createSnapshot(listing.getId(), raw);
+                snapshotRepository.save(snapshot);
+                affectedListingIds.add(listing.getId());
+            }
 
-        if (!affectedListingIds.isEmpty()) {
-            eventPublisher.publishEvent(new ListingSnapshotsCreated(affectedListingIds, event.correlationId()));
+            if (!affectedListingIds.isEmpty()) {
+                eventPublisher.publishEvent(new ListingSnapshotsCreated(affectedListingIds, event.correlationId()));
+            }
+        } finally {
+            if (previousCorrelationId != null) {
+                MDC.put("correlationId", previousCorrelationId);
+            } else {
+                MDC.remove("correlationId");
+            }
         }
     }
 
