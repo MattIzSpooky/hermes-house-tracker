@@ -6,7 +6,6 @@ import com.kropholler.dev.hermes.listing.ListingSnapshotDto;
 import com.kropholler.dev.hermes.listing.ListingSnapshotsCreated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.MDC;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
@@ -28,25 +27,13 @@ public class ListingSummaryGenerationService {
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onListingSnapshotsCreated(ListingSnapshotsCreated event) {
-        String previousCorrelationId = MDC.get("correlationId");
-        try {
-            if (event.correlationId() != null) {
-                MDC.put("correlationId", event.correlationId());
-            }
-            ChatClient chatClient = chatClientBuilder.build();
+        ChatClient chatClient = chatClientBuilder.build();
 
-            for (UUID listingId : event.listingIds()) {
-                listingService.findById(listingId).ifPresent(listing -> {
-                    String summary = generateSummary(chatClient, listing);
-                    upsertSummary(listingId, summary);
-                });
-            }
-        } finally {
-            if (previousCorrelationId != null) {
-                MDC.put("correlationId", previousCorrelationId);
-            } else {
-                MDC.remove("correlationId");
-            }
+        for (UUID listingId : event.listingIds()) {
+            listingService.findById(listingId).ifPresent(listing -> {
+                String summary = generateSummary(chatClient, listing);
+                upsertSummary(listingId, summary);
+            });
         }
     }
 

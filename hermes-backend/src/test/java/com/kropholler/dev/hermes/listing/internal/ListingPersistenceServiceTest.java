@@ -3,20 +3,16 @@ package com.kropholler.dev.hermes.listing.internal;
 import com.kropholler.dev.hermes.listing.ListingSnapshotsCreated;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,11 +27,6 @@ class ListingPersistenceServiceTest {
 
     @InjectMocks
     private ListingPersistenceService service;
-
-    @AfterEach
-    void cleanupMdc() {
-        MDC.clear();
-    }
 
     @Test
     void onScrapingCompleted_createsNewListingAndSnapshot() {
@@ -80,51 +71,5 @@ class ListingPersistenceServiceTest {
 
         assertThat(existing.getLastSeenAt()).isAfterOrEqualTo(originalLastSeen);
         verify(snapshotRepository).save(any());
-    }
-
-    @Test
-    void onScrapingCompleted_restoresMdcCorrelationIdDuringExecution() {
-        AtomicReference<String> capturedMdc = new AtomicReference<>();
-        Listing existingListing = new Listing();
-        existingListing.setFundaId("12345678");
-
-        when(listingRepository.findByFundaId("12345678")).thenAnswer(inv -> {
-            capturedMdc.set(MDC.get("correlationId"));
-            return Optional.of(existingListing);
-        });
-        when(listingRepository.save(any())).thenReturn(existingListing);
-        when(snapshotRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        RawListing raw = new RawListing(
-            "12345678", "https://f.nl/1", "Street", "1", null,
-            "1234AB", "Amsterdam", "Noord-Holland", null, null, null, null, null, "FOR_SALE");
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(
-            UUID.randomUUID(), List.of(raw), "chain-corr");
-
-        service.onScrapingSessionCompleted(event);
-
-        assertThat(capturedMdc.get()).isEqualTo("chain-corr");
-        assertThat(MDC.get("correlationId")).isNull();
-    }
-
-    @Test
-    void onScrapingCompleted_publishesListingSnapshotsCreatedWithCorrelationId() {
-        Listing existingListing = new Listing();
-        existingListing.setFundaId("12345678");
-        when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existingListing));
-        when(listingRepository.save(any())).thenReturn(existingListing);
-        when(snapshotRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
-
-        RawListing raw = new RawListing(
-            "12345678", "https://f.nl/1", "Street", "1", null,
-            "1234AB", "Amsterdam", "Noord-Holland", null, null, null, null, null, "FOR_SALE");
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(
-            UUID.randomUUID(), List.of(raw), "chain-corr");
-
-        service.onScrapingSessionCompleted(event);
-
-        ArgumentCaptor<ListingSnapshotsCreated> captor = ArgumentCaptor.forClass(ListingSnapshotsCreated.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-        assertThat(captor.getValue().correlationId()).isEqualTo("chain-corr");
     }
 }
