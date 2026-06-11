@@ -7,6 +7,7 @@ import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -37,13 +38,13 @@ public class ScrapingWorker {
             session.setStatus(ScrapingSessionStatus.COMPLETED);
             session.setCompletedAt(Instant.now());
             sessionRepository.save(session);
-            eventPublisher.publishEvent(new ScrapingSessionCompleted(session.getId(), listings));
+            eventPublisher.publishEvent(new ScrapingSessionCompleted(session.getId(), listings, MDC.get("correlationId")));
         } catch (Exception e) {
             log.error("Scraping session {} failed", session.getId(), e);
             session.setStatus(ScrapingSessionStatus.FAILED);
             session.setCompletedAt(Instant.now());
             sessionRepository.save(session);
-            eventPublisher.publishEvent(new ScrapingSessionFailed(session.getId(), e.getMessage()));
+            eventPublisher.publishEvent(new ScrapingSessionFailed(session.getId(), e.getMessage(), MDC.get("correlationId")));
         }
     }
 

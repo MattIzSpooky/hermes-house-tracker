@@ -35,7 +35,7 @@ class ListingPersistenceServiceTest {
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
             450000, 75, 3, "A", null, "FOR_SALE"
         );
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
+        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw), null);
 
         Listing listing = new Listing();
         listing.setFundaId("12345678");
@@ -61,7 +61,7 @@ class ListingPersistenceServiceTest {
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
             460000, 75, 3, "A", null, "FOR_SALE"
         );
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
+        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw), null);
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
         when(listingRepository.save(any())).thenReturn(existing);
