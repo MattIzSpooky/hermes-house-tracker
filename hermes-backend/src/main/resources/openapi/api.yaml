@@ -401,3 +401,6 @@ components:
           type: string
         detail:
           type: string
+        correlationId:
+          type: string
+          nullable: true

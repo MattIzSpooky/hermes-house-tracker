@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.api;
 
 import com.kropholler.dev.hermes.api.generated.model.ErrorResponse;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,7 +15,8 @@ class GlobalExceptionHandler {
     ResponseEntity<ErrorResponse> handleResponseStatus(ResponseStatusException ex) {
         ErrorResponse body = new ErrorResponse()
             .error(ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString())
-            .detail(ex.getMessage());
+            .detail(ex.getMessage())
+            .correlationId(MDC.get("correlationId"));
         return ResponseEntity.status(ex.getStatusCode()).body(body);
     }
 
@@ -22,7 +24,8 @@ class GlobalExceptionHandler {
     ResponseEntity<ErrorResponse> handleGeneral(Exception ex) {
         ErrorResponse body = new ErrorResponse()
             .error("INTERNAL_SERVER_ERROR")
-            .detail(ex.getMessage());
+            .detail(ex.getMessage())
+            .correlationId(MDC.get("correlationId"));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }
