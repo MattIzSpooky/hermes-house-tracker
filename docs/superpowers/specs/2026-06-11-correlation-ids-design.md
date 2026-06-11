@@ -68,26 +68,6 @@ Both `@ExceptionHandler` methods read `MDC.get("correlationId")` and set it on t
 
 `ErrorResponse` schema gains an optional `correlationId: string` property so the generated model includes the field.
 
-### 9. Domain event propagation (hermes-backend)
-
-All three domain event records gain a `String correlationId` field:
-
-- `ScrapingSessionCompleted(UUID sessionId, List<RawListing> listings, String correlationId)`
-- `ScrapingSessionFailed(UUID sessionId, String reason, String correlationId)`
-- `ListingSnapshotsCreated(List<UUID> listingIds, String correlationId)`
-
-**Publishers** read `MDC.get("correlationId")` when constructing the event:
-
-- `ScrapingWorker` — already runs on the MDC-decorated async thread, so the correlation ID is present when it builds `ScrapingSessionCompleted` / `ScrapingSessionFailed`.
-- `ListingPersistenceService.onScrapingSessionCompleted()` — passes `event.correlationId()` directly when constructing `ListingSnapshotsCreated`.
-
-**Listeners** restore and clean up MDC around their handler body:
-
-- `ListingPersistenceService.onScrapingSessionCompleted()`: set `MDC["correlationId"]` from `event.correlationId()` at method start; clear in a `try/finally`.
-- `ListingSummaryGenerationService.onListingSnapshotsCreated()`: same pattern from `event.correlationId()`.
-
-`@ApplicationModuleListener` runs in a separate transaction on a Spring-managed thread; the MDC is otherwise empty at that point, so explicit restore is required.
-
 ## Data Flow
 
 ```
@@ -110,15 +90,6 @@ funda-proxy middleware       → _correlation_id_var = abc
   │
   ▼
 funda-proxy log lines        → JSON field correlation_id=abc
-
-  (back in hermes-backend)
-ScrapingSessionCompleted     → event.correlationId = abc
-  │
-  ▼ @ApplicationModuleListener (ListingPersistenceService)
-MDC["correlationId"] = abc   → logs include correlationId=abc
-  │  publishes ListingSnapshotsCreated(correlationId=abc)
-  ▼ @ApplicationModuleListener (ListingSummaryGenerationService)
-MDC["correlationId"] = abc   → logs include correlationId=abc
 ```
 
 ## Error Response
@@ -133,6 +104,7 @@ MDC["correlationId"] = abc   → logs include correlationId=abc
 
 ## Out of Scope
 
+- Propagating correlation IDs through Spring Modulith domain events (event payloads are not modified).
 - Nightly rescrape scheduler — scheduler-triggered jobs have no inbound HTTP request; they run without a correlation ID. OTel trace context covers those flows.
 - Frontend changes.
 
@@ -141,5 +113,4 @@ MDC["correlationId"] = abc   → logs include correlationId=abc
 - Unit test `CorrelationIdFilter`: verify MDC is populated, response header is set, MDC is cleared after the request.
 - Unit test `MdcTaskDecorator`: verify MDC snapshot is restored in the decorated runnable and cleared afterwards.
 - Integration test (existing `ScrapingQueueServiceTest` or new): verify that a correlation ID set before `@Async` dispatch appears in the worker thread's MDC.
-- Unit test domain event listeners: verify that `MDC["correlationId"]` is set from `event.correlationId()` during handler execution and cleared afterwards.
 - funda-proxy: unit test the middleware using FastAPI `TestClient` — verify `correlation_id` appears in log output and that a missing header results in an empty string.
