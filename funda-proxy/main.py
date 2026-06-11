@@ -7,7 +7,6 @@ from funda.exceptions import FundaError, ListingNotFound
 from client import lifespan, get_client
 from models import ListingResponse
 from telemetry import configure_telemetry
-from correlation import CorrelationIdMiddleware
 
 configure_telemetry()
 
@@ -15,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="funda-proxy", lifespan=lifespan)
 FastAPIInstrumentor.instrument_app(app)
-app.add_middleware(CorrelationIdMiddleware)
 
 
 @app.get("/health")

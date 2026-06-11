@@ -17,8 +17,6 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from pythonjsonlogger.json import JsonFormatter
 
-from correlation import _correlation_id_var
-
 _configured = False
 _logging_configured = False
 
@@ -36,7 +34,6 @@ class _OtelJsonFormatter(JsonFormatter):
         else:
             log_record["trace_id"] = ""
             log_record["span_id"] = ""
-        log_record["correlation_id"] = _correlation_id_var.get("")
 
 
 def setup_logging() -> None:
