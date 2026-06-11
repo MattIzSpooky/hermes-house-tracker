@@ -42,7 +42,7 @@ public class ListingPersistenceService {
         }
 
         if (!affectedListingIds.isEmpty()) {
-            eventPublisher.publishEvent(new ListingSnapshotsCreated(affectedListingIds, event.correlationId()));
+            eventPublisher.publishEvent(new ListingSnapshotsCreated(affectedListingIds));
         }
     }
 
