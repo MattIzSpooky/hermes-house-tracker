@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.scraping.internal;
 
 import com.kropholler.dev.hermes.scraping.RawListing;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,16 @@ class FundaProxyClient {
 
     FundaProxyClient(RestClient.Builder builder,
                      @Value("${funda.proxy.url:http://funda-proxy:8001}") String baseUrl) {
-        this.restClient = builder.baseUrl(baseUrl).build();
+        this.restClient = builder
+            .baseUrl(baseUrl)
+            .requestInterceptor((request, body, execution) -> {
+                String correlationId = MDC.get("correlationId");
+                if (correlationId != null) {
+                    request.getHeaders().set("X-Correlation-ID", correlationId);
+                }
+                return execution.execute(request, body);
+            })
+            .build();
     }
 
     List<RawListing> search(String city, Integer minPrice, Integer maxPrice,
