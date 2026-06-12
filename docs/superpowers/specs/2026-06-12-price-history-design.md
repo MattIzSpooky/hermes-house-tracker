@@ -76,22 +76,22 @@ FOR_SALE, UNDER_OFFER, SOLD, WITHDRAWN, DELETED
 
 Table: `price_history_entries`
 
-| Column       | Type         | Constraints                                      |
-|--------------|--------------|--------------------------------------------------|
-| `id`         | UUID PK      | auto-generated                                   |
-| `listing_id` | UUID NOT NULL| FK to `listings.id`                              |
-| `price`      | INTEGER      | nullable                                         |
-| `status`     | VARCHAR(50)  | `asking_price`, `sold`, or `woz`                 |
-| `source`     | VARCHAR(255) | nullable                                         |
-| `date`       | VARCHAR(100) | Dutch date string from Funda, e.g. "15 mei 2024" |
-| `timestamp`  | VARCHAR(100) | ISO timestamp string from Funda                  |
+| Column       | Type                    | Constraints                      |
+|--------------|-------------------------|----------------------------------|
+| `id`         | UUID PK                 | auto-generated                   |
+| `listing_id` | UUID NOT NULL           | FK to `listings.id`              |
+| `price`      | INTEGER                 | nullable                         |
+| `status`     | VARCHAR(50)             | `asking_price`, `sold`, or `woz` |
+| `source`     | VARCHAR(255)            | nullable                         |
+| `date`       | DATE                    | nullable; parsed from Funda string in funda-proxy |
+| `timestamp`  | TIMESTAMP WITH TIME ZONE| nullable; parsed from Funda string in funda-proxy |
 
 Unique constraint on `(listing_id, timestamp)` — merge strategy skips entries that already exist.
 
 ### `PriceHistoryEntryDto` (public DTO, replaces `ListingSnapshotDto`)
 
 ```java
-record PriceHistoryEntryDto(UUID id, Integer price, String status, String date, String timestamp)
+record PriceHistoryEntryDto(UUID id, Integer price, String status, LocalDate date, Instant timestamp)
 ```
 
 ### `ListingDto` changes
@@ -106,14 +106,22 @@ record PriceHistoryEntryDto(UUID id, Integer price, String status, String date, 
 
 ### New Pydantic model (`models.py`)
 
+pyfunda returns `date` and `timestamp` as raw strings from the Walter Living API. The proxy parses
+them into proper types before returning. `date` is a Dutch locale date string (e.g. "15 mei 2024")
+parsed with `dateparser`; `timestamp` is an ISO-like string parsed with `datetime.fromisoformat`.
+Both fields are nullable — if parsing fails they are omitted.
+
 ```python
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
+
 class PriceChangeResponse(BaseModel):
     price: int | None = None
     human_price: str | None = None
     status: str | None = None
     source: str | None = None
-    date: str | None = None
-    timestamp: str | None = None
+    date: date | None = None
+    timestamp: datetime | None = None
 
     @classmethod
     def from_change(cls, change) -> "PriceChangeResponse":
@@ -122,10 +130,14 @@ class PriceChangeResponse(BaseModel):
             human_price=change.human_price,
             status=change.status,
             source=change.source,
-            date=change.date,
-            timestamp=change.timestamp,
+            date=_parse_date(change.date),
+            timestamp=_parse_timestamp(change.timestamp),
         )
 ```
+
+`_parse_date` uses `dateparser.parse(raw, languages=["nl"])` and extracts `.date()`.
+`_parse_timestamp` uses `datetime.fromisoformat(raw)`, making it timezone-aware if needed.
+Both return `None` on failure rather than raising.
 
 ### New endpoint (`main.py`)
 
@@ -148,7 +160,7 @@ Error handling mirrors the existing `/listings/{id}` endpoint:
 
 In `listing.internal`. Repository exposes:
 - `findByListingIdOrderByTimestampAsc(UUID listingId)`
-- `existsByListingIdAndTimestamp(UUID listingId, String timestamp)` — for dedup
+- `existsByListingIdAndTimestamp(UUID listingId, Instant timestamp)` — for dedup
 
 ### New: `PriceHistoryService` (in `listing.internal`)
 
@@ -246,8 +258,8 @@ CREATE TABLE price_history_entries (
     price       INTEGER,
     status      VARCHAR(50),
     source      VARCHAR(255),
-    date        VARCHAR(100),
-    timestamp   VARCHAR(100),
+    date        DATE,
+    timestamp   TIMESTAMP WITH TIME ZONE,
     PRIMARY KEY (id),
     CONSTRAINT uk_price_history_listing_timestamp UNIQUE (listing_id, timestamp),
     CONSTRAINT fk_price_history_listing FOREIGN KEY (listing_id)
