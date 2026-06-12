@@ -125,16 +125,16 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
   private readonly router = inject(Router);
 
-  currentPage = 0;
-  pageSize = 20;
+  protected currentPage = 0;
+  protected pageSize = 20;
 
-  street = '';
-  houseNumber = '';
-  houseNumberAddition = '';
-  zipCode = '';
-  province = '';
+  protected street = '';
+  protected houseNumber = '';
+  protected houseNumberAddition = '';
+  protected zipCode = '';
+  protected province = '';
 
-  private filterChange$ = new Subject<void>();
+  private readonly filterChange$ = new Subject<void>();
   private filterSub?: Subscription;
 
   ngOnInit(): void {
