@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.internal.JmsQueues;
 import com.kropholler.dev.hermes.listing.internal.Listing;
 import com.kropholler.dev.hermes.listing.internal.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
@@ -99,7 +100,7 @@ class PriceHistoryServiceTest {
         service.refreshAll();
 
         ArgumentCaptor<Object> cmdCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(jmsTemplate).convertAndSend(eq("price.history.fetch"), cmdCaptor.capture());
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), cmdCaptor.capture());
         assertThat(cmdCaptor.getValue()).isInstanceOf(FetchPriceHistoryCommand.class);
         FetchPriceHistoryCommand cmd = (FetchPriceHistoryCommand) cmdCaptor.getValue();
         assertThat(cmd.listingId()).isEqualTo(listingId);

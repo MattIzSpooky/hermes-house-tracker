@@ -34,7 +34,9 @@ public class ListingPersistenceService {
             Listing saved = listingRepository.save(listing);
 
             if (isNew) {
-                jmsTemplate.convertAndSend("price.history.fetch",
+                // Sent inside the transaction — if the commit later fails, this message is
+                // already on the broker. The consumer handles a missing listing gracefully.
+                jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                     new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
             }
         }

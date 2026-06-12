@@ -53,7 +53,7 @@ class ListingPersistenceServiceTest {
         assertThat(listingCaptor.getValue().getLastUpdatedAt()).isNotNull();
 
         ArgumentCaptor<FetchPriceHistoryCommand> cmdCaptor = ArgumentCaptor.forClass(FetchPriceHistoryCommand.class);
-        verify(jmsTemplate).convertAndSend(eq("price.history.fetch"), cmdCaptor.capture());
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), cmdCaptor.capture());
         assertThat(cmdCaptor.getValue().fundaId()).isEqualTo("12345678");
         assertThat(cmdCaptor.getValue().listingId()).isEqualTo(saved.getId());
     }

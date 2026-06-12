@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.internal.JmsQueues;
 import com.kropholler.dev.hermes.listing.internal.Listing;
 import com.kropholler.dev.hermes.listing.internal.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
@@ -35,7 +36,7 @@ public class PriceHistoryService {
             batch = listingRepository.findAllByDeletedAtIsNull(PageRequest.of(page, 100));
             for (Listing listing : batch.getContent()) {
                 try {
-                    jmsTemplate.convertAndSend("price.history.fetch",
+                    jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                         new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
                 } catch (Exception e) {
                     log.warn("Failed to enqueue price history fetch for listing {}: {}",

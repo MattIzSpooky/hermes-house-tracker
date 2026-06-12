@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.listing;
 
 import com.google.common.util.concurrent.RateLimiter;
 import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.internal.JmsQueues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -22,7 +23,7 @@ class PriceHistoryConsumer {
     private final PriceHistoryService priceHistoryService;
     private final ApplicationEventPublisher eventPublisher;
 
-    @JmsListener(destination = "price.history.fetch")
+    @JmsListener(destination = JmsQueues.PRICE_HISTORY_FETCH)
     public void onMessage(FetchPriceHistoryCommand command) {
         RATE_LIMITER.acquire();
         log.debug("Fetching price history for listing {}", command.listingId());
