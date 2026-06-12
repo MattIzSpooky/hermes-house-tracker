@@ -67,3 +67,50 @@ def test_from_listing_falls_back_to_title_when_no_street_name():
     m.address.title = "Keizersgracht"
     result = ListingResponse.from_listing(m)
     assert result.street == "Keizersgracht"
+
+
+from datetime import date, datetime, timezone
+from models import PriceChangeResponse
+
+
+def _make_change(**overrides):
+    m = MagicMock()
+    m.price = 350000
+    m.human_price = "€ 350.000 k.k."
+    m.status = "asking_price"
+    m.source = "walter"
+    m.date = "15 mei 2024"
+    m.timestamp = "2024-05-15T00:00:00+00:00"
+    for k, v in overrides.items():
+        setattr(m, k, v)
+    return m
+
+
+def test_price_change_response_maps_all_fields():
+    result = PriceChangeResponse.from_change(_make_change())
+    assert result.price == 350000
+    assert result.human_price == "€ 350.000 k.k."
+    assert result.status == "asking_price"
+    assert result.source == "walter"
+    assert result.date == date(2024, 5, 15)
+    assert result.timestamp == datetime(2024, 5, 15, 0, 0, 0, tzinfo=timezone.utc)
+
+
+def test_price_change_response_null_date_becomes_none():
+    result = PriceChangeResponse.from_change(_make_change(date=None))
+    assert result.date is None
+
+
+def test_price_change_response_null_timestamp_becomes_none():
+    result = PriceChangeResponse.from_change(_make_change(timestamp=None))
+    assert result.timestamp is None
+
+
+def test_price_change_response_unparseable_date_becomes_none():
+    result = PriceChangeResponse.from_change(_make_change(date="not a date"))
+    assert result.date is None
+
+
+def test_price_change_response_unparseable_timestamp_becomes_none():
+    result = PriceChangeResponse.from_change(_make_change(timestamp="not a timestamp"))
+    assert result.timestamp is None

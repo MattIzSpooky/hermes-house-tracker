@@ -5,7 +5,7 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from funda.exceptions import FundaError, ListingNotFound
 from client import lifespan, get_client
-from models import ListingResponse
+from models import ListingResponse, PriceChangeResponse
 from telemetry import configure_telemetry
 
 configure_telemetry()
@@ -62,3 +62,17 @@ def get_listing(listing_id: str):
         raise HTTPException(status_code=404, detail="Listing not found")
     logger.info("get_listing id=%s success", listing_id)
     return ListingResponse.from_listing(listing)
+
+
+@app.get("/listings/{listing_id}/price-history", response_model=list[PriceChangeResponse])
+def get_price_history(listing_id: str):
+    logger.info("get_price_history id=%s", listing_id)
+    try:
+        history = get_client().price_history(listing_id)
+    except ListingNotFound as e:
+        logger.warning("get_price_history id=%s not found: %s", listing_id, e)
+        raise HTTPException(status_code=404, detail=str(e))
+    except FundaError as e:
+        logger.warning("get_price_history id=%s failed: %s", listing_id, e)
+        raise HTTPException(status_code=502, detail=str(e))
+    return [PriceChangeResponse.from_change(c) for c in history.changes]

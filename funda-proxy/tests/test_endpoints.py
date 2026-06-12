@@ -106,3 +106,45 @@ def test_get_listing_funda_error_returns_502(api):
     mock_funda.listing.side_effect = FundaError("api down")
     resp = client.get("/listings/12345678")
     assert resp.status_code == 502
+
+
+def _make_change():
+    m = MagicMock()
+    m.price = 350000
+    m.human_price = "€ 350.000 k.k."
+    m.status = "asking_price"
+    m.source = "walter"
+    m.date = "15 mei 2024"
+    m.timestamp = "2024-05-15T00:00:00+00:00"
+    return m
+
+
+def test_get_price_history_returns_changes(api):
+    client, mock_funda = api
+    history = MagicMock()
+    history.changes = [_make_change()]
+    mock_funda.price_history.return_value = history
+    resp = client.get("/listings/12345678/price-history")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["price"] == 350000
+    assert data[0]["status"] == "asking_price"
+    assert data[0]["date"] == "2024-05-15"
+    assert "2024-05-15" in data[0]["timestamp"]
+
+
+def test_get_price_history_not_found_returns_404(api):
+    client, mock_funda = api
+    from funda.exceptions import ListingNotFound
+    mock_funda.price_history.side_effect = ListingNotFound("not found")
+    resp = client.get("/listings/99999999/price-history")
+    assert resp.status_code == 404
+
+
+def test_get_price_history_funda_error_returns_502(api):
+    client, mock_funda = api
+    from funda.exceptions import FundaError
+    mock_funda.price_history.side_effect = FundaError("upstream down")
+    resp = client.get("/listings/12345678/price-history")
+    assert resp.status_code == 502

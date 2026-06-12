@@ -1,3 +1,5 @@
+import dateparser
+from datetime import date as _Date, datetime as _DateTime, timezone
 from pydantic import BaseModel
 
 
@@ -44,3 +46,45 @@ class ListingResponse(BaseModel):
             status=getattr(listing.property_details, "status", None),
             offering_type=listing.offering_type,
         )
+
+
+class PriceChangeResponse(BaseModel):
+    price: int | None = None
+    human_price: str | None = None
+    status: str | None = None
+    source: str | None = None
+    date: _Date | None = None
+    timestamp: _DateTime | None = None
+
+    @classmethod
+    def from_change(cls, change) -> "PriceChangeResponse":
+        return cls(
+            price=change.price,
+            human_price=change.human_price,
+            status=change.status,
+            source=change.source,
+            date=_parse_date(change.date),
+            timestamp=_parse_timestamp(change.timestamp),
+        )
+
+
+def _parse_date(raw: str | None) -> _Date | None:
+    if not raw:
+        return None
+    try:
+        parsed = dateparser.parse(raw, languages=["nl"])
+        return parsed.date() if parsed else None
+    except Exception:
+        return None
+
+
+def _parse_timestamp(raw: str | None) -> _DateTime | None:
+    if not raw:
+        return None
+    try:
+        dt = _DateTime.fromisoformat(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt
+    except Exception:
+        return None
