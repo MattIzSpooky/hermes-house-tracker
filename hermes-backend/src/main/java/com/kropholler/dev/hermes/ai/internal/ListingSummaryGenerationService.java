@@ -2,7 +2,6 @@ package com.kropholler.dev.hermes.ai.internal;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.ListingSnapshotDto;
 import com.kropholler.dev.hermes.listing.ListingSnapshotsCreated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,8 +37,7 @@ public class ListingSummaryGenerationService {
     }
 
     private String generateSummary(ChatClient chatClient, ListingDto listing) {
-        ListingSnapshotDto snapshot = listing.latestSnapshot();
-        String prompt = buildPrompt(listing, snapshot);
+        String prompt = buildPrompt(listing);
         try {
             return chatClient.prompt().user(prompt).call().content();
         } catch (Exception e) {
@@ -48,7 +46,7 @@ public class ListingSummaryGenerationService {
         }
     }
 
-    private String buildPrompt(ListingDto listing, ListingSnapshotDto snapshot) {
+    private String buildPrompt(ListingDto listing) {
         return String.format(
             """
             Write a concise, plain-language summary (2-3 sentences) of this Dutch property listing.
@@ -56,19 +54,13 @@ public class ListingSummaryGenerationService {
 
             Address: %s %s%s, %s %s, %s
             Price: €%,d
-            Size: %d m²
-            Rooms: %d
-            Energy label: %s
             Status: %s
             """,
             listing.street(), listing.houseNumber(),
             listing.houseNumberAddition() != null ? " " + listing.houseNumberAddition() : "",
             listing.zipCode(), listing.city(), listing.province(),
-            snapshot != null ? snapshot.askingPrice() : 0,
-            snapshot != null ? snapshot.livingAreaM2() : 0,
-            snapshot != null ? snapshot.rooms() : 0,
-            snapshot != null && snapshot.energyLabel() != null ? snapshot.energyLabel() : "unknown",
-            snapshot != null ? snapshot.status() : "unknown"
+            listing.currentPrice() != null ? listing.currentPrice() : 0,
+            listing.status() != null ? listing.status() : "unknown"
         );
     }
 

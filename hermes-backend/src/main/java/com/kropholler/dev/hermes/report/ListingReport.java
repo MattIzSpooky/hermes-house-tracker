@@ -7,12 +7,10 @@ import java.util.UUID;
 
 public record ListingReport(
     UUID listingId,
-    Long daysListedOnFunda,
     Long daysInHermes,
     Integer currentPrice,
     Integer initialPrice,
     Double priceChangePct,
     List<PricePoint> priceHistory,
-    List<StatusPoint> statusHistory,
     ListingStatus currentStatus
 ) {}

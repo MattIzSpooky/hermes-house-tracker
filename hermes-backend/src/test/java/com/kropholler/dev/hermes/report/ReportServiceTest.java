@@ -2,8 +2,8 @@ package com.kropholler.dev.hermes.report;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.ListingSnapshotDto;
 import com.kropholler.dev.hermes.listing.ListingStatus;
+import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,16 +36,16 @@ class ReportServiceTest {
         ListingDto listing = new ListingDto(
             listingId, "12345678", "https://funda.nl/...",
             "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
-            now.minus(30, ChronoUnit.DAYS), now, null
+            now.minus(30, ChronoUnit.DAYS), now, 380000, ListingStatus.FOR_SALE
         );
 
-        List<ListingSnapshotDto> snapshots = List.of(
-            snapshot(now.minus(30, ChronoUnit.DAYS), 400000, ListingStatus.FOR_SALE),
-            snapshot(now.minus(10, ChronoUnit.DAYS), 380000, ListingStatus.FOR_SALE)
+        List<PriceHistoryEntryDto> history = List.of(
+            entry(now.minus(30, ChronoUnit.DAYS), 400000, "asking_price"),
+            entry(now.minus(10, ChronoUnit.DAYS), 380000, "asking_price")
         );
 
         when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
-        when(listingService.findSnapshotsByListingId(listingId)).thenReturn(snapshots);
+        when(listingService.findPriceHistoryByListingId(listingId)).thenReturn(history);
 
         Optional<ListingReport> result = service.generateReport(listingId);
 
@@ -65,36 +65,44 @@ class ReportServiceTest {
     }
 
     @Test
-    void generateReport_deduplicatesStatusHistory() {
+    void generateReport_returnsEmptyWhenNoPriceHistory() {
         UUID listingId = UUID.randomUUID();
         Instant now = Instant.now();
 
         ListingDto listing = new ListingDto(
             listingId, "12345678", "https://funda.nl/...",
             "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
-            now.minus(60, ChronoUnit.DAYS), now, null
-        );
-
-        List<ListingSnapshotDto> snapshots = List.of(
-            snapshot(now.minus(60, ChronoUnit.DAYS), 400000, ListingStatus.FOR_SALE),
-            snapshot(now.minus(30, ChronoUnit.DAYS), 400000, ListingStatus.FOR_SALE),
-            snapshot(now.minus(5,  ChronoUnit.DAYS), 400000, ListingStatus.UNDER_OFFER)
+            now.minus(5, ChronoUnit.DAYS), now, null, null
         );
 
         when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
-        when(listingService.findSnapshotsByListingId(listingId)).thenReturn(snapshots);
+        when(listingService.findPriceHistoryByListingId(listingId)).thenReturn(List.of());
+
+        assertThat(service.generateReport(listingId)).isEmpty();
+    }
+
+    @Test
+    void generateReport_currentStatusFromListing() {
+        UUID listingId = UUID.randomUUID();
+        Instant now = Instant.now();
+
+        ListingDto listing = new ListingDto(
+            listingId, "12345678", "https://funda.nl/...",
+            "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
+            now.minus(10, ChronoUnit.DAYS), now, 400000, ListingStatus.SOLD
+        );
+
+        when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
+        when(listingService.findPriceHistoryByListingId(listingId))
+            .thenReturn(List.of(entry(now.minus(10, ChronoUnit.DAYS), 400000, "asking_price")));
 
         ListingReport report = service.generateReport(listingId).orElseThrow();
 
-        assertThat(report.statusHistory()).hasSize(2);
-        assertThat(report.statusHistory().get(0).status()).isEqualTo(ListingStatus.FOR_SALE);
-        assertThat(report.statusHistory().get(1).status()).isEqualTo(ListingStatus.UNDER_OFFER);
+        assertThat(report.currentStatus()).isEqualTo(ListingStatus.SOLD);
     }
 
-    private ListingSnapshotDto snapshot(Instant scrapedAt, int price, ListingStatus status) {
-        return new ListingSnapshotDto(
-            UUID.randomUUID(), scrapedAt, price,
-            75, 3, "A", LocalDate.now().minusDays(60), status
-        );
+    private PriceHistoryEntryDto entry(Instant timestamp, int price, String status) {
+        return new PriceHistoryEntryDto(UUID.randomUUID(), price, status, "walter",
+            LocalDate.now().minusDays(10), timestamp);
     }
 }
