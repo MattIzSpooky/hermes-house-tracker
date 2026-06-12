@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing.internal;
 
+import com.kropholler.dev.hermes.listing.ListingStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,4 +38,11 @@ public class Listing {
 
     @Column(nullable = false)
     private Instant lastSeenAt = Instant.now();
+
+    @Enumerated(EnumType.STRING)
+    private ListingStatus status;
+
+    private Instant lastUpdatedAt;
+
+    private Instant deletedAt;
 }

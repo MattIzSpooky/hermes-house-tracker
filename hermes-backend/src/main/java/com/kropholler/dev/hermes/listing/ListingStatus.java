@@ -1,5 +1,5 @@
 package com.kropholler.dev.hermes.listing;
 
 public enum ListingStatus {
-    FOR_SALE, UNDER_OFFER, SOLD, WITHDRAWN
+    FOR_SALE, UNDER_OFFER, SOLD, WITHDRAWN, DELETED
 }
