@@ -83,6 +83,23 @@ Individual listings can be re-scraped at any time from the detail page. The repo
 | Styling | Tailwind CSS 4 |
 | Charts | Chart.js + ng2-charts |
 
+### Funda Proxy
+
+A small Python service that sits between the backend and Funda.nl, abstracting the scraping logic away from the JVM.
+
+| Layer | Technology |
+|---|---|
+| Framework | FastAPI |
+| Language | Python 3.12+ |
+| Observability | OpenTelemetry (FastAPI instrumentation) |
+
+**Endpoints:**
+- `GET /search?location=...` — search listings by location with optional price/area filters
+- `GET /listings/{id}` — fetch a single listing by Funda ID
+- `GET /listings/{id}/price-history` — fetch the full price history for a listing
+
+The backend configures the proxy URL via `funda.proxy.url` (defaults to `http://localhost:8001` in dev).
+
 ### Infrastructure (local dev via Docker Compose)
 
 | Service | Purpose |
@@ -90,6 +107,7 @@ Individual listings can be re-scraped at any time from the detail page. The repo
 | PostgreSQL | Primary database |
 | ActiveMQ Artemis | JMS message broker for async price history fetching |
 | Ollama | Local LLM server |
+| Funda Proxy | Python/FastAPI sidecar that scrapes Funda.nl |
 | Grafana LGTM | Logs, traces, and metrics (OpenTelemetry) |
 
 ## Project Structure
@@ -109,6 +127,11 @@ hermes-house-tracker/
 │   │   └── application.properties
 │   ├── docker-compose.yml          Local Docker services
 │   └── pom.xml
+├── funda-proxy/                    Python/FastAPI proxy for Funda.nl
+│   ├── main.py                     FastAPI app (search, listing, price-history endpoints)
+│   ├── client.py                   Funda.nl HTTP client with lifespan management
+│   ├── models.py                   Pydantic response models
+│   └── tests/
 └── hermes-frontend/                Angular application
     └── src/app/
         ├── core/                   Services and API types
