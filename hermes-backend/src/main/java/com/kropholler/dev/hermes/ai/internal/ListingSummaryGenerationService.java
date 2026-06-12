@@ -13,7 +13,6 @@ import java.util.UUID;
 // TODO: wire up as a JMS listener on a listing.summary.generate queue;
 //       private helpers below are ready, the listener method needs to be added.
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class ListingSummaryGenerationService {
 

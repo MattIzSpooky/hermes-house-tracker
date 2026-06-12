@@ -47,6 +47,9 @@ public class PriceHistoryService {
         } while (batch.hasNext());
     }
 
+    // @Transactional begins a logical transaction but Hibernate 6 DELAYED_ACQUISITION_AND_HOLD
+    // defers physical JDBC connection acquisition until the first SQL statement, so no connection
+    // is held during the proxyFacade HTTP call below.
     @Transactional
     void fetchAndStore(UUID listingId, String fundaId) {
         List<RawPriceChange> changes = proxyFacade.getPriceHistory(fundaId);

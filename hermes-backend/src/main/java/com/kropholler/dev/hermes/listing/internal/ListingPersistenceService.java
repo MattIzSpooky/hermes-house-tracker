@@ -34,8 +34,11 @@ public class ListingPersistenceService {
             Listing saved = listingRepository.save(listing);
 
             if (isNew) {
-                // Sent inside the transaction — if the commit later fails, this message is
-                // already on the broker. The consumer handles a missing listing gracefully.
+                // Sent inside the transaction — if commit later fails this message is already
+                // on the broker (dual-write risk). In that case the consumer will receive a
+                // command for a listing that does not exist and the price-history write will
+                // fail with a FK violation or produce orphan rows. Acceptable for this
+                // house-tracker use case; the nightly refresh self-heals missing entries.
                 jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                     new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
             }
