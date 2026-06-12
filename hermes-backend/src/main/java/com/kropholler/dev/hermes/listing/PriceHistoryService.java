@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.internal.Listing;
 import com.kropholler.dev.hermes.listing.internal.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
@@ -8,15 +9,12 @@ import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
 import com.kropholler.dev.hermes.scraping.RawPriceChange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.modulith.events.ApplicationModuleListener;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,37 +26,22 @@ public class PriceHistoryService {
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
     private final FundaProxyFacade proxyFacade;
-    private final ApplicationEventPublisher eventPublisher;
-
-    @ApplicationModuleListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void onListingCreated(ListingCreated event) {
-        fetchAndStore(event.listingId(), event.fundaId());
-        eventPublisher.publishEvent(new PriceHistoryUpdated(List.of(event.listingId())));
-    }
+    private final JmsTemplate jmsTemplate;
 
     public void refreshAll() {
-        List<UUID> updated = new ArrayList<>();
         int page = 0;
         Page<Listing> batch;
         do {
             batch = listingRepository.findAllByDeletedAtIsNull(PageRequest.of(page, 100));
             for (Listing listing : batch.getContent()) {
-                try {
-                    fetchAndStore(listing.getId(), listing.getFundaId());
-                    updated.add(listing.getId());
-                } catch (Exception e) {
-                    log.warn("Failed to refresh price history for listing {}: {}",
-                        listing.getId(), e.getMessage());
-                }
+                jmsTemplate.convertAndSend("price.history.fetch",
+                    new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
             }
             page++;
         } while (batch.hasNext());
-        if (!updated.isEmpty()) {
-            eventPublisher.publishEvent(new PriceHistoryUpdated(updated));
-        }
     }
 
+    @Transactional
     void fetchAndStore(UUID listingId, String fundaId) {
         List<RawPriceChange> changes = proxyFacade.getPriceHistory(fundaId);
         for (RawPriceChange change : changes) {

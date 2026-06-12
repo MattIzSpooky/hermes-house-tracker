@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.internal.Listing;
 import com.kropholler.dev.hermes.listing.internal.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
@@ -12,9 +13,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.jms.core.JmsTemplate;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,7 +33,7 @@ class PriceHistoryServiceTest {
     @Mock private ListingRepository listingRepository;
     @Mock private PriceHistoryEntryRepository priceHistoryRepository;
     @Mock private FundaProxyFacade proxyFacade;
-    @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private JmsTemplate jmsTemplate;
 
     @InjectMocks
     private PriceHistoryService service;
@@ -85,7 +87,7 @@ class PriceHistoryServiceTest {
     }
 
     @Test
-    void refreshAll_publishesPriceHistoryUpdated() {
+    void refreshAll_sendsJmsMessagePerListing() {
         Listing listing = new Listing();
         listing.setFundaId("12345678");
         UUID listingId = UUID.randomUUID();
@@ -93,26 +95,14 @@ class PriceHistoryServiceTest {
 
         when(listingRepository.findAllByDeletedAtIsNull(any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(listing)));
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of());
 
         service.refreshAll();
 
-        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-        assertThat(captor.getValue()).isInstanceOf(PriceHistoryUpdated.class);
-    }
-
-    @Test
-    void onListingCreated_callsFetchAndStoreAndPublishesEvent() {
-        UUID listingId = UUID.randomUUID();
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of());
-
-        service.onListingCreated(new ListingCreated(listingId, "12345678"));
-
-        verify(proxyFacade).getPriceHistory("12345678");
-        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(captor.capture());
-        assertThat(captor.getValue()).isInstanceOf(PriceHistoryUpdated.class);
-        assertThat(((PriceHistoryUpdated) captor.getValue()).listingIds()).contains(listingId);
+        ArgumentCaptor<Object> cmdCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(jmsTemplate).convertAndSend(eq("price.history.fetch"), cmdCaptor.capture());
+        assertThat(cmdCaptor.getValue()).isInstanceOf(FetchPriceHistoryCommand.class);
+        FetchPriceHistoryCommand cmd = (FetchPriceHistoryCommand) cmdCaptor.getValue();
+        assertThat(cmd.listingId()).isEqualTo(listingId);
+        assertThat(cmd.fundaId()).isEqualTo("12345678");
     }
 }
