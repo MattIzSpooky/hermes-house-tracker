@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.scraping.internal;
 
+import com.kropholler.dev.hermes.scraping.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionFailed;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -50,9 +52,11 @@ public class ScrapingWorker {
     private List<RawListing> scrapeAllPages(ScrapingSession session) {
         if (session.getType() == ScrapingSessionType.RESCRAPE) {
             String fundaId = proxyClient.extractFundaId(session.getTargetListingUrl());
-            return proxyClient.getListing(fundaId)
-                .map(List::of)
-                .orElse(List.of());
+            Optional<RawListing> listing = proxyClient.getListing(fundaId);
+            if (listing.isEmpty()) {
+                eventPublisher.publishEvent(new ListingNotFound(fundaId));
+            }
+            return listing.map(List::of).orElse(List.of());
         }
 
         List<RawListing> all = new ArrayList<>();
