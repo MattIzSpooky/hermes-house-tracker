@@ -59,7 +59,7 @@ public class PriceHistoryService {
         }
     }
 
-    void fetchAndStore(UUID listingId, String fundaId) {
+    public void fetchAndStore(UUID listingId, String fundaId) {
         List<RawPriceChange> changes = proxyFacade.getPriceHistory(fundaId);
         for (RawPriceChange change : changes) {
             if (change.timestamp() == null) continue;
