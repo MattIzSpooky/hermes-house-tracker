@@ -15,5 +15,6 @@ public record ListingDto(
     String province,
     Instant firstSeenAt,
     Instant lastSeenAt,
-    ListingSnapshotDto latestSnapshot
+    Integer currentPrice,
+    ListingStatus status
 ) {}
