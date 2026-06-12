@@ -15,10 +15,11 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 class PriceHistoryConsumer {
+    private static final int AMOUNT_PER_MINUTE = 50;
+    private static final double MINUTE_IN_SECONDS = 60;
 
-    // 10 fetches per minute shared across all 5 consumer threads
     @SuppressWarnings("UnstableApiUsage")
-    private static final RateLimiter RATE_LIMITER = RateLimiter.create(10.0 / 60.0);
+    private static final RateLimiter RATE_LIMITER = RateLimiter.create(AMOUNT_PER_MINUTE / MINUTE_IN_SECONDS);
 
     private final PriceHistoryService priceHistoryService;
     private final ApplicationEventPublisher eventPublisher;
