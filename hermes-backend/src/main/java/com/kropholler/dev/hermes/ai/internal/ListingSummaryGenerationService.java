@@ -2,14 +2,10 @@ package com.kropholler.dev.hermes.ai.internal;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.ListingCreated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -22,16 +18,6 @@ public class ListingSummaryGenerationService {
     private final ListingSummaryRepository summaryRepository;
     private final ListingService listingService;
     private final ChatClient.Builder chatClientBuilder;
-
-    @ApplicationModuleListener
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void onListingCreated(ListingCreated event) {
-        ChatClient chatClient = chatClientBuilder.build();
-        listingService.findById(event.listingId()).ifPresent(listing -> {
-            String summary = generateSummary(chatClient, listing);
-            upsertSummary(event.listingId(), summary);
-        });
-    }
 
     private String generateSummary(ChatClient chatClient, ListingDto listing) {
         String prompt = buildPrompt(listing);

@@ -1,6 +1,5 @@
 package com.kropholler.dev.hermes.listing.internal;
 
-import com.kropholler.dev.hermes.listing.ListingCreated;
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.scraping.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.RawListing;
@@ -11,7 +10,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jms.core.JmsTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,19 +18,20 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ListingPersistenceServiceTest {
 
     @Mock private ListingRepository listingRepository;
-    @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private JmsTemplate jmsTemplate;
 
     @InjectMocks
     private ListingPersistenceService service;
 
     @Test
-    void newListing_setsStatusAndPublishesListingCreated() {
+    void newListing_setsStatusAndSendsFetchCommand() {
         RawListing raw = new RawListing(
             "12345678", "https://www.funda.nl/koop/amsterdam/huis-12345678/",
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
@@ -40,6 +40,7 @@ class ListingPersistenceServiceTest {
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 
         Listing saved = new Listing();
+        saved.setId(UUID.randomUUID());
         saved.setFundaId("12345678");
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.empty());
         when(listingRepository.save(any())).thenReturn(saved);
@@ -51,14 +52,14 @@ class ListingPersistenceServiceTest {
         assertThat(listingCaptor.getValue().getStatus()).isEqualTo(ListingStatus.FOR_SALE);
         assertThat(listingCaptor.getValue().getLastUpdatedAt()).isNotNull();
 
-        ArgumentCaptor<Object> eventCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(eventPublisher).publishEvent(eventCaptor.capture());
-        assertThat(eventCaptor.getValue()).isInstanceOf(ListingCreated.class);
-        assertThat(((ListingCreated) eventCaptor.getValue()).fundaId()).isEqualTo("12345678");
+        ArgumentCaptor<FetchPriceHistoryCommand> cmdCaptor = ArgumentCaptor.forClass(FetchPriceHistoryCommand.class);
+        verify(jmsTemplate).convertAndSend(eq("price.history.fetch"), cmdCaptor.capture());
+        assertThat(cmdCaptor.getValue().fundaId()).isEqualTo("12345678");
+        assertThat(cmdCaptor.getValue().listingId()).isEqualTo(saved.getId());
     }
 
     @Test
-    void existingListing_updatesStatusAndDoesNotPublishListingCreated() {
+    void existingListing_updatesStatusAndDoesNotSendFetchCommand() {
         Listing existing = new Listing();
         existing.setFundaId("12345678");
 
@@ -75,7 +76,7 @@ class ListingPersistenceServiceTest {
         service.onScrapingSessionCompleted(event);
 
         assertThat(existing.getStatus()).isEqualTo(ListingStatus.UNDER_OFFER);
-        verify(eventPublisher, never()).publishEvent(any(ListingCreated.class));
+        verify(jmsTemplate, never()).convertAndSend(any(String.class), any(Object.class));
     }
 
     @Test

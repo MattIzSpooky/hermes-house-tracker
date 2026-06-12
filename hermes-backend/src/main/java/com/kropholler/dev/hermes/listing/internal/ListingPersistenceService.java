@@ -1,12 +1,11 @@
 package com.kropholler.dev.hermes.listing.internal;
 
-import com.kropholler.dev.hermes.listing.ListingCreated;
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.scraping.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,7 +18,7 @@ import java.time.Instant;
 public class ListingPersistenceService {
 
     private final ListingRepository listingRepository;
-    private final ApplicationEventPublisher eventPublisher;
+    private final JmsTemplate jmsTemplate;
 
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -32,10 +31,11 @@ public class ListingPersistenceService {
             listing.setLastSeenAt(Instant.now());
             listing.setLastUpdatedAt(Instant.now());
             listing.setStatus(parseStatus(raw.status()));
-            listingRepository.save(listing);
+            Listing saved = listingRepository.save(listing);
 
             if (isNew) {
-                eventPublisher.publishEvent(new ListingCreated(listing.getId(), listing.getFundaId()));
+                jmsTemplate.convertAndSend("price.history.fetch",
+                    new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
             }
         }
     }
