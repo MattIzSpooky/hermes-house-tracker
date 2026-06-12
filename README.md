@@ -10,7 +10,7 @@ The backend is a **modular monolith** built with [Spring Modulith](https://sprin
 
 | Module | Package | Responsibility |
 |---|---|---|
-| `scraping` | `com.kropholler.dev.hermes.scraping` | Scraping session management, queue processing, Funda.nl HTML parsing via JSoup |
+| `scraping` | `com.kropholler.dev.hermes.scraping` | Scraping session management, queue processing, delegates fetching to funda-proxy |
 | `listing` | `com.kropholler.dev.hermes.listing` | Real estate listing data model, persistence, deduplication, price history fetching |
 | `report` | `com.kropholler.dev.hermes.report` | Report generation: days tracked, price trend, price change % |
 | `ai` | `com.kropholler.dev.hermes.ai` | Ollama-backed LLM integration for listing summaries |
@@ -65,7 +65,6 @@ Individual listings can be re-scraped at any time from the detail page. The repo
 | Architecture | Spring Modulith 2.0.x |
 | Persistence | Spring Data JPA + PostgreSQL |
 | Messaging | ActiveMQ Artemis (external broker) |
-| Web scraping | Spring AI JSoup Document Reader |
 | AI/LLM | Spring AI + Ollama (local) |
 | HTTP client | Spring RestClient |
 | Rate limiting | Guava RateLimiter |
