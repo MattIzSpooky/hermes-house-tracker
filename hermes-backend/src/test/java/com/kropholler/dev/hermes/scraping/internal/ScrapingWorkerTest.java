@@ -1,8 +1,6 @@
 package com.kropholler.dev.hermes.scraping.internal;
 
 import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +10,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -21,7 +19,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ScrapingWorkerTest {
 
-    @Mock private ScrapingSessionRepository sessionRepository;
+    @Mock private ScrapingSessionStore sessionStore;
     @Mock private FundaProxyClient proxyClient;
     @Mock private ApplicationEventPublisher eventPublisher;
 
@@ -36,7 +34,6 @@ class ScrapingWorkerTest {
         session.setPageLimit(1);
         session.setFundaUrl("https://funda.nl/koop/amsterdam/huis-12345678/");
         session.setTargetListingUrl("https://funda.nl/koop/amsterdam/huis-12345678/");
-        when(sessionRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(proxyClient.extractFundaId("https://funda.nl/koop/amsterdam/huis-12345678/"))
             .thenReturn("12345678");
         when(proxyClient.getListing("12345678")).thenReturn(Optional.empty());
