@@ -2,6 +2,14 @@ export type SessionStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' |
 export type SessionType = 'SEARCH' | 'RESCRAPE';
 export type ListingStatus = 'FOR_SALE' | 'UNDER_OFFER' | 'SOLD' | 'WITHDRAWN';
 
+export interface ListingSearchFilter {
+  street?: string;
+  houseNumber?: string;
+  houseNumberAddition?: string;
+  zipCode?: string;
+  province?: string;
+}
+
 export interface ScrapingSessionResponse {
   id: string;
   status: SessionStatus;
@@ -40,17 +48,6 @@ export interface ListingSummaryResponse {
   firstSeenAt: string;
 }
 
-export interface SnapshotResponse {
-  id: string;
-  scrapedAt: string;
-  askingPrice?: number;
-  livingAreaM2?: number;
-  rooms?: number;
-  energyLabel?: string;
-  listedOnFundaSince?: string;
-  status?: ListingStatus;
-}
-
 export interface ListingDetailResponse {
   id: string;
   fundaId: string;
@@ -63,28 +60,22 @@ export interface ListingDetailResponse {
   province: string;
   firstSeenAt: string;
   lastSeenAt: string;
-  latestSnapshot?: SnapshotResponse;
+  currentPrice?: number;
+  status?: ListingStatus;
 }
 
 export interface PricePointResponse {
-  scrapedAt: string;
-  askingPrice?: number;
-}
-
-export interface StatusPointResponse {
-  scrapedAt: string;
-  status: ListingStatus;
+  timestamp: string;
+  price?: number;
 }
 
 export interface ListingReportResponse {
   listingId: string;
-  daysListedOnFunda?: number;
   daysInHermes: number;
   currentPrice?: number;
   initialPrice?: number;
   priceChangePct?: number;
   priceHistory: PricePointResponse[];
-  statusHistory: StatusPointResponse[];
   currentStatus?: string;
 }
 
