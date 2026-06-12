@@ -14,6 +14,7 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -56,12 +57,12 @@ class ListingServiceSearchTest {
     @Test
     void listingSearchParams_isEmpty_trueWhenAllBlank() {
         var params = new ListingSearchParams("", " ", null, "", null);
-        assert params.isEmpty();
+        assertThat(params.isEmpty()).isTrue();
     }
 
     @Test
     void listingSearchParams_isEmpty_falseWhenAnyNonBlank() {
         var params = new ListingSearchParams(null, null, null, "1234AB", null);
-        assert !params.isEmpty();
+        assertThat(params.isEmpty()).isFalse();
     }
 }
