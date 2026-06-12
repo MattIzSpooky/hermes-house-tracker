@@ -1,5 +1,7 @@
+from datetime import date, datetime, timezone
 from unittest.mock import MagicMock
-from models import ListingResponse
+
+from models import ListingResponse, PriceChangeResponse
 
 
 def _make_listing(**overrides):
@@ -67,10 +69,6 @@ def test_from_listing_falls_back_to_title_when_no_street_name():
     m.address.title = "Keizersgracht"
     result = ListingResponse.from_listing(m)
     assert result.street == "Keizersgracht"
-
-
-from datetime import date, datetime, timezone
-from models import PriceChangeResponse
 
 
 def _make_change(**overrides):
