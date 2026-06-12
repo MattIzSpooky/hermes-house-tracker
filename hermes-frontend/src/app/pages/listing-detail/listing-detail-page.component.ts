@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ListingsService } from '../../core/listings.service';
-import { ListingReportResponse, ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
+import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 
@@ -53,11 +53,15 @@ import { StatusBadgeComponent } from '../../shared/status-badge.component';
           </div>
           <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Price change</p>
-            @if (svc.report()?.priceChangePct != null) {
-              <p class="text-3xl font-bold mt-2 tabular-nums"
-                [class]="svc.report()!.priceChangePct! <= 0 ? 'text-emerald-500' : 'text-red-500'">
-                {{ svc.report()!.priceChangePct! | number:'1.1-1' }}%
-              </p>
+            @if (svc.report(); as report) {
+              @if (report.priceChangePct != null) {
+                <p class="text-3xl font-bold mt-2 tabular-nums"
+                  [class]="report.priceChangePct <= 0 ? 'text-emerald-500' : 'text-red-500'">
+                  {{ report.priceChangePct | number:'1.1-1' }}%
+                </p>
+              } @else {
+                <p class="text-3xl font-bold text-slate-300 mt-2">—</p>
+              }
             } @else {
               <p class="text-3xl font-bold text-slate-300 mt-2">—</p>
             }

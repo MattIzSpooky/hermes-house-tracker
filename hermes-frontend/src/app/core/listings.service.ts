@@ -49,22 +49,6 @@ export class ListingsService {
     });
   }
 
-  loadListing(id: string): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.currentListing.set(null);
-    this.http.get<ListingDetailResponse>(`/api/listings/${id}`).subscribe({
-      next: data => {
-        this.currentListing.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load listing'));
-        this.loading.set(false);
-      },
-    });
-  }
-
   loadReport(id: string): void {
     this.loading.set(true);
     this.error.set(null);
