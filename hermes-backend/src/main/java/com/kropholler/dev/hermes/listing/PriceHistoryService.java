@@ -34,8 +34,13 @@ public class PriceHistoryService {
         do {
             batch = listingRepository.findAllByDeletedAtIsNull(PageRequest.of(page, 100));
             for (Listing listing : batch.getContent()) {
-                jmsTemplate.convertAndSend("price.history.fetch",
-                    new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
+                try {
+                    jmsTemplate.convertAndSend("price.history.fetch",
+                        new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
+                } catch (Exception e) {
+                    log.warn("Failed to enqueue price history fetch for listing {}: {}",
+                        listing.getId(), e.getMessage());
+                }
             }
             page++;
         } while (batch.hasNext());
