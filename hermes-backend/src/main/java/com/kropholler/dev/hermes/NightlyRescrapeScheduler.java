@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
+import com.kropholler.dev.hermes.listing.PriceHistoryService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -19,6 +20,7 @@ class NightlyRescrapeScheduler {
 
     private final ListingService listingService;
     private final ScrapingQueueService queueService;
+    private final PriceHistoryService priceHistoryService;
     private final ObservationRegistry observationRegistry;
 
     @Scheduled(cron = "0 0 2 * * *")
@@ -34,7 +36,7 @@ class NightlyRescrapeScheduler {
         Page<ListingDto> batch;
 
         do {
-            batch = listingService.findAll(PageRequest.of(page, 100));
+            batch = listingService.findAllActive(PageRequest.of(page, 100));
             for (ListingDto listing : batch.getContent()) {
                 queueService.enqueueRescrape(listing.url(), listing.city());
                 count++;
@@ -42,6 +44,8 @@ class NightlyRescrapeScheduler {
             page++;
         } while (batch.hasNext());
 
-        log.info("Nightly rescrape job enqueued {} sessions", count);
+        log.info("Nightly rescrape enqueued {} sessions, starting price history refresh", count);
+        priceHistoryService.refreshAll();
+        log.info("Nightly rescrape job complete");
     }
 }
