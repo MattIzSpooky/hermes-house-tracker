@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.scraping.internal;
 
 import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.RawPriceChange;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,10 +19,12 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-class FundaProxyClient {
+public class FundaProxyClient {
 
     private static final Pattern ID_PATTERN = Pattern.compile("/(\\d{7,9})(?:/|$)");
     private static final ParameterizedTypeReference<List<FundaProxyListing>> LISTING_LIST =
+        new ParameterizedTypeReference<>() {};
+    private static final ParameterizedTypeReference<List<FundaProxyPriceChange>> PRICE_CHANGE_LIST =
         new ParameterizedTypeReference<>() {};
 
     private final RestClient restClient;
@@ -69,6 +72,24 @@ class FundaProxyClient {
         }
     }
 
+    public List<RawPriceChange> getPriceHistory(String fundaId) {
+        log.info("Calling funda-proxy: GET /listings/{}/price-history", fundaId);
+        try {
+            List<FundaProxyPriceChange> results = restClient.get()
+                .uri("/listings/{id}/price-history", fundaId)
+                .retrieve()
+                .body(PRICE_CHANGE_LIST);
+            return results == null ? List.of()
+                : results.stream().map(this::toRawPriceChange).toList();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                log.warn("Price history for {} not found in funda-proxy", fundaId);
+                return List.of();
+            }
+            throw e;
+        }
+    }
+
     String extractFundaId(String listingUrl) {
         Matcher m = ID_PATTERN.matcher(listingUrl);
         String last = null;
@@ -102,5 +123,9 @@ class FundaProxyClient {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private RawPriceChange toRawPriceChange(FundaProxyPriceChange p) {
+        return new RawPriceChange(p.price(), p.status(), p.source(), p.date(), p.timestamp());
     }
 }
