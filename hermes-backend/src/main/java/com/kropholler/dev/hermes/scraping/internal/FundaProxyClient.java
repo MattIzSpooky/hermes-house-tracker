@@ -11,7 +11,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -108,21 +107,8 @@ public class FundaProxyClient {
             p.city(),
             p.province(),
             p.askingPrice(),
-            p.livingAreaM2(),
-            p.rooms(),
-            p.energyLabel(),
-            parseDate(p.publicationDate()),
             p.status()
         );
-    }
-
-    private LocalDate parseDate(String date) {
-        if (date == null || date.isBlank()) return null;
-        try {
-            return LocalDate.parse(date);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     private RawPriceChange toRawPriceChange(FundaProxyPriceChange p) {

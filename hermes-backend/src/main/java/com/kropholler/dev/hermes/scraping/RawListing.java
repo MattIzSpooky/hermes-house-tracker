@@ -1,7 +1,5 @@
 package com.kropholler.dev.hermes.scraping;
 
-import java.time.LocalDate;
-
 public record RawListing(
     String fundaId,
     String url,
@@ -12,9 +10,5 @@ public record RawListing(
     String city,
     String province,
     Integer askingPrice,
-    Integer livingAreaM2,
-    Integer rooms,
-    String energyLabel,
-    LocalDate listedOnFundaSince,
     String status
 ) {}

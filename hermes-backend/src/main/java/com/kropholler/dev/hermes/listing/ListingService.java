@@ -41,6 +41,11 @@ public class ListingService {
         return listingRepository.findAllByDeletedAtIsNull(pageable).map(this::toDto);
     }
 
+    @Transactional
+    public void deleteAllDeleted() {
+        listingRepository.deleteAllByDeletedAtIsNotNull();
+    }
+
     @Transactional(readOnly = true)
     public List<PriceHistoryEntryDto> findPriceHistoryByListingId(UUID listingId) {
         return priceHistoryRepository.findByListingIdOrderByTimestampAsc(listingId)

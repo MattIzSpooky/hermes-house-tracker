@@ -1,0 +1,27 @@
+Collecting dateparser
+  Downloading dateparser-1.4.0-py3-none-any.whl.metadata (31 kB)
+Collecting python-dateutil>=2.7.0 (from dateparser)
+  Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Collecting pytz>=2024.2 (from dateparser)
+  Downloading pytz-2026.2-py2.py3-none-any.whl.metadata (22 kB)
+Collecting regex>=2024.9.11 (from dateparser)
+  Downloading regex-2026.5.9-cp314-cp314-win_amd64.whl.metadata (41 kB)
+Collecting tzlocal>=0.2 (from dateparser)
+  Downloading tzlocal-5.3.1-py3-none-any.whl.metadata (7.6 kB)
+Collecting six>=1.5 (from python-dateutil>=2.7.0->dateparser)
+  Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+Collecting tzdata (from tzlocal>=0.2->dateparser)
+  Downloading tzdata-2026.2-py2.py3-none-any.whl.metadata (1.4 kB)
+Downloading dateparser-1.4.0-py3-none-any.whl (300 kB)
+Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Downloading pytz-2026.2-py2.py3-none-any.whl (510 kB)
+Downloading regex-2026.5.9-cp314-cp314-win_amd64.whl (280 kB)
+Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+Downloading tzlocal-5.3.1-py3-none-any.whl (18 kB)
+Downloading tzdata-2026.2-py2.py3-none-any.whl (349 kB)
+Installing collected packages: pytz, tzdata, six, regex, tzlocal, python-dateutil, dateparser
+
+Successfully installed dateparser-1.4.0 python-dateutil-2.9.0.post0 pytz-2026.2 regex-2026.5.9 six-1.17.0 tzdata-2026.2 tzlocal-5.3.1
+
+[notice] A new release of pip is available: 26.1.1 -> 26.1.2
+[notice] To update, run: python.exe -m pip install --upgrade pip
