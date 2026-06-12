@@ -17,13 +17,6 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'listings/:id/report',
-    loadComponent: () =>
-      import('./pages/listing-report/listing-report-page.component').then(
-        m => m.ListingReportPageComponent
-      ),
-  },
-  {
     path: 'scraping',
     loadComponent: () =>
       import('./pages/scraping/scraping-page.component').then(
