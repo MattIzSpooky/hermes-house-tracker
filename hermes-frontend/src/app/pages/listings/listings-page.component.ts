@@ -1,8 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { ListingsService } from '../../core/listings.service';
+import { ListingSearchFilter } from '../../core/api.types';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 
@@ -14,6 +17,31 @@ import { EuroPricePipe } from '../../shared/euro-price.pipe';
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-slate-900">Listings</h1>
       <p class="text-sm text-slate-500 mt-0.5">All tracked properties</p>
+    </div>
+
+    <!-- Search bar -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 mb-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3">
+        <input [(ngModel)]="street" (input)="onFilterChange()"
+          placeholder="Street"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+        <input [(ngModel)]="houseNumber" (input)="onFilterChange()"
+          placeholder="House number"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+        <input [(ngModel)]="houseNumberAddition" (input)="onFilterChange()"
+          placeholder="Addition"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+        <input [(ngModel)]="zipCode" (input)="onFilterChange()"
+          placeholder="Zip code"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+        <input [(ngModel)]="province" (input)="onFilterChange()"
+          placeholder="Province"
+          class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+      </div>
+      <button (click)="clearFilters()"
+        class="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
+        Clear filters
+      </button>
     </div>
 
     @if (svc.error()) {
@@ -93,35 +121,80 @@ import { EuroPricePipe } from '../../shared/euro-price.pipe';
     }
   `,
 })
-export class ListingsPageComponent implements OnInit {
+export class ListingsPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
   private readonly router = inject(Router);
 
   currentPage = 0;
   pageSize = 20;
 
+  street = '';
+  houseNumber = '';
+  houseNumberAddition = '';
+  zipCode = '';
+  province = '';
+
+  private filterChange$ = new Subject<void>();
+  private filterSub?: Subscription;
+
   ngOnInit(): void {
     this.svc.loadListings(this.currentPage, this.pageSize);
+    this.filterSub = this.filterChange$.pipe(debounceTime(300)).subscribe(() => {
+      this.currentPage = 0;
+      this.loadWithFilters();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.filterSub?.unsubscribe();
+  }
+
+  onFilterChange(): void {
+    this.filterChange$.next();
+  }
+
+  clearFilters(): void {
+    this.street = '';
+    this.houseNumber = '';
+    this.houseNumberAddition = '';
+    this.zipCode = '';
+    this.province = '';
+    this.currentPage = 0;
+    this.svc.loadListings(0, this.pageSize);
   }
 
   onPageSizeChange(): void {
     this.currentPage = 0;
-    this.svc.loadListings(this.currentPage, this.pageSize);
+    this.loadWithFilters();
   }
 
   prev(): void {
     if (this.currentPage > 0) {
       this.currentPage--;
-      this.svc.loadListings(this.currentPage, this.pageSize);
+      this.loadWithFilters();
     }
   }
 
   next(): void {
     this.currentPage++;
-    this.svc.loadListings(this.currentPage, this.pageSize);
+    this.loadWithFilters();
   }
 
   navigate(id: string): void {
     this.router.navigate(['/listings', id]);
+  }
+
+  private get currentFilter(): ListingSearchFilter {
+    return {
+      street: this.street || undefined,
+      houseNumber: this.houseNumber || undefined,
+      houseNumberAddition: this.houseNumberAddition || undefined,
+      zipCode: this.zipCode || undefined,
+      province: this.province || undefined,
+    };
+  }
+
+  private loadWithFilters(): void {
+    this.svc.loadListings(this.currentPage, this.pageSize, this.currentFilter);
   }
 }

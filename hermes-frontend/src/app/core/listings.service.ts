@@ -1,11 +1,12 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   AiSummaryResponse,
   ListingDetailResponse,
   ListingPage,
   ListingReportResponse,
+  ListingSearchFilter,
   ScrapingSessionResponse,
 } from './api.types';
 
@@ -27,21 +28,25 @@ export class ListingsService {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  loadListings(page: number, size: number): void {
+  loadListings(page: number, size: number, filter?: ListingSearchFilter): void {
     this.loading.set(true);
     this.error.set(null);
-    this.http
-      .get<ListingPage>(`/api/listings?page=${page}&size=${size}`)
-      .subscribe({
-        next: data => {
-          this.listings.set(data);
-          this.loading.set(false);
-        },
-        error: err => {
-          this.error.set(err.error?.detail ?? 'Failed to load listings');
-          this.loading.set(false);
-        },
-      });
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (filter?.street) params = params.set('street', filter.street);
+    if (filter?.houseNumber) params = params.set('houseNumber', filter.houseNumber);
+    if (filter?.houseNumberAddition) params = params.set('houseNumberAddition', filter.houseNumberAddition);
+    if (filter?.zipCode) params = params.set('zipCode', filter.zipCode);
+    if (filter?.province) params = params.set('province', filter.province);
+    this.http.get<ListingPage>('/api/listings', { params }).subscribe({
+      next: data => {
+        this.listings.set(data);
+        this.loading.set(false);
+      },
+      error: err => {
+        this.error.set(err.error?.detail ?? 'Failed to load listings');
+        this.loading.set(false);
+      },
+    });
   }
 
   loadListing(id: string): void {
@@ -76,6 +81,29 @@ export class ListingsService {
     });
   }
 
+  loadListingAndReport(id: string): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.currentListing.set(null);
+    this.report.set(null);
+    this.http.get<ListingDetailResponse>(`/api/listings/${id}`).subscribe({
+      next: listing => {
+        this.currentListing.set(listing);
+        this.http.get<ListingReportResponse>(`/api/listings/${id}/report`).subscribe({
+          next: report => {
+            this.report.set(report);
+            this.loading.set(false);
+          },
+          error: () => this.loading.set(false),
+        });
+      },
+      error: err => {
+        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load listing'));
+        this.loading.set(false);
+      },
+    });
+  }
+
   loadSummary(id: string): void {
     this.summary.set(null);
     this.summaryNotFound.set(false);
@@ -86,9 +114,6 @@ export class ListingsService {
   }
 
   rescrape(id: string): Observable<ScrapingSessionResponse> {
-    return this.http.post<ScrapingSessionResponse>(
-      `/api/listings/${id}/rescrape`,
-      {}
-    );
+    return this.http.post<ScrapingSessionResponse>(`/api/listings/${id}/rescrape`, {});
   }
 }
