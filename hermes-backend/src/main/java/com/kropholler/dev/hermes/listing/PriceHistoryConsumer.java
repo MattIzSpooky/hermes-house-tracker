@@ -1,8 +1,7 @@
-package com.kropholler.dev.hermes.listing.internal;
+package com.kropholler.dev.hermes.listing;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.kropholler.dev.hermes.listing.PriceHistoryService;
-import com.kropholler.dev.hermes.listing.PriceHistoryUpdated;
+import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -27,7 +26,12 @@ class PriceHistoryConsumer {
     public void onMessage(FetchPriceHistoryCommand command) {
         RATE_LIMITER.acquire();
         log.debug("Fetching price history for listing {}", command.listingId());
-        priceHistoryService.fetchAndStore(command.listingId(), command.fundaId());
-        eventPublisher.publishEvent(new PriceHistoryUpdated(List.of(command.listingId())));
+        try {
+            priceHistoryService.fetchAndStore(command.listingId(), command.fundaId());
+            eventPublisher.publishEvent(new PriceHistoryUpdated(List.of(command.listingId())));
+        } catch (Exception e) {
+            log.warn("Failed to fetch price history for listing {}: {}", command.listingId(), e.getMessage());
+            throw e;
+        }
     }
 }

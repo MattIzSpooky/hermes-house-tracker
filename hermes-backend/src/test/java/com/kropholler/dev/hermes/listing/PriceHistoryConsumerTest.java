@@ -1,7 +1,6 @@
-package com.kropholler.dev.hermes.listing.internal;
+package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.PriceHistoryService;
-import com.kropholler.dev.hermes.listing.PriceHistoryUpdated;
+import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,9 +32,8 @@ class PriceHistoryConsumerTest {
 
         verify(priceHistoryService).fetchAndStore(listingId, "12345678");
 
-        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        ArgumentCaptor<PriceHistoryUpdated> captor = ArgumentCaptor.forClass(PriceHistoryUpdated.class);
         verify(eventPublisher).publishEvent(captor.capture());
-        assertThat(captor.getValue()).isInstanceOf(PriceHistoryUpdated.class);
-        assertThat(((PriceHistoryUpdated) captor.getValue()).listingIds()).containsExactly(listingId);
+        assertThat(captor.getValue().listingIds()).containsExactly(listingId);
     }
 }
