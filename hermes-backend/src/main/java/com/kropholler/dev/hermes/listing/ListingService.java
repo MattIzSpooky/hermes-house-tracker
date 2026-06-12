@@ -27,6 +27,15 @@ public class ListingService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
+        if (params.isEmpty()) {
+            return listingRepository.findAll(pageable).map(this::toDto);
+        }
+        return listingRepository.findAll(ListingSpecifications.withParams(params), pageable)
+            .map(this::toDto);
+    }
+
+    @Transactional(readOnly = true)
     public Optional<ListingDto> findById(UUID id) {
         return listingRepository.findById(id).map(this::toDto);
     }
