@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.ai.ListingSummaryService;
 import com.kropholler.dev.hermes.api.generated.ListingsApi;
 import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
+import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ListingReport;
 import com.kropholler.dev.hermes.report.ReportService;
@@ -30,8 +31,11 @@ class ListingController implements ListingsApi {
     private final ListingSummaryService summaryService;
 
     @Override
-    public ResponseEntity<ListingPage> getListings(Integer page, Integer size) {
-        Page<ListingDto> result = listingService.findAll(PageRequest.of(page, size));
+    public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
+            String street, String houseNumber, String houseNumberAddition,
+            String zipCode, String province) {
+        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province);
+        Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
             .content(result.getContent().stream().map(this::toSummaryResponse).toList())
             .totalElements(result.getTotalElements())

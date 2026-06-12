@@ -66,6 +66,26 @@ paths:
             default: 20
             minimum: 1
             maximum: 100
+        - name: street
+          in: query
+          schema:
+            type: string
+        - name: houseNumber
+          in: query
+          schema:
+            type: string
+        - name: houseNumberAddition
+          in: query
+          schema:
+            type: string
+        - name: zipCode
+          in: query
+          schema:
+            type: string
+        - name: province
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Paginated listing results

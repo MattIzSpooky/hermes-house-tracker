@@ -22,11 +22,6 @@ public class ListingService {
     private final PriceHistoryEntryRepository priceHistoryRepository;
 
     @Transactional(readOnly = true)
-    public Page<ListingDto> findAll(Pageable pageable) {
-        return listingRepository.findAll(pageable).map(this::toDto);
-    }
-
-    @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
         if (params.isEmpty()) {
             return listingRepository.findAll(pageable).map(this::toDto);
