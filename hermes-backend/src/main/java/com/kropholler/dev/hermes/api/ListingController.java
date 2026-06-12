@@ -5,7 +5,6 @@ import com.kropholler.dev.hermes.api.generated.ListingsApi;
 import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.ListingSnapshotDto;
 import com.kropholler.dev.hermes.report.ListingReport;
 import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
@@ -55,7 +54,6 @@ class ListingController implements ListingsApi {
         ListingDto listing = listingService.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
-
         ScrapingSessionDto session = queueService.enqueueRescrape(listing.url(), listing.city());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(toSessionResponse(session));
     }
@@ -80,7 +78,6 @@ class ListingController implements ListingsApi {
     }
 
     private ListingSummaryResponse toSummaryResponse(ListingDto dto) {
-        ListingSnapshotDto snap = dto.latestSnapshot();
         return new ListingSummaryResponse()
             .id(dto.id())
             .street(dto.street())
@@ -89,8 +86,8 @@ class ListingController implements ListingsApi {
             .zipCode(dto.zipCode())
             .city(dto.city())
             .province(dto.province())
-            .askingPrice(snap != null ? snap.askingPrice() : null)
-            .status(snap != null && snap.status() != null ? snap.status().name() : null)
+            .askingPrice(dto.currentPrice())
+            .status(dto.status() != null ? dto.status().name() : null)
             .firstSeenAt(dto.firstSeenAt().atOffset(ZoneOffset.UTC));
     }
 
@@ -107,39 +104,21 @@ class ListingController implements ListingsApi {
             .province(dto.province())
             .firstSeenAt(dto.firstSeenAt().atOffset(ZoneOffset.UTC))
             .lastSeenAt(dto.lastSeenAt().atOffset(ZoneOffset.UTC))
-            .latestSnapshot(dto.latestSnapshot() != null ? toSnapshotResponse(dto.latestSnapshot()) : null);
-    }
-
-    private SnapshotResponse toSnapshotResponse(ListingSnapshotDto s) {
-        return new SnapshotResponse()
-            .id(s.id())
-            .scrapedAt(s.scrapedAt().atOffset(ZoneOffset.UTC))
-            .askingPrice(s.askingPrice())
-            .livingAreaM2(s.livingAreaM2())
-            .rooms(s.rooms())
-            .energyLabel(s.energyLabel())
-            .listedOnFundaSince(s.listedOnFundaSince())
-            .status(s.status() != null
-                ? SnapshotResponse.StatusEnum.valueOf(s.status().name()) : null);
+            .currentPrice(dto.currentPrice())
+            .status(dto.status() != null ? dto.status().name() : null);
     }
 
     private ListingReportResponse toReportResponse(ListingReport r) {
         return new ListingReportResponse()
             .listingId(r.listingId())
-            .daysListedOnFunda(r.daysListedOnFunda())
             .daysInHermes(r.daysInHermes())
             .currentPrice(r.currentPrice())
             .initialPrice(r.initialPrice())
             .priceChangePct(r.priceChangePct())
             .priceHistory(r.priceHistory().stream()
                 .map(p -> new PricePointResponse()
-                    .scrapedAt(p.scrapedAt().atOffset(ZoneOffset.UTC))
-                    .askingPrice(p.askingPrice()))
-                .toList())
-            .statusHistory(r.statusHistory().stream()
-                .map(s -> new StatusPointResponse()
-                    .scrapedAt(s.scrapedAt().atOffset(ZoneOffset.UTC))
-                    .status(s.status().name()))
+                    .timestamp(p.timestamp().atOffset(ZoneOffset.UTC))
+                    .price(p.price()))
                 .toList())
             .currentStatus(r.currentStatus() != null ? r.currentStatus().name() : null);
     }

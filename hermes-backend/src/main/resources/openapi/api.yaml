@@ -295,37 +295,11 @@ components:
         lastSeenAt:
           type: string
           format: date-time
-        latestSnapshot:
-          $ref: '#/components/schemas/SnapshotResponse'
-
-    SnapshotResponse:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        scrapedAt:
-          type: string
-          format: date-time
-        askingPrice:
+        currentPrice:
           type: integer
-          nullable: true
-        livingAreaM2:
-          type: integer
-          nullable: true
-        rooms:
-          type: integer
-          nullable: true
-        energyLabel:
-          type: string
-          nullable: true
-        listedOnFundaSince:
-          type: string
-          format: date
           nullable: true
         status:
           type: string
-          enum: [FOR_SALE, UNDER_OFFER, SOLD, WITHDRAWN]
           nullable: true
 
     ListingReportResponse:
@@ -334,10 +308,6 @@ components:
         listingId:
           type: string
           format: uuid
-        daysListedOnFunda:
-          type: integer
-          format: int64
-          nullable: true
         daysInHermes:
           type: integer
           format: int64
@@ -355,10 +325,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/PricePointResponse'
-        statusHistory:
-          type: array
-          items:
-            $ref: '#/components/schemas/StatusPointResponse'
         currentStatus:
           type: string
           nullable: true
@@ -366,21 +332,12 @@ components:
     PricePointResponse:
       type: object
       properties:
-        scrapedAt:
+        timestamp:
           type: string
           format: date-time
-        askingPrice:
+        price:
           type: integer
           nullable: true
-
-    StatusPointResponse:
-      type: object
-      properties:
-        scrapedAt:
-          type: string
-          format: date-time
-        status:
-          type: string
 
     AiSummaryResponse:
       type: object
