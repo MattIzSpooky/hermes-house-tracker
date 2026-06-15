@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.scraping.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
+import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -42,7 +43,7 @@ class ListingPersistenceServiceTest {
     @Test
     void newListing_setsStatusAndSendsBothFetchCommands() {
         RawListing raw = rawListing("12345678", "FOR_SALE");
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
+        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.SEARCH, List.of(raw));
 
         Listing saved = new Listing();
         saved.setId(UUID.randomUUID());
@@ -72,13 +73,13 @@ class ListingPersistenceServiceTest {
     }
 
     @Test
-    void existingListing_updatesStatusAndSendsDetailsCommandOnly() {
+    void existingListing_onRescrape_sendsBothFetchCommands() {
         Listing existing = new Listing();
         existing.setId(UUID.randomUUID());
         existing.setFundaId("12345678");
 
         RawListing raw = rawListing("12345678", "UNDER_OFFER");
-        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
+        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.RESCRAPE, List.of(raw));
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
         when(listingRepository.save(any())).thenReturn(existing);
@@ -86,12 +87,25 @@ class ListingPersistenceServiceTest {
         service.onScrapingSessionCompleted(event);
 
         assertThat(existing.getStatus()).isEqualTo(ListingStatus.UNDER_OFFER);
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH), any(FetchListingDetailsCommand.class));
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
+    }
 
-        // Details command sent for existing listing too
-        verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH),
-            any(FetchListingDetailsCommand.class));
+    @Test
+    void existingListing_onSearch_sendsDetailsCommandOnly() {
+        Listing existing = new Listing();
+        existing.setId(UUID.randomUUID());
+        existing.setFundaId("12345678");
 
-        // Price history command NOT sent for existing listings
+        RawListing raw = rawListing("12345678", "UNDER_OFFER");
+        ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.SEARCH, List.of(raw));
+
+        when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
+        when(listingRepository.save(any())).thenReturn(existing);
+
+        service.onScrapingSessionCompleted(event);
+
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH), any(FetchListingDetailsCommand.class));
         verify(jmsTemplate, never()).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(Object.class));
     }
 

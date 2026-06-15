@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.scraping.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
+import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.modulith.events.ApplicationModuleListener;
@@ -37,12 +38,7 @@ public class ListingPersistenceService {
             jmsTemplate.convertAndSend(JmsQueues.LISTING_DETAILS_FETCH,
                 new FetchListingDetailsCommand(saved.getId(), saved.getFundaId()));
 
-            if (isNew) {
-                // Sent inside the transaction — if commit later fails this message is already
-                // on the broker (dual-write risk). In that case the consumer will receive a
-                // command for a listing that does not exist and the price-history write will
-                // fail with a FK violation or produce orphan rows. Acceptable for this
-                // house-tracker use case; the nightly refresh self-heals missing entries.
+            if (isNew || event.type() == ScrapingSessionType.RESCRAPE) {
                 jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                     new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
             }

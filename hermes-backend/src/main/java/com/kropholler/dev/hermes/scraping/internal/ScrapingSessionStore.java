@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.scraping.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionFailed;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
+import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,7 @@ class ScrapingSessionStore {
         sessionRepository.findById(sessionId).ifPresent(session -> {
             session.setStatus(ScrapingSessionStatus.COMPLETED);
             session.setCompletedAt(Instant.now());
-            eventPublisher.publishEvent(new ScrapingSessionCompleted(sessionId, listings));
+            eventPublisher.publishEvent(new ScrapingSessionCompleted(sessionId, session.getType(), listings));
         });
     }
 
