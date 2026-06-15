@@ -2,6 +2,27 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: funda-proxy — PriceChangeResponse model + price-history endpoint | ✅ Done | f5f519e |
+| Task 2: Flyway V3 migration | ✅ Done | 65e94a4 |
+| Task 3: ListingStatus.DELETED + Listing entity new fields | ✅ Done | 7224ce3 |
+| Task 4: PriceHistoryEntry entity + repository + DTO | ✅ Done | 42eec83 |
+| Task 5: New events | ✅ Done | 08297d8 |
+| Task 6: RawPriceChange + FundaProxyClient.getPriceHistory + FundaProxyFacade | ✅ Done | 2a2296e |
+| Task 7: ScrapingWorker — emit ListingNotFound on 404 rescrape | ✅ Done | 85b2a69 |
+| Task 8: ListingPersistenceService rewrite | ✅ Done | 71a96d8 |
+| Task 9: PriceHistoryService | ✅ Done | 0fd74b3 |
+| Task 10: ListingRepository — add active/deleted queries | ✅ Done | 7fb19f6 |
+| Task 11: ListingDto + ListingService | ✅ Done | 2b5b5b0 |
+| Task 12: OpenAPI spec update + ListingController | ✅ Done | 9d7e438 |
+| Task 13: ReportService + ListingReport + PricePoint | ✅ Done | a518647 |
+| Task 14: ListingSummaryGenerationService | ✅ Done | — |
+| Task 15: NightlyRescrapeScheduler + DeletedListingCleanupScheduler | ✅ Done | 9106a6b |
+| Task 16: Remove dead code | ✅ Done | 46560b1 |
+
 **Goal:** Replace `ListingSnapshot` with pyfunda's `price_history()` API, adding real Funda price change history fetched on listing creation and refreshed nightly, plus soft-delete support for 404 listings.
 
 **Architecture:** A new `PriceHistoryService` (in `listing` public package) listens to `ListingCreated` for initial fetches and exposes `refreshAll()` for the nightly scheduler. A `FundaProxyFacade` in the `scraping` module exposes `getPriceHistory()` as a public API. Dead `ListingSnapshot` code is removed in the final task.

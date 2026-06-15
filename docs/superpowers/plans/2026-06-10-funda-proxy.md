@@ -2,6 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: Project scaffold | ✅ Done | 5132809 |
+| Task 2: Pydantic response model | ✅ Done | 3708f94 |
+| Task 3: Funda client module | ✅ Done | 3545743 |
+| Task 4: FastAPI app and endpoints | ✅ Done | f14c055 |
+| Task 5: Docker-compose integration | ✅ Done | efd6721 |
+
 **Goal:** Create a FastAPI microservice (`funda-proxy`) that wraps the `pyfunda` library and exposes two HTTP endpoints — search and listing detail — so the Java `hermes-backend` can fetch Funda data without running a Python runtime itself.
 
 **Architecture:** Single Python package with four focused files: `models.py` (Pydantic response shape + mapping from pyfunda's Listing), `client.py` (singleton Funda lifecycle tied to FastAPI startup/shutdown), `main.py` (endpoints), plus container config. Tests live in `funda-proxy/tests/`.

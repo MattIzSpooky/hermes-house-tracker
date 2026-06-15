@@ -2,6 +2,21 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: funda-proxy — add description and plot_area_m2 | ✅ Done | a801c41 |
+| Task 2: Backend — extend RawListing and FundaProxyListing/Client | ✅ Done | b86c8fb |
+| Task 3: Backend — DB migration and Listing entity | ✅ Done | 6973b0a |
+| Task 4: Backend — FetchListingDetailsCommand, JmsQueues, FundaProxyFacade | ✅ Done | 1dcd42d |
+| Task 5: Backend — ListingPersistenceService sends details command for all listings | ✅ Done | 08dae9f |
+| Task 6: Backend — ListingDetailsConsumer | ✅ Done | 328669e |
+| Task 7: Backend — ListingDto, ListingService, and search infrastructure | ✅ Done | 5c5d720 |
+| Task 8: Backend — OpenAPI spec and ListingController | ✅ Done | 8480d6a |
+| Task 9: Frontend — types, service, listings page filters | ✅ Done | 258e9a9 |
+| Task 10: Frontend — listing detail page enrichment display | ✅ Done | 37e6081 |
+
 **Goal:** Persist and display six new listing fields (description, living area, plot area, rooms, bedrooms, energy label) fetched asynchronously from the funda-proxy detail endpoint; make four of them searchable.
 
 **Architecture:** When a scraping session completes, `ListingPersistenceService` enqueues a `FetchListingDetailsCommand` for every listing (new and existing). `ListingDetailsConsumer` dequeues it, calls the funda-proxy `/listings/{id}` endpoint, and writes all six enrichment fields onto the `Listing` row. This mirrors the existing price-history pattern exactly, so rescraping a listing automatically refreshes its details.

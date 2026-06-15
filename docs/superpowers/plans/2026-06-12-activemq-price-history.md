@@ -2,6 +2,16 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: Add infrastructure — dependencies, broker, properties | ✅ Done | 72b8a0d |
+| Task 2: Create `FetchPriceHistoryCommand` | ✅ Done | b137503 |
+| Task 3: Create `PriceHistoryConsumer` with test | ✅ Done | 93bc4c9 |
+| Task 4: Refactor `PriceHistoryService` — remove event listener, add JMS send | ✅ Done | a77116b |
+| Task 5: Refactor `ListingPersistenceService` and remove `ListingCreated` | ✅ Done | 982de8f |
+
 **Goal:** Replace the `@ApplicationModuleListener` approach for price history fetching with an ActiveMQ Artemis queue that limits processing to 5 concurrent consumers and a maximum of 10 items per minute, eliminating HikariCP connection pool exhaustion.
 
 **Architecture:** `ListingPersistenceService` sends a `FetchPriceHistoryCommand` JMS message to a `price.history.fetch` queue when a new listing is created (replacing the `ListingCreated` Spring event). A new `PriceHistoryConsumer` with `concurrency=5` and a shared Guava `RateLimiter` (10/min) reads from the queue and calls `PriceHistoryService.fetchAndStore`. `PriceHistoryService.refreshAll` is also updated to enqueue JMS messages instead of calling `fetchAndStore` inline.

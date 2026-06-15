@@ -2,6 +2,18 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: JPA search infrastructure | ✅ Done | 641f023 |
+| Task 2: Wire search into OpenAPI spec and controller | ✅ Done | 09ba022 |
+| Task 3: Fix frontend API types | ✅ Done | bf48f29 |
+| Task 4: Search UI on listings page | ✅ Done | 5a99558 |
+| Task 5: Fix detail page, merge report, delete report route | ✅ Done | 8a918eb |
+| Task 6: Full backend test run | ✅ Done | — |
+| Task 7: Final verification | ✅ Done | — |
+
 **Goal:** Add server-side paginated search to the listings page, fix the broken detail page (blank due to stale frontend types), and merge the report page into the detail page.
 
 **Architecture:** Backend gains JPA `Specification`-based filtering on `GET /api/listings` with five optional query params. Frontend gets debounced search inputs and a merged detail+report view using `forkJoin`. The separate report route and component are deleted.

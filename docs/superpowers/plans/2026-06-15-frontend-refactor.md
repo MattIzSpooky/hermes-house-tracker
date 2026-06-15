@@ -2,6 +2,19 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: SpinnerComponent | ✅ Done | e9905d8 |
+| Task 2: ErrorAlertComponent | ✅ Done | 5607eab |
+| Task 3: StatCardComponent | ✅ Done | 33a4dca |
+| Task 4: SectionCardComponent | ✅ Done | 9c2603e |
+| Task 5: Externalize status-badge template | ✅ Done | df265a7 |
+| Task 6: Refactor listings-page | ✅ Done | 6a997f5 |
+| Task 7: Refactor listing-detail-page | ✅ Done | 09c3f1c |
+| Task 8: Refactor scraping-page | ✅ Done | 46faa7d |
+
 **Goal:** Extract all inline Angular templates to `.html` files and introduce four reusable shared components (`SpinnerComponent`, `ErrorAlertComponent`, `StatCardComponent`, `SectionCardComponent`) to eliminate repeated markup.
 
 **Architecture:** New shared components live in `src/app/shared/`. Each page component loses its inline `template` string in favour of a sibling `.html` file via `templateUrl`. No service, routing, or business logic changes.

@@ -2,6 +2,21 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: Upgrade Angular 17 scaffold to Angular 22 (remove SSR, remove zone.js) | ✅ Done | 9c240a0 |
+| Task 2: Configure Tailwind CSS 4 | ✅ Done | 9975001 |
+| Task 3: Dev proxy + API types | ✅ Done | 2e8b88a |
+| Task 4: Signal-based services | ✅ Done | dbeeec1 |
+| Task 5: Shared components — EuroPricePipe and StatusBadgeComponent | ✅ Done | c8219e3 |
+| Task 6: App shell — navigation and routes | ✅ Done | 95c7284 |
+| Task 7: Scraping page | ✅ Done | 32f4d26 |
+| Task 8: Listings page | ✅ Done | 3142500 |
+| Task 9: Listing detail page | ✅ Done | da65188 |
+| Task 10: Listing report page with price history chart | ✅ Done | d85c8cd |
+
 **Goal:** Build an Angular 22 SPA with four pages (listings browser, listing detail, listing report, scraping sessions) that communicate with the existing Spring Boot backend at `http://localhost:8080`.
 
 **Architecture:** Standalone components with signal-based services (`ListingsService`, `ScrapingService`) providing reactive state. The Angular dev server proxies `/api/**` to the backend. No SSR — the current scaffold's SSR setup must be removed.
