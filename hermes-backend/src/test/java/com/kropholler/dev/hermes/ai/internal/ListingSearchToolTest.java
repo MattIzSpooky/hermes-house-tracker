@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,7 +67,7 @@ class ListingSearchToolTest {
     }
 
     @Test
-    void searchListings_emptyResults_holderRemainsEmpty() {
+    void searchListings_emptyResults_holderIsSetToEmpty() {
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
                 null, null, null, null, null, null, null, "south-facing garden");
 
@@ -78,6 +80,24 @@ class ListingSearchToolTest {
         List<ChatListingCard> result = tool.searchListings(params);
 
         assertThat(result).isEmpty();
+        assertThat(holder.get()).isEmpty();
+        verifyNoInteractions(mapper);
+    }
+
+    @Test
+    void searchListings_serviceThrows_exceptionPropagatesAndHolderUnchanged() {
+        ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
+                null, null, null, null, null, null, null, null);
+
+        when(listingService.findForChat(null, null, null, null, null, null, null, null))
+                .thenThrow(new RuntimeException("DB error"));
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder);
+
+        assertThatThrownBy(() -> tool.searchListings(params))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("DB error");
         assertThat(holder.get()).isEmpty();
     }
 }

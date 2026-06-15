@@ -9,6 +9,12 @@ import org.springframework.ai.tool.annotation.Tool;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Spring AI tool that searches for property listings.
+ * Must be instantiated fresh per chat request — a single instance must not
+ * be shared across concurrent requests because {@code resultHolder} is written
+ * once per call and read by the caller after streaming completes.
+ */
 public class ListingSearchTool {
 
     public record SearchParams(
