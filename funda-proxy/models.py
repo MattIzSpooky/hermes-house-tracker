@@ -18,6 +18,8 @@ class ListingResponse(BaseModel):
     rooms: int | None = None
     bedrooms: int | None = None
     energy_label: str | None = None
+    description: str | None = None
+    plot_area_m2: int | None = None
     publication_date: str | None = None
     status: str | None = None
     offering_type: str | None = None
@@ -42,6 +44,8 @@ class ListingResponse(BaseModel):
             rooms=getattr(listing.rooms, "total", None),
             bedrooms=getattr(listing.rooms, "bedrooms", None),
             energy_label=getattr(listing.property_details, "energy_label", None),
+            description=listing.description,
+            plot_area_m2=getattr(listing.areas, "plot", None),
             publication_date=listing.publication_date,
             status=getattr(listing.property_details, "status", None),
             offering_type=listing.offering_type,

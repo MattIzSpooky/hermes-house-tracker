@@ -19,10 +19,12 @@ def _make_listing():
     m.address.province = "Noord-Holland"
     m.price.amount = 850000
     m.areas.living = 120
+    m.areas.plot = 85
     m.rooms.total = 5
     m.rooms.bedrooms = 3
     m.property_details.energy_label = "A"
     m.property_details.status = "beschikbaar"
+    m.description = "Ruim appartement met balkon"
     return m
 
 

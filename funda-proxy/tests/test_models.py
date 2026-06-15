@@ -19,10 +19,12 @@ def _make_listing(**overrides):
     m.address.province = "Noord-Holland"
     m.price.amount = 850000
     m.areas.living = 120
+    m.areas.plot = 85
     m.rooms.total = 5
     m.rooms.bedrooms = 3
     m.property_details.energy_label = "A"
     m.property_details.status = "beschikbaar"
+    m.description = "Ruim appartement met balkon"
     for k, v in overrides.items():
         setattr(m, k, v)
     return m
@@ -44,6 +46,8 @@ def test_from_listing_maps_all_fields():
     assert result.rooms == 5
     assert result.bedrooms == 3
     assert result.energy_label == "A"
+    assert result.description == "Ruim appartement met balkon"
+    assert result.plot_area_m2 == 85
     assert result.publication_date == "2024-01-15"
     assert result.status == "beschikbaar"
     assert result.offering_type == "koop"
