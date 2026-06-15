@@ -73,4 +73,22 @@ describe('SectionCardComponent — inputs', () => {
     await f.whenStable();
     expect(f.nativeElement.querySelector('.space-y-4')).toBeTruthy();
   });
+
+  it('should render base classes when padding is empty string', async () => {
+    @Component({
+      standalone: true,
+      imports: [SectionCardComponent],
+      template: `<app-section-card padding=""><p>X</p></app-section-card>`,
+    })
+    class Host {}
+    await TestBed.configureTestingModule({
+      imports: [Host],
+      providers: [provideZonelessChangeDetection()],
+    }).compileComponents();
+    const f = TestBed.createComponent(Host);
+    await f.whenStable();
+    const card = f.nativeElement.querySelector('.bg-white.rounded-xl');
+    expect(card).toBeTruthy();
+    expect(card?.className).not.toContain('  '); // no double spaces
+  });
 });

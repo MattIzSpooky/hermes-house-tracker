@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 
 @Component({
   selector: 'app-section-card',
@@ -8,4 +8,10 @@ import { Component, input } from '@angular/core';
 export class SectionCardComponent {
   readonly padding = input<string>('p-5');
   readonly extraClass = input<string>('');
+
+  protected readonly classes = computed(() =>
+    ['bg-white rounded-xl border border-slate-200 shadow-sm', this.padding(), this.extraClass()]
+      .filter(Boolean)
+      .join(' ')
+  );
 }
