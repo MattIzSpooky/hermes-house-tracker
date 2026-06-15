@@ -33,6 +33,18 @@ public class Listing {
     private String city;
     private String province;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private Integer livingAreaM2;
+    private Integer rooms;
+    private Integer bedrooms;
+
+    @Column(length = 10)
+    private String energyLabel;
+
+    private Integer plotAreaM2;
+
     @Column(nullable = false)
     private Instant firstSeenAt = Instant.now();
 
