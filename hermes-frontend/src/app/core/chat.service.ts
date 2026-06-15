@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { ChatListingCard, ResultFrame, TokenFrame } from './api.types';
 
 export interface ChatMessage {
@@ -13,6 +13,7 @@ export class ChatService {
   readonly sessionId: string;
 
   private readonly client: Client;
+  private subscription?: StompSubscription;
   private readonly _messages = signal<ChatMessage[]>([]);
   private readonly _isStreaming = signal(false);
   private readonly _isOpen = signal(false);
@@ -25,7 +26,7 @@ export class ChatService {
     this.sessionId = localStorage.getItem('hermes-chat-session') ?? this.initSession();
 
     this.client = new Client({
-      brokerURL: `ws://${location.host}/ws/chat`,
+      brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
       reconnectDelay: 5000,
       onConnect: () => this.subscribe(),
     });
@@ -40,7 +41,8 @@ export class ChatService {
   }
 
   private subscribe(): void {
-    this.client.subscribe(`/topic/chat/${this.sessionId}`, (msg: IMessage) => {
+    this.subscription?.unsubscribe();
+    this.subscription = this.client.subscribe(`/topic/chat/${this.sessionId}`, (msg: IMessage) => {
       const frame = JSON.parse(msg.body) as TokenFrame | ResultFrame;
 
       if (frame.type === 'TOKEN') {
