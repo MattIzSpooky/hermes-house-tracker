@@ -78,7 +78,7 @@ export class ChatService {
   }
 
   sendMessage(text: string): void {
-    if (!text.trim() || this._isStreaming()) return;
+    if (!text.trim() || this._isStreaming() || !this.client.connected) return;
     this._messages.update(msgs => [...msgs, { role: 'user', content: text }]);
     this._isStreaming.set(true);
     this.client.publish({
