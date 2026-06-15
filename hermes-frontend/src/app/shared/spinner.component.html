@@ -1,0 +1,8 @@
+<span class="inline-flex items-center gap-2">
+  <span class="inline-block w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+    [class.border-cyan-500]="color() === 'cyan'"
+    [class.border-white]="color() === 'white'"></span>
+  @if (label()) {
+    {{ label() }}
+  }
+</span>
