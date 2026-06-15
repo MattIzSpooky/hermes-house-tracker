@@ -8,10 +8,10 @@ describe('ChatBubbleComponent', () => {
   let el: HTMLElement;
   let chatSvc: jasmine.SpyObj<ChatService>;
 
-  beforeEach(async () => {
+  async function setup(isOpen = false, isStreaming = false): Promise<void> {
     chatSvc = jasmine.createSpyObj('ChatService', ['toggle'], {
-      isOpen: () => false,
-      isStreaming: () => false,
+      isOpen: () => isOpen,
+      isStreaming: () => isStreaming,
     });
 
     await TestBed.configureTestingModule({
@@ -24,15 +24,42 @@ describe('ChatBubbleComponent', () => {
 
     fixture = TestBed.createComponent(ChatBubbleComponent);
     el = fixture.nativeElement;
-    fixture.detectChanges();
-  });
+    await fixture.whenStable();
+  }
 
-  it('renders the toggle button', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('renders the toggle button', async () => {
+    await setup();
     expect(el.querySelector('button[aria-label="Toggle chat"]')).toBeTruthy();
   });
 
-  it('calls toggle() when button is clicked', () => {
+  it('calls toggle() when button is clicked', async () => {
+    await setup();
     el.querySelector<HTMLButtonElement>('button')!.click();
     expect(chatSvc.toggle).toHaveBeenCalled();
+  });
+
+  it('shows the chat panel when isOpen is true', async () => {
+    await setup(true, false);
+    expect(el.querySelector('app-chat-panel')).toBeTruthy();
+  });
+
+  it('hides the chat panel when isOpen is false', async () => {
+    await setup(false, false);
+    expect(el.querySelector('app-chat-panel')).toBeNull();
+  });
+
+  it('shows the pulsing ... indicator when isStreaming is true', async () => {
+    await setup(false, true);
+    const pulse = el.querySelector('.animate-pulse');
+    expect(pulse).toBeTruthy();
+    expect(pulse!.textContent?.trim()).toBe('...');
+  });
+
+  it('shows the Chat label when not streaming', async () => {
+    await setup(false, false);
+    expect(el.querySelector('.animate-pulse')).toBeNull();
+    expect(el.querySelector('button')!.textContent?.trim()).toBe('Chat');
   });
 });
