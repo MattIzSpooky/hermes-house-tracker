@@ -51,6 +51,10 @@ describe('ChatPanelComponent', () => {
 
     el.querySelector<HTMLButtonElement>('button')!.click();
     expect(chatSvc.sendMessage).toHaveBeenCalledWith('I want a big house');
+
+    // After send, input should be cleared
+    await fixture.whenStable();
+    expect(el.querySelector<HTMLInputElement>('input')!.value).toBe('');
   });
 
   it('disables input and button while streaming', async () => {
