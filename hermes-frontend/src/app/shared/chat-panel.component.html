@@ -1,0 +1,54 @@
+<app-section-card padding="p-0" extraClass="w-80 flex flex-col" style="height: 28rem;">
+  <div class="flex-1 overflow-y-auto space-y-3 p-4">
+    @for (msg of svc.messages(); track $index) {
+      <div [class]="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
+        <span
+          [class]="msg.role === 'user'
+            ? 'inline-block bg-cyan-100 text-slate-800 rounded-lg px-3 py-2 text-sm max-w-56'
+            : 'inline-block bg-slate-100 text-slate-800 rounded-lg px-3 py-2 text-sm max-w-56'"
+        >
+          {{ msg.content }}
+          @if (msg.role === 'assistant' && svc.isStreaming() && $last) {
+            <span class="animate-pulse">|</span>
+          }
+        </span>
+      </div>
+      @if (msg.listings && msg.listings.length > 0) {
+        <div class="space-y-2">
+          @for (listing of msg.listings; track listing.id) {
+            <a [routerLink]="['/listings', listing.id]" class="block hover:opacity-80 transition-opacity">
+              <app-stat-card [label]="(listing.street ?? '') + ' ' + (listing.houseNumber ?? '') + (listing.houseNumberAddition ?? '') + ', ' + (listing.city ?? '')">
+                <p class="text-sm font-semibold text-slate-700 mt-1">
+                  @if (listing.currentPrice) {
+                    {{ listing.currentPrice | euroPrice }}
+                  } @else {
+                    Price unknown
+                  }
+                </p>
+                @if (listing.bedrooms) {
+                  <p class="text-xs text-slate-500">{{ listing.bedrooms }} bedrooms &middot; {{ listing.livingAreaM2 }} m&sup2;</p>
+                }
+              </app-stat-card>
+            </a>
+          }
+        </div>
+      }
+    }
+  </div>
+  <div class="border-t border-slate-200 p-3 flex gap-2">
+    <input
+      [(ngModel)]="inputText"
+      (keydown.enter)="send()"
+      [disabled]="svc.isStreaming()"
+      placeholder="Ask about properties..."
+      class="flex-1 text-sm border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
+    />
+    <button
+      (click)="send()"
+      [disabled]="svc.isStreaming()"
+      class="text-sm bg-cyan-600 text-white px-3 py-1.5 rounded hover:bg-cyan-700 disabled:opacity-50 transition-colors"
+    >
+      Send
+    </button>
+  </div>
+</app-section-card>

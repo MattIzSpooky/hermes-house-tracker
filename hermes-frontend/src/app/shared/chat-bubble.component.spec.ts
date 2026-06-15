@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ChatBubbleComponent } from './chat-bubble.component';
 import { ChatService } from '../core/chat.service';
 
@@ -9,15 +10,17 @@ describe('ChatBubbleComponent', () => {
   let chatSvc: jasmine.SpyObj<ChatService>;
 
   async function setup(isOpen = false, isStreaming = false): Promise<void> {
-    chatSvc = jasmine.createSpyObj('ChatService', ['toggle'], {
+    chatSvc = jasmine.createSpyObj('ChatService', ['toggle', 'sendMessage'], {
       isOpen: () => isOpen,
       isStreaming: () => isStreaming,
+      messages: signal([]).asReadonly(),
     });
 
     await TestBed.configureTestingModule({
       imports: [ChatBubbleComponent],
       providers: [
         provideZonelessChangeDetection(),
+        provideRouter([]),
         { provide: ChatService, useValue: chatSvc },
       ],
     }).compileComponents();
