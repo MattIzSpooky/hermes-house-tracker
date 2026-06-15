@@ -104,17 +104,17 @@ export const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED
 
 export interface ChatListingCard {
   id: string;
-  street: string;
-  houseNumber: string;
+  street?: string;
+  houseNumber?: string;
   houseNumberAddition?: string;
-  city: string;
-  province: string;
+  city?: string;
+  province?: string;
   currentPrice?: number;
   bedrooms?: number;
   livingAreaM2?: number;
   energyLabel?: string;
   status?: string;
-  url: string;
+  url?: string;
 }
 
 export interface ChatMessageRequest {
