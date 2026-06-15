@@ -101,3 +101,33 @@ export interface ErrorResponse {
 }
 
 export const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
+
+export interface ChatListingCard {
+  id: string;
+  street: string;
+  houseNumber: string;
+  houseNumberAddition?: string;
+  city: string;
+  province: string;
+  currentPrice?: number;
+  bedrooms?: number;
+  livingAreaM2?: number;
+  energyLabel?: string;
+  status?: string;
+  url: string;
+}
+
+export interface ChatMessageRequest {
+  sessionId: string;
+  message: string;
+}
+
+export interface TokenFrame {
+  type: 'TOKEN' | 'ERROR';
+  content: string;
+}
+
+export interface ResultFrame {
+  type: 'RESULT';
+  listings: ChatListingCard[];
+}
