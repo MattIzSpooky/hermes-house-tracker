@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,6 +42,8 @@ public class AiChatService {
 
     @Transactional
     public void saveUserMessage(UUID sessionId, String content) {
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(content, "content must not be null");
         ChatMessage msg = new ChatMessage();
         msg.setSessionId(sessionId);
         msg.setRole("USER");
@@ -50,6 +53,8 @@ public class AiChatService {
 
     @Transactional
     public void saveAssistantMessage(UUID sessionId, String content) {
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(content, "content must not be null");
         ChatMessage msg = new ChatMessage();
         msg.setSessionId(sessionId);
         msg.setRole("ASSISTANT");
@@ -57,13 +62,23 @@ public class AiChatService {
         chatMessageRepository.save(msg);
     }
 
+    /**
+     * Builds a streaming handle for the given session's next message.
+     * Must be called AFTER {@link #saveUserMessage} has persisted the current user turn —
+     * {@code startStream} loads history from the DB, and the current message must already
+     * be present to appear in the conversation context sent to the LLM.
+     */
     public StreamHandle startStream(UUID sessionId, String userMessage) {
+        Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(userMessage, "userMessage must not be null");
         List<Message> history = chatMessageRepository
                 .findBySessionIdOrderByCreatedAtAsc(sessionId)
                 .stream()
-                .map(m -> (Message) (m.getRole().equals("USER")
-                        ? new UserMessage(m.getContent())
-                        : new AssistantMessage(m.getContent())))
+                .map(m -> switch (m.getRole()) {
+                    case "USER"      -> (Message) new UserMessage(m.getContent());
+                    case "ASSISTANT" -> new AssistantMessage(m.getContent());
+                    default -> throw new IllegalStateException("Unknown chat role: " + m.getRole());
+                })
                 .toList();
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
