@@ -24,6 +24,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // Open to all origins: this is an unauthenticated endpoint for a personal/local tool.
+        // If deployed to a shared environment, restrict origins and add authentication.
         registry.addEndpoint("/ws/chat").setAllowedOriginPatterns("*");
     }
 

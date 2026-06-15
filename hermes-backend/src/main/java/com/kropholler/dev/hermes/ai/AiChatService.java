@@ -19,6 +19,13 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * Orchestrates AI chat for a single session.
+ *
+ * <p>Session IDs are client-generated UUIDs. There is no server-side authentication:
+ * any client that knows a session ID can subscribe to its messages. This is acceptable
+ * for a personal/local deployment but must be addressed before any shared deployment.
+ */
 @Slf4j
 @Service
 public class AiChatService {
