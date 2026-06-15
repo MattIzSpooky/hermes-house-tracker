@@ -90,5 +90,8 @@ class ChatControllerTest {
                 eq("/topic/chat/" + sessionId),
                 (Object) argThat(obj -> obj instanceof TokenFrame tf && tf.type().equals("ERROR")));
         verify(aiChatService, never()).saveAssistantMessage(any(), any());
+        verify(messaging, never()).convertAndSend(
+                eq("/topic/chat/" + sessionId),
+                (Object) argThat(obj -> obj instanceof ResultFrame));
     }
 }
