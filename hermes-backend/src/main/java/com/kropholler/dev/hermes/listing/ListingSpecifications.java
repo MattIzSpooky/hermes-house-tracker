@@ -5,6 +5,8 @@ import org.springframework.data.jpa.domain.Specification;
 
 class ListingSpecifications {
 
+    private ListingSpecifications() {}
+
     static Specification<Listing> withParams(ListingSearchParams params) {
         Specification<Listing> spec = (root, query, cb) -> cb.conjunction();
         spec = andIfPresent(spec, "street", params.street());
