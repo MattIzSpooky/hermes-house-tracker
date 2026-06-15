@@ -37,6 +37,10 @@ export class ListingsService {
     if (filter?.houseNumberAddition) params = params.set('houseNumberAddition', filter.houseNumberAddition);
     if (filter?.zipCode) params = params.set('zipCode', filter.zipCode);
     if (filter?.province) params = params.set('province', filter.province);
+    if (filter?.minBedrooms) params = params.set('minBedrooms', filter.minBedrooms);
+    if (filter?.minRooms) params = params.set('minRooms', filter.minRooms);
+    if (filter?.minLivingAreaM2) params = params.set('minLivingAreaM2', filter.minLivingAreaM2);
+    if (filter?.energyLabel?.trim()) params = params.set('energyLabel', filter.energyLabel.trim());
     this.http.get<ListingPage>('/api/listings', { params }).subscribe({
       next: data => {
         this.listings.set(data);

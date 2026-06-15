@@ -8,6 +8,10 @@ export interface ListingSearchFilter {
   houseNumberAddition?: string;
   zipCode?: string;
   province?: string;
+  minBedrooms?: number | null;
+  minRooms?: number | null;
+  minLivingAreaM2?: number | null;
+  energyLabel?: string | null;
 }
 
 export interface ScrapingSessionResponse {
@@ -62,6 +66,12 @@ export interface ListingDetailResponse {
   lastSeenAt: string;
   currentPrice?: number;
   status?: ListingStatus;
+  description?: string | null;
+  livingAreaM2?: number | null;
+  plotAreaM2?: number | null;
+  rooms?: number | null;
+  bedrooms?: number | null;
+  energyLabel?: string | null;
 }
 
 export interface PricePointResponse {

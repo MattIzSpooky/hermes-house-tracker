@@ -31,6 +31,10 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
   protected houseNumberAddition = '';
   protected zipCode = '';
   protected province = '';
+  protected minBedrooms: number | null = null;
+  protected minRooms: number | null = null;
+  protected minLivingAreaM2: number | null = null;
+  protected energyLabel = '';
 
   private readonly filterChange$ = new Subject<void>();
   private filterSub?: Subscription;
@@ -57,6 +61,10 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
     this.houseNumberAddition = '';
     this.zipCode = '';
     this.province = '';
+    this.minBedrooms = null;
+    this.minRooms = null;
+    this.minLivingAreaM2 = null;
+    this.energyLabel = '';
     this.currentPage = 0;
     this.svc.loadListings(0, this.pageSize);
   }
@@ -89,6 +97,10 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
       houseNumberAddition: this.houseNumberAddition || undefined,
       zipCode: this.zipCode || undefined,
       province: this.province || undefined,
+      minBedrooms: this.minBedrooms,
+      minRooms: this.minRooms,
+      minLivingAreaM2: this.minLivingAreaM2,
+      energyLabel: this.energyLabel || undefined,
     };
   }
 

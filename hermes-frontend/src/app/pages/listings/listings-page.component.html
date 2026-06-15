@@ -21,6 +21,20 @@
       placeholder="Province"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
   </div>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+    <input type="number" [(ngModel)]="minBedrooms" (input)="onFilterChange()"
+      placeholder="Min bedrooms"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+    <input type="number" [(ngModel)]="minRooms" (input)="onFilterChange()"
+      placeholder="Min rooms"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+    <input type="number" [(ngModel)]="minLivingAreaM2" (input)="onFilterChange()"
+      placeholder="Min area (m²)"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+    <input [(ngModel)]="energyLabel" (input)="onFilterChange()"
+      placeholder="Energy label"
+      class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+  </div>
   <button (click)="clearFilters()"
     class="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
     Clear filters
