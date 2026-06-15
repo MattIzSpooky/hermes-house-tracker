@@ -33,8 +33,10 @@ class ListingController implements ListingsApi {
     @Override
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
             String street, String houseNumber, String houseNumberAddition,
-            String zipCode, String province) {
-        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province, null, null, null, null);
+            String zipCode, String province,
+            Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String energyLabel) {
+        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province,
+            minBedrooms, minRooms, minLivingAreaM2, energyLabel);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
             .content(result.getContent().stream().map(this::toSummaryResponse).toList())
@@ -109,7 +111,13 @@ class ListingController implements ListingsApi {
             .firstSeenAt(dto.firstSeenAt().atOffset(ZoneOffset.UTC))
             .lastSeenAt(dto.lastSeenAt().atOffset(ZoneOffset.UTC))
             .currentPrice(dto.currentPrice())
-            .status(dto.status() != null ? dto.status().name() : null);
+            .status(dto.status() != null ? dto.status().name() : null)
+            .description(dto.description())
+            .livingAreaM2(dto.livingAreaM2())
+            .plotAreaM2(dto.plotAreaM2())
+            .rooms(dto.rooms())
+            .bedrooms(dto.bedrooms())
+            .energyLabel(dto.energyLabel());
     }
 
     private ListingReportResponse toReportResponse(ListingReport r) {

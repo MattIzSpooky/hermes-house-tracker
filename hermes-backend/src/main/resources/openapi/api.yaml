@@ -86,6 +86,30 @@ paths:
           in: query
           schema:
             type: string
+        - name: minBedrooms
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: minRooms
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: minLivingAreaM2
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: energyLabel
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
       responses:
         '200':
           description: Paginated listing results
@@ -319,6 +343,24 @@ components:
           type: integer
           nullable: true
         status:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        livingAreaM2:
+          type: integer
+          nullable: true
+        plotAreaM2:
+          type: integer
+          nullable: true
+        rooms:
+          type: integer
+          nullable: true
+        bedrooms:
+          type: integer
+          nullable: true
+        energyLabel:
           type: string
           nullable: true
 
