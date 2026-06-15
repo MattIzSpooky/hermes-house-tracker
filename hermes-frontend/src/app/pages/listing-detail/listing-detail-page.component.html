@@ -26,7 +26,7 @@
       <p class="text-slate-500 mt-1">{{ listing.zipCode }} {{ listing.city }}, {{ listing.province }}</p>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
       <app-stat-card label="Days in Hermes">
         <p class="text-3xl font-bold text-cyan-500 mt-2 tabular-nums">
           {{ svc.report()?.daysInHermes ?? '—' }}
@@ -56,9 +56,6 @@
           <p class="text-slate-300 mt-2">—</p>
         }
       </app-stat-card>
-    </div>
-
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
       <app-stat-card label="Living area">
         <p class="text-3xl font-bold text-slate-900 mt-2">{{ listing.livingAreaM2 ?? '—' }} m²</p>
       </app-stat-card>
@@ -86,8 +83,8 @@
     }
 
     @if (svc.currentListing()?.description) {
-      <app-section-card class="mb-6">
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Description</h2>
+      <app-section-card class="mt-6">
+        <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Description</h2>
         <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
           {{ svc.currentListing()?.description }}
         </p>
