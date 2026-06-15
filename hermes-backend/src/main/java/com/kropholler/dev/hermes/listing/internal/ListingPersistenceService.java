@@ -33,6 +33,10 @@ public class ListingPersistenceService {
             listing.setStatus(parseStatus(raw.status()));
             Listing saved = listingRepository.save(listing);
 
+            // Always enqueue detail fetch — runs on both initial scrape and rescrape
+            jmsTemplate.convertAndSend(JmsQueues.LISTING_DETAILS_FETCH,
+                new FetchListingDetailsCommand(saved.getId(), saved.getFundaId()));
+
             if (isNew) {
                 // Sent inside the transaction — if commit later fails this message is already
                 // on the broker (dual-write risk). In that case the consumer will receive a

@@ -30,14 +30,18 @@ class ListingPersistenceServiceTest {
     @InjectMocks
     private ListingPersistenceService service;
 
-    @Test
-    void newListing_setsStatusAndSendsFetchCommand() {
-        RawListing raw = new RawListing(
-            "12345678", "https://www.funda.nl/koop/amsterdam/huis-12345678/",
+    private static RawListing rawListing(String fundaId, String status) {
+        return new RawListing(
+            fundaId, "https://www.funda.nl/koop/amsterdam/huis-" + fundaId + "/",
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
-            450000, "FOR_SALE",
+            450000, status,
             null, null, null, null, null, null
         );
+    }
+
+    @Test
+    void newListing_setsStatusAndSendsBothFetchCommands() {
+        RawListing raw = rawListing("12345678", "FOR_SALE");
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 
         Listing saved = new Listing();
@@ -53,23 +57,27 @@ class ListingPersistenceServiceTest {
         assertThat(listingCaptor.getValue().getStatus()).isEqualTo(ListingStatus.FOR_SALE);
         assertThat(listingCaptor.getValue().getLastUpdatedAt()).isNotNull();
 
-        ArgumentCaptor<FetchPriceHistoryCommand> cmdCaptor = ArgumentCaptor.forClass(FetchPriceHistoryCommand.class);
-        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), cmdCaptor.capture());
-        assertThat(cmdCaptor.getValue().fundaId()).isEqualTo("12345678");
-        assertThat(cmdCaptor.getValue().listingId()).isEqualTo(saved.getId());
+        // Details command sent for all listings
+        ArgumentCaptor<FetchListingDetailsCommand> detailsCaptor =
+            ArgumentCaptor.forClass(FetchListingDetailsCommand.class);
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH), detailsCaptor.capture());
+        assertThat(detailsCaptor.getValue().fundaId()).isEqualTo("12345678");
+        assertThat(detailsCaptor.getValue().listingId()).isEqualTo(saved.getId());
+
+        // Price history command sent only for new listings
+        ArgumentCaptor<FetchPriceHistoryCommand> priceCaptor =
+            ArgumentCaptor.forClass(FetchPriceHistoryCommand.class);
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), priceCaptor.capture());
+        assertThat(priceCaptor.getValue().fundaId()).isEqualTo("12345678");
     }
 
     @Test
-    void existingListing_updatesStatusAndDoesNotSendFetchCommand() {
+    void existingListing_updatesStatusAndSendsDetailsCommandOnly() {
         Listing existing = new Listing();
+        existing.setId(UUID.randomUUID());
         existing.setFundaId("12345678");
 
-        RawListing raw = new RawListing(
-            "12345678", "https://www.funda.nl/koop/amsterdam/huis-12345678/",
-            "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
-            460000, "UNDER_OFFER",
-            null, null, null, null, null, null
-        );
+        RawListing raw = rawListing("12345678", "UNDER_OFFER");
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
@@ -78,7 +86,13 @@ class ListingPersistenceServiceTest {
         service.onScrapingSessionCompleted(event);
 
         assertThat(existing.getStatus()).isEqualTo(ListingStatus.UNDER_OFFER);
-        verify(jmsTemplate, never()).convertAndSend(any(String.class), any(Object.class));
+
+        // Details command sent for existing listing too
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH),
+            any(FetchListingDetailsCommand.class));
+
+        // Price history command NOT sent for existing listings
+        verify(jmsTemplate, never()).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(Object.class));
     }
 
     @Test
