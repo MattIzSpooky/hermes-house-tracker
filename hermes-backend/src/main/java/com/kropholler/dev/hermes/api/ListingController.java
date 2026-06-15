@@ -34,7 +34,7 @@ class ListingController implements ListingsApi {
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
             String street, String houseNumber, String houseNumberAddition,
             String zipCode, String province) {
-        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province);
+        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province, null, null, null, null);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
             .content(result.getContent().stream().map(this::toSummaryResponse).toList())

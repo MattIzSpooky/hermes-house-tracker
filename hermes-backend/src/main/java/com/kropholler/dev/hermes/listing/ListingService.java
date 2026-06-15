@@ -61,10 +61,14 @@ public class ListingService {
             .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
             .map(PriceHistoryEntry::getPrice)
             .orElse(null);
-        return new ListingDto(l.getId(), l.getFundaId(), l.getUrl(),
+        return new ListingDto(
+            l.getId(), l.getFundaId(), l.getUrl(),
             l.getStreet(), l.getHouseNumber(), l.getHouseNumberAddition(),
             l.getZipCode(), l.getCity(), l.getProvince(),
-            l.getFirstSeenAt(), l.getLastSeenAt(), currentPrice, l.getStatus());
+            l.getFirstSeenAt(), l.getLastSeenAt(), currentPrice, l.getStatus(),
+            l.getDescription(), l.getLivingAreaM2(), l.getRooms(),
+            l.getBedrooms(), l.getEnergyLabel(), l.getPlotAreaM2()
+        );
     }
 
     private PriceHistoryEntryDto toPriceHistoryDto(PriceHistoryEntry e) {

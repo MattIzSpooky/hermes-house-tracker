@@ -5,11 +5,17 @@ public record ListingSearchParams(
     String houseNumber,
     String houseNumberAddition,
     String zipCode,
-    String province
+    String province,
+    Integer minBedrooms,
+    Integer minRooms,
+    Integer minLivingAreaM2,
+    String energyLabel
 ) {
     public boolean isEmpty() {
         return isBlank(street) && isBlank(houseNumber) && isBlank(houseNumberAddition)
-            && isBlank(zipCode) && isBlank(province);
+            && isBlank(zipCode) && isBlank(province)
+            && minBedrooms == null && minRooms == null && minLivingAreaM2 == null
+            && isBlank(energyLabel);
     }
 
     private static boolean isBlank(String s) {

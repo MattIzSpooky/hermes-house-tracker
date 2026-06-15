@@ -16,5 +16,11 @@ public record ListingDto(
     Instant firstSeenAt,
     Instant lastSeenAt,
     Integer currentPrice,
-    ListingStatus status
+    ListingStatus status,
+    String description,
+    Integer livingAreaM2,
+    Integer rooms,
+    Integer bedrooms,
+    String energyLabel,
+    Integer plotAreaM2
 ) {}
