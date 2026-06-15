@@ -8,155 +8,16 @@ import { ListingsService } from '../../core/listings.service';
 import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
+import { SpinnerComponent } from '../../shared/spinner.component';
+import { ErrorAlertComponent } from '../../shared/error-alert.component';
+import { StatCardComponent } from '../../shared/stat-card.component';
+import { SectionCardComponent } from '../../shared/section-card.component';
 
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, BaseChartDirective, EuroPricePipe, StatusBadgeComponent],
-  template: `
-    @if (svc.error() === '404') {
-      <div class="rounded-xl bg-white border border-slate-200 shadow-sm p-12 text-center">
-        <p class="text-slate-500 font-medium">Listing not found</p>
-        <a routerLink="/listings" class="mt-4 inline-block text-sm text-cyan-600 hover:text-cyan-500 font-medium">← Back to listings</a>
-      </div>
-    } @else {
-      @if (svc.error()) {
-        <div class="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700 mb-4">{{ svc.error() }}</div>
-      }
-
-      @if (svc.loading()) {
-        <div class="flex items-center gap-2 text-sm text-slate-500">
-          <span class="inline-block w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></span>
-          Loading...
-        </div>
-      }
-
-      @if (svc.currentListing(); as listing) {
-        <div class="mb-5">
-          <a routerLink="/listings" class="text-sm text-cyan-600 hover:text-cyan-500 font-medium">← All listings</a>
-        </div>
-
-        <div class="mb-6">
-          <h1 class="text-2xl font-bold text-slate-900 leading-tight">
-            {{ listing.street }} {{ listing.houseNumber }}{{ listing.houseNumberAddition ?? '' }}
-          </h1>
-          <p class="text-slate-500 mt-1">{{ listing.zipCode }} {{ listing.city }}, {{ listing.province }}</p>
-        </div>
-
-        <!-- Stats row -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Days in Hermes</p>
-            <p class="text-3xl font-bold text-cyan-500 mt-2 tabular-nums">
-              {{ svc.report()?.daysInHermes ?? '—' }}
-            </p>
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Price change</p>
-            @if (svc.report(); as report) {
-              @if (report.priceChangePct != null) {
-                <p class="text-3xl font-bold mt-2 tabular-nums"
-                  [class]="report.priceChangePct <= 0 ? 'text-emerald-500' : 'text-red-500'">
-                  {{ report.priceChangePct | number:'1.1-1' }}%
-                </p>
-              } @else {
-                <p class="text-3xl font-bold text-slate-300 mt-2">—</p>
-              }
-            } @else {
-              <p class="text-3xl font-bold text-slate-300 mt-2">—</p>
-            }
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Current price</p>
-            <p class="text-3xl font-bold text-slate-900 mt-2 tabular-nums">{{ listing.currentPrice | euroPrice }}</p>
-          </div>
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</p>
-            @if (listing.status) {
-              <div class="mt-2"><app-status-badge [status]="listing.status" /></div>
-            } @else {
-              <p class="text-slate-300 mt-2">—</p>
-            }
-          </div>
-        </div>
-
-        <!-- Price history chart -->
-        @if (svc.report(); as report) {
-          @if (report.priceHistory.length > 0) {
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 mb-6">
-              <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-5">Price history</h2>
-              <canvas baseChart [data]="chartData()" [options]="chartOptions" type="line"></canvas>
-            </div>
-          }
-        }
-
-        <!-- Detail + AI summary -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Left: listing details -->
-          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3">
-            <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Details</h2>
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
-              <span class="text-slate-400">First seen</span>
-              <span class="font-medium text-slate-700">{{ listing.firstSeenAt | date:'mediumDate' }}</span>
-              <span class="text-slate-400">Last seen</span>
-              <span class="font-medium text-slate-700">{{ listing.lastSeenAt | date:'mediumDate' }}</span>
-              <span class="text-slate-400">Funda ID</span>
-              <span class="font-medium text-slate-700 tabular-nums">{{ listing.fundaId }}</span>
-              <span class="text-slate-400">Listing URL</span>
-              <a [href]="listing.url" target="_blank" rel="noopener"
-                class="font-medium text-cyan-600 hover:text-cyan-500 truncate">Open on Funda</a>
-            </div>
-          </div>
-
-          <!-- Right: AI summary + rescrape -->
-          <div class="space-y-5">
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-              <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4">AI Summary</h2>
-              @if (svc.summary(); as summary) {
-                <p class="text-sm text-slate-700 leading-relaxed">{{ summary.summary }}</p>
-                <p class="text-xs text-slate-400 mt-3">Generated {{ summary.generatedAt | date:'medium' }}</p>
-              } @else if (svc.summaryNotFound()) {
-                <p class="text-sm text-slate-400 italic">No summary available yet.</p>
-              } @else {
-                <div class="space-y-2.5">
-                  <div class="h-3 bg-slate-100 rounded-full animate-pulse"></div>
-                  <div class="h-3 bg-slate-100 rounded-full animate-pulse w-4/5"></div>
-                  <div class="h-3 bg-slate-100 rounded-full animate-pulse w-3/5"></div>
-                </div>
-              }
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-4">
-              <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rescrape</h2>
-              <button (click)="triggerRescrape()" [disabled]="rescrapeLoading() || isRescrapePolling()"
-                class="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white
-                       hover:bg-slate-700 disabled:opacity-50 transition-colors">
-                @if (rescrapeLoading()) {
-                  <span class="flex items-center gap-2">
-                    <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    Triggering...
-                  </span>
-                } @else if (isRescrapePolling()) {
-                  <span class="flex items-center gap-2">
-                    <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                    In progress...
-                  </span>
-                } @else {
-                  Trigger rescrape
-                }
-              </button>
-              @if (rescrapeSession(); as s) {
-                <div class="flex items-center gap-2 text-sm text-slate-500">
-                  <span>Session:</span>
-                  <app-status-badge [status]="s.status" />
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      }
-    }
-  `,
+  imports: [DatePipe, DecimalPipe, RouterLink, BaseChartDirective, EuroPricePipe, StatusBadgeComponent, SpinnerComponent, ErrorAlertComponent, StatCardComponent, SectionCardComponent],
+  templateUrl: './listing-detail-page.component.html',
 })
 export class ListingDetailPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
