@@ -54,7 +54,7 @@ public class ListingService {
     @Transactional(readOnly = true)
     public List<PriceHistoryEntryDto> findPriceHistoryByListingId(UUID listingId) {
         return priceHistoryRepository.findByListingIdOrderByTimestampAsc(listingId)
-            .stream().map(this::toPriceHistoryDto).toList();
+            .stream().map(mapper::toDto).toList();
     }
 
     private ListingDto toDto(Listing l) {
@@ -65,7 +65,5 @@ public class ListingService {
         return mapper.toDto(l, currentPrice);
     }
 
-    private PriceHistoryEntryDto toPriceHistoryDto(PriceHistoryEntry e) {
-        return mapper.toDto(e);
-    }
+
 }

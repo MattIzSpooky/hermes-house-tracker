@@ -5,13 +5,11 @@ import com.kropholler.dev.hermes.listing.internal.Listing;
 import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(config = MapStructConfig.class)
 interface ListingMapper {
 
     @BeanMapping(ignoreUnmappedSourceProperties = {"lastUpdatedAt", "deletedAt"})
-    @Mapping(target = "currentPrice", source = "currentPrice")
     ListingDto toDto(Listing listing, Integer currentPrice);
 
     @BeanMapping(ignoreUnmappedSourceProperties = {"listingId"})
