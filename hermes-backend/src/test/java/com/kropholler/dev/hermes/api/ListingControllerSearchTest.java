@@ -30,6 +30,7 @@ class ListingControllerSearchTest {
     @MockitoBean ScrapingQueueService queueService;
     @MockitoBean ReportService reportService;
     @MockitoBean ListingSummaryService summaryService;
+    @MockitoBean ApiMapper apiMapper;
 
     @Test
     void getListings_passesStreetParamToService() throws Exception {

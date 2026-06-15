@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.ZoneOffset;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +18,7 @@ import java.util.UUID;
 class ScrapingSessionController implements ScrapingSessionsApi {
 
     private final ScrapingQueueService queueService;
+    private final ApiMapper apiMapper;
 
     @Override
     public ResponseEntity<ScrapingSessionResponse> createScrapingSession(
@@ -31,23 +31,15 @@ class ScrapingSessionController implements ScrapingSessionsApi {
             request.getMaxArea(),
             request.getPageLimit()
         );
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiMapper.toSessionResponse(dto));
     }
 
     @Override
     public ResponseEntity<ScrapingSessionResponse> getScrapingSession(UUID id) {
         return queueService.findById(id)
-            .map(dto -> ResponseEntity.ok(toResponse(dto)))
+            .map(dto -> ResponseEntity.ok(apiMapper.toSessionResponse(dto)))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Scraping session " + id + " not found"));
     }
 
-    private ScrapingSessionResponse toResponse(ScrapingSessionDto dto) {
-        return new ScrapingSessionResponse()
-            .id(dto.id())
-            .status(ScrapingSessionResponse.StatusEnum.valueOf(dto.status().name()))
-            .type(ScrapingSessionResponse.TypeEnum.valueOf(dto.type().name()))
-            .createdAt(dto.createdAt() != null ? dto.createdAt().atOffset(ZoneOffset.UTC) : null)
-            .completedAt(dto.completedAt() != null ? dto.completedAt().atOffset(ZoneOffset.UTC) : null);
-    }
 }

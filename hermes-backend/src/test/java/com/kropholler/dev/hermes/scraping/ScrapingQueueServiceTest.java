@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.scraping;
 
 import com.kropholler.dev.hermes.scraping.internal.ScrapingSession;
 import com.kropholler.dev.hermes.scraping.internal.ScrapingSessionRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,8 +19,20 @@ class ScrapingQueueServiceTest {
     @Mock
     private ScrapingSessionRepository repository;
 
+    @Mock
+    private ScrapingSessionMapper mapper;
+
     @InjectMocks
     private ScrapingQueueService service;
+
+    @BeforeEach
+    void stubMapper() {
+        when(mapper.toDto(any(ScrapingSession.class))).thenAnswer(inv -> {
+            ScrapingSession s = inv.getArgument(0);
+            return new ScrapingSessionDto(s.getId(), s.getStatus(), s.getType(),
+                s.getCreatedAt(), s.getCompletedAt());
+        });
+    }
 
     @Test
     void enqueueSearch_clampsPageLimitToFive() {

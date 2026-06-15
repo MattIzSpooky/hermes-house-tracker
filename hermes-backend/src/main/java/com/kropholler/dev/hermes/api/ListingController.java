@@ -6,7 +6,6 @@ import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.report.ListingReport;
 import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
@@ -29,6 +28,7 @@ class ListingController implements ListingsApi {
     private final ScrapingQueueService queueService;
     private final ReportService reportService;
     private final ListingSummaryService summaryService;
+    private final ApiMapper apiMapper;
 
     @Override
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
@@ -39,7 +39,7 @@ class ListingController implements ListingsApi {
             minBedrooms, minRooms, minLivingAreaM2, energyLabel);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
-            .content(result.getContent().stream().map(this::toSummaryResponse).toList())
+            .content(result.getContent().stream().map(apiMapper::toSummaryResponse).toList())
             .totalElements(result.getTotalElements())
             .totalPages(result.getTotalPages())
             .page(result.getNumber())
@@ -50,7 +50,7 @@ class ListingController implements ListingsApi {
     @Override
     public ResponseEntity<ListingDetailResponse> getListing(UUID id) {
         return listingService.findById(id)
-            .map(dto -> ResponseEntity.ok(toDetailResponse(dto)))
+            .map(dto -> ResponseEntity.ok(apiMapper.toDetailResponse(dto)))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
     }
@@ -61,13 +61,13 @@ class ListingController implements ListingsApi {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
         ScrapingSessionDto session = queueService.enqueueRescrape(listing.url(), listing.city());
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(toSessionResponse(session));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(apiMapper.toSessionResponse(session));
     }
 
     @Override
     public ResponseEntity<ListingReportResponse> getListingReport(UUID id) {
         return reportService.generateReport(id)
-            .map(report -> ResponseEntity.ok(toReportResponse(report)))
+            .map(report -> ResponseEntity.ok(apiMapper.toReportResponse(report)))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
     }
@@ -83,64 +83,4 @@ class ListingController implements ListingsApi {
                 "Summary for listing " + id + " not found"));
     }
 
-    private ListingSummaryResponse toSummaryResponse(ListingDto dto) {
-        return new ListingSummaryResponse()
-            .id(dto.id())
-            .street(dto.street())
-            .houseNumber(dto.houseNumber())
-            .houseNumberAddition(dto.houseNumberAddition())
-            .zipCode(dto.zipCode())
-            .city(dto.city())
-            .province(dto.province())
-            .askingPrice(dto.currentPrice())
-            .status(dto.status() != null ? dto.status().name() : null)
-            .firstSeenAt(dto.firstSeenAt().atOffset(ZoneOffset.UTC));
-    }
-
-    private ListingDetailResponse toDetailResponse(ListingDto dto) {
-        return new ListingDetailResponse()
-            .id(dto.id())
-            .fundaId(dto.fundaId())
-            .url(dto.url())
-            .street(dto.street())
-            .houseNumber(dto.houseNumber())
-            .houseNumberAddition(dto.houseNumberAddition())
-            .zipCode(dto.zipCode())
-            .city(dto.city())
-            .province(dto.province())
-            .firstSeenAt(dto.firstSeenAt().atOffset(ZoneOffset.UTC))
-            .lastSeenAt(dto.lastSeenAt().atOffset(ZoneOffset.UTC))
-            .currentPrice(dto.currentPrice())
-            .status(dto.status() != null ? dto.status().name() : null)
-            .description(dto.description())
-            .livingAreaM2(dto.livingAreaM2())
-            .plotAreaM2(dto.plotAreaM2())
-            .rooms(dto.rooms())
-            .bedrooms(dto.bedrooms())
-            .energyLabel(dto.energyLabel());
-    }
-
-    private ListingReportResponse toReportResponse(ListingReport r) {
-        return new ListingReportResponse()
-            .listingId(r.listingId())
-            .daysInHermes(r.daysInHermes())
-            .currentPrice(r.currentPrice())
-            .initialPrice(r.initialPrice())
-            .priceChangePct(r.priceChangePct())
-            .priceHistory(r.priceHistory().stream()
-                .map(p -> new PricePointResponse()
-                    .timestamp(p.timestamp().atOffset(ZoneOffset.UTC))
-                    .price(p.price()))
-                .toList())
-            .currentStatus(r.currentStatus() != null ? r.currentStatus().name() : null);
-    }
-
-    private ScrapingSessionResponse toSessionResponse(ScrapingSessionDto dto) {
-        return new ScrapingSessionResponse()
-            .id(dto.id())
-            .status(ScrapingSessionResponse.StatusEnum.valueOf(dto.status().name()))
-            .type(ScrapingSessionResponse.TypeEnum.valueOf(dto.type().name()))
-            .createdAt(dto.createdAt().atOffset(ZoneOffset.UTC))
-            .completedAt(dto.completedAt() != null ? dto.completedAt().atOffset(ZoneOffset.UTC) : null);
-    }
 }

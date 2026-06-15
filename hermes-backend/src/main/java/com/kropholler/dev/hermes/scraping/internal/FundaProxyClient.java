@@ -27,10 +27,13 @@ public class FundaProxyClient {
         new ParameterizedTypeReference<>() {};
 
     private final RestClient restClient;
+    private final FundaProxyListingMapper mapper;
 
     FundaProxyClient(RestClient.Builder builder,
-                     @Value("${funda.proxy.url:http://funda-proxy:8001}") String baseUrl) {
+                     @Value("${funda.proxy.url:http://funda-proxy:8001}") String baseUrl,
+                     FundaProxyListingMapper mapper) {
         this.restClient = builder.baseUrl(baseUrl).build();
+        this.mapper = mapper;
     }
 
     List<RawListing> search(String city, Integer minPrice, Integer maxPrice,
@@ -51,7 +54,7 @@ public class FundaProxyClient {
             .retrieve()
             .body(LISTING_LIST);
 
-        return results == null ? List.of() : results.stream().map(this::toRawListing).toList();
+        return results == null ? List.of() : results.stream().map(mapper::toRawListing).toList();
     }
 
     public Optional<RawListing> getListing(String fundaId) {
@@ -61,7 +64,7 @@ public class FundaProxyClient {
                 .uri("/listings/{id}", fundaId)
                 .retrieve()
                 .body(FundaProxyListing.class);
-            return Optional.ofNullable(listing).map(this::toRawListing);
+            return Optional.ofNullable(listing).map(mapper::toRawListing);
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.warn("Listing {} not found in funda-proxy", fundaId);
@@ -79,7 +82,7 @@ public class FundaProxyClient {
                 .retrieve()
                 .body(PRICE_CHANGE_LIST);
             return results == null ? List.of()
-                : results.stream().map(this::toRawPriceChange).toList();
+                : results.stream().map(mapper::toRawPriceChange).toList();
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 log.warn("Price history for {} not found in funda-proxy", fundaId);
@@ -96,28 +99,4 @@ public class FundaProxyClient {
         return last != null ? last : listingUrl;
     }
 
-    private RawListing toRawListing(FundaProxyListing p) {
-        return new RawListing(
-            p.globalId() != null ? p.globalId().toString() : p.tinyId(),
-            p.url(),
-            p.street(),
-            p.houseNumber(),
-            p.houseNumberSuffix(),
-            p.zipCode(),
-            p.city(),
-            p.province(),
-            p.askingPrice(),
-            p.status(),
-            p.description(),
-            p.livingAreaM2(),
-            p.rooms(),
-            p.bedrooms(),
-            p.energyLabel(),
-            p.plotAreaM2()
-        );
-    }
-
-    private RawPriceChange toRawPriceChange(FundaProxyPriceChange p) {
-        return new RawPriceChange(p.price(), p.status(), p.source(), p.date(), p.timestamp());
-    }
 }

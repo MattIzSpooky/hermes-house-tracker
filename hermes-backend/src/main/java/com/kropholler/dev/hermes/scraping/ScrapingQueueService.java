@@ -17,6 +17,7 @@ public class ScrapingQueueService {
     private static final int MAX_PAGE_LIMIT = 5;
 
     private final ScrapingSessionRepository sessionRepository;
+    private final ScrapingSessionMapper mapper;
 
     @Transactional
     public ScrapingSessionDto enqueueSearch(String city, Integer minPrice, Integer maxPrice,
@@ -34,7 +35,7 @@ public class ScrapingQueueService {
         session.setPageLimit(clampedLimit);
         session.setFundaUrl(url);
 
-        return toDto(sessionRepository.save(session));
+        return mapper.toDto(sessionRepository.save(session));
     }
 
     @Transactional
@@ -46,12 +47,12 @@ public class ScrapingQueueService {
         session.setFundaUrl(listingUrl);
         session.setTargetListingUrl(listingUrl);
 
-        return toDto(sessionRepository.save(session));
+        return mapper.toDto(sessionRepository.save(session));
     }
 
     @Transactional(readOnly = true)
     public Optional<ScrapingSessionDto> findById(UUID id) {
-        return sessionRepository.findById(id).map(this::toDto);
+        return sessionRepository.findById(id).map(mapper::toDto);
     }
 
     private String buildSearchUrl(String city, Integer minPrice, Integer maxPrice,
@@ -67,8 +68,4 @@ public class ScrapingQueueService {
         return uri.build().encode().toUriString();
     }
 
-    private ScrapingSessionDto toDto(ScrapingSession s) {
-        return new ScrapingSessionDto(s.getId(), s.getStatus(), s.getType(),
-                                      s.getCreatedAt(), s.getCompletedAt());
-    }
 }

@@ -20,6 +20,7 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
+    private final ListingMapper mapper;
 
     @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
@@ -61,18 +62,10 @@ public class ListingService {
             .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
             .map(PriceHistoryEntry::getPrice)
             .orElse(null);
-        return new ListingDto(
-            l.getId(), l.getFundaId(), l.getUrl(),
-            l.getStreet(), l.getHouseNumber(), l.getHouseNumberAddition(),
-            l.getZipCode(), l.getCity(), l.getProvince(),
-            l.getFirstSeenAt(), l.getLastSeenAt(), currentPrice, l.getStatus(),
-            l.getDescription(), l.getLivingAreaM2(), l.getRooms(),
-            l.getBedrooms(), l.getEnergyLabel(), l.getPlotAreaM2()
-        );
+        return mapper.toDto(l, currentPrice);
     }
 
     private PriceHistoryEntryDto toPriceHistoryDto(PriceHistoryEntry e) {
-        return new PriceHistoryEntryDto(e.getId(), e.getPrice(), e.getStatus(),
-            e.getSource(), e.getDate(), e.getTimestamp());
+        return mapper.toDto(e);
     }
 }
