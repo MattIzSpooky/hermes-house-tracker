@@ -4,6 +4,7 @@ import { Component, computed, input } from '@angular/core';
   selector: 'app-section-card',
   standalone: true,
   templateUrl: './section-card.component.html',
+  host: { class: 'block' },
 })
 export class SectionCardComponent {
   readonly padding = input<string>('p-5');
