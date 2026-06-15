@@ -64,9 +64,8 @@ public class AiChatService {
 
     /**
      * Builds a streaming handle for the given session's next message.
-     * Must be called AFTER {@link #saveUserMessage} has persisted the current user turn —
-     * {@code startStream} loads history from the DB, and the current message must already
-     * be present to appear in the conversation context sent to the LLM.
+     * History is loaded from the DB before the current user message is saved,
+     * so the caller must save both user and assistant messages after streaming completes.
      */
     public StreamHandle startStream(UUID sessionId, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");

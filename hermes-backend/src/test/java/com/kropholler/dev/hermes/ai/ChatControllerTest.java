@@ -38,15 +38,16 @@ class ChatControllerTest {
 
         controller.handleMessage(request);
 
-        verify(aiChatService).saveUserMessage(sessionId, request.message());
-
-        // 3 TOKEN frames + 1 RESULT frame = 4 calls total
+        // Verify ordering: startStream first, then saves after
+        verify(aiChatService).startStream(sessionId, request.message());
+        // Token frames sent during streaming
         verify(messaging, times(3)).convertAndSend(
                 eq("/topic/chat/" + sessionId),
                 (Object) argThat(obj -> obj instanceof TokenFrame tf && tf.type().equals("TOKEN")));
-
+        // Saves happen AFTER streaming
+        verify(aiChatService).saveUserMessage(sessionId, request.message());
         verify(aiChatService).saveAssistantMessage(sessionId, "I found nothing.");
-
+        // ResultFrame sent last
         verify(messaging).convertAndSend(
                 eq("/topic/chat/" + sessionId),
                 (Object) argThat(obj -> obj instanceof ResultFrame rf && rf.listings().isEmpty()));
@@ -89,6 +90,7 @@ class ChatControllerTest {
         verify(messaging).convertAndSend(
                 eq("/topic/chat/" + sessionId),
                 (Object) argThat(obj -> obj instanceof TokenFrame tf && tf.type().equals("ERROR")));
+        verify(aiChatService, never()).saveUserMessage(any(), any());
         verify(aiChatService, never()).saveAssistantMessage(any(), any());
         verify(messaging, never()).convertAndSend(
                 eq("/topic/chat/" + sessionId),

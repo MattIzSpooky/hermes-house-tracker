@@ -27,7 +27,6 @@ public class ChatController {
         StringBuilder fullResponse = new StringBuilder();
 
         try {
-            aiChatService.saveUserMessage(request.sessionId(), request.message());
             AiChatService.StreamHandle handle = aiChatService.startStream(request.sessionId(), request.message());
 
             for (String token : handle.tokens().toIterable()) {
@@ -35,6 +34,7 @@ public class ChatController {
                 messaging.convertAndSend(destination, new TokenFrame("TOKEN", token));
             }
 
+            aiChatService.saveUserMessage(request.sessionId(), request.message());
             aiChatService.saveAssistantMessage(request.sessionId(), fullResponse.toString());
             messaging.convertAndSend(destination, new ResultFrame("RESULT", handle.resultHolder().get()));
 
