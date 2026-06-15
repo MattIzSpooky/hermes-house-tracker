@@ -1,0 +1,16 @@
+<div class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+  @if (svc.isOpen()) {
+    <app-chat-panel />
+  }
+  <button
+    (click)="svc.toggle()"
+    aria-label="Toggle chat"
+    class="w-14 h-14 rounded-full bg-cyan-600 text-white shadow-lg flex items-center justify-center hover:bg-cyan-700 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition-colors"
+  >
+    @if (svc.isStreaming()) {
+      <span class="text-xs font-bold animate-pulse tracking-widest">...</span>
+    } @else {
+      <span class="text-xs font-bold">Chat</span>
+    }
+  </button>
+</div>
