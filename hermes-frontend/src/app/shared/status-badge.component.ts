@@ -15,11 +15,7 @@ const STATUS_CLASSES: Record<string, string> = {
 @Component({
   selector: 'app-status-badge',
   standalone: true,
-  template: `
-    <span [class]="'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ' + badgeClass()">
-      {{ label() }}
-    </span>
-  `,
+  templateUrl: './status-badge.component.html',
 })
 export class StatusBadgeComponent {
   readonly status = input.required<string>();
