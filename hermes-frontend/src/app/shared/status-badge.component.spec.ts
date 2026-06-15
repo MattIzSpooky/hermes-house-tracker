@@ -16,9 +16,9 @@ describe('StatusBadgeComponent', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('applies green class for COMPLETED', async () => {
+  it('applies emerald class for COMPLETED', async () => {
     const el = await create('COMPLETED');
-    expect(el.className).toContain('text-green-700');
+    expect(el.className).toContain('text-emerald-700');
   });
 
   it('applies red class for FAILED', async () => {
@@ -26,13 +26,13 @@ describe('StatusBadgeComponent', () => {
     expect(el.className).toContain('text-red-700');
   });
 
-  it('applies blue class for IN_PROGRESS', async () => {
+  it('applies cyan class for IN_PROGRESS', async () => {
     const el = await create('IN_PROGRESS');
-    expect(el.className).toContain('text-blue-700');
+    expect(el.className).toContain('text-cyan-700');
   });
 
-  it('applies grey class for unknown status', async () => {
+  it('applies slate class for unknown status', async () => {
     const el = await create('UNKNOWN_XYZ');
-    expect(el.className).toContain('text-gray-700');
+    expect(el.className).toContain('text-slate-600');
   });
 });
