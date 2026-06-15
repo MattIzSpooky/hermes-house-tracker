@@ -46,6 +46,20 @@ public class ListingService {
         return listingRepository.findAllByDeletedAtIsNull(pageable).map(this::toDto);
     }
 
+    @Transactional(readOnly = true)
+    public List<ListingDto> findForChat(Integer minPrice, Integer maxPrice,
+                                         Integer minBedrooms, Integer minRooms,
+                                         Integer minLivingAreaM2, String province,
+                                         String city, String keywords) {
+        return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
+                        province, city, keywords)
+                .stream()
+                .map(this::toDto)
+                .filter(dto -> minPrice == null || (dto.currentPrice() != null && dto.currentPrice() >= minPrice))
+                .filter(dto -> maxPrice == null || (dto.currentPrice() != null && dto.currentPrice() <= maxPrice))
+                .toList();
+    }
+
     @Transactional
     public void deleteAllDeleted() {
         listingRepository.deleteAllByDeletedAtIsNotNull();
