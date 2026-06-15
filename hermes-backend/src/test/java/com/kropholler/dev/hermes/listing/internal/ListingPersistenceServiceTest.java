@@ -35,7 +35,8 @@ class ListingPersistenceServiceTest {
         RawListing raw = new RawListing(
             "12345678", "https://www.funda.nl/koop/amsterdam/huis-12345678/",
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
-            450000, "FOR_SALE"
+            450000, "FOR_SALE",
+            null, null, null, null, null, null
         );
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 
@@ -66,7 +67,8 @@ class ListingPersistenceServiceTest {
         RawListing raw = new RawListing(
             "12345678", "https://www.funda.nl/koop/amsterdam/huis-12345678/",
             "Teststraat", "10", null, "1234AB", "amsterdam", "Noord-Holland",
-            460000, "UNDER_OFFER"
+            460000, "UNDER_OFFER",
+            null, null, null, null, null, null
         );
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 

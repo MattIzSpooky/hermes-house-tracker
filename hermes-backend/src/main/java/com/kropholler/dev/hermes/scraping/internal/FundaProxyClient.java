@@ -54,7 +54,7 @@ public class FundaProxyClient {
         return results == null ? List.of() : results.stream().map(this::toRawListing).toList();
     }
 
-    Optional<RawListing> getListing(String fundaId) {
+    public Optional<RawListing> getListing(String fundaId) {
         log.info("Calling funda-proxy: GET /listings/{}", fundaId);
         try {
             FundaProxyListing listing = restClient.get()
@@ -107,7 +107,13 @@ public class FundaProxyClient {
             p.city(),
             p.province(),
             p.askingPrice(),
-            p.status()
+            p.status(),
+            p.description(),
+            p.livingAreaM2(),
+            p.rooms(),
+            p.bedrooms(),
+            p.energyLabel(),
+            p.plotAreaM2()
         );
     }
 

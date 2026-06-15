@@ -10,5 +10,11 @@ public record RawListing(
     String city,
     String province,
     Integer askingPrice,
-    String status
+    String status,
+    String description,
+    Integer livingAreaM2,
+    Integer rooms,
+    Integer bedrooms,
+    String energyLabel,
+    Integer plotAreaM2
 ) {}
