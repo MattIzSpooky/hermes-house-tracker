@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -14,5 +15,9 @@ public class FundaProxyFacade {
 
     public List<RawPriceChange> getPriceHistory(String fundaId) {
         return client.getPriceHistory(fundaId);
+    }
+
+    public Optional<RawListing> getListing(String fundaId) {
+        return client.getListing(fundaId);
     }
 }
