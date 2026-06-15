@@ -18,6 +18,13 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
 
     @Query(value = """
             SELECT l.* FROM listings l
+            LEFT JOIN LATERAL (
+                SELECT phe.price
+                FROM price_history_entries phe
+                WHERE phe.listing_id = l.id
+                ORDER BY phe.timestamp DESC
+                LIMIT 1
+            ) latest_price ON true
             WHERE l.deleted_at IS NULL
             AND (:minBedrooms IS NULL OR l.bedrooms >= :minBedrooms)
             AND (:minRooms IS NULL OR l.rooms >= :minRooms)
@@ -27,6 +34,8 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             AND (:keywords IS NULL OR
                  to_tsvector('dutch', coalesce(l.description, '')) @@
                  plainto_tsquery('dutch', :keywords))
+            AND (:minPrice IS NULL OR latest_price.price >= :minPrice)
+            AND (:maxPrice IS NULL OR latest_price.price <= :maxPrice)
             ORDER BY l.last_updated_at DESC
             LIMIT 5
             """, nativeQuery = true)
@@ -36,6 +45,8 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             @Param("minLivingAreaM2") Integer minLivingAreaM2,
             @Param("province") String province,
             @Param("city") String city,
-            @Param("keywords") String keywords
+            @Param("keywords") String keywords,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice
     );
 }

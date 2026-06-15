@@ -52,11 +52,9 @@ public class ListingService {
                                          Integer minLivingAreaM2, String province,
                                          String city, String keywords) {
         return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
-                        province, city, keywords)
+                        province, city, keywords, minPrice, maxPrice)
                 .stream()
                 .map(this::toDto)
-                .filter(dto -> minPrice == null || (dto.currentPrice() != null && dto.currentPrice() >= minPrice))
-                .filter(dto -> maxPrice == null || (dto.currentPrice() != null && dto.currentPrice() <= maxPrice))
                 .toList();
     }
 
