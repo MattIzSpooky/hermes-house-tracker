@@ -62,4 +62,38 @@ describe('ChatPanelComponent', () => {
     expect(el.querySelector<HTMLInputElement>('input')!.disabled).toBeTrue();
     expect(el.querySelector<HTMLButtonElement>('button')!.disabled).toBeTrue();
   });
+
+  it('sends a message on Enter keydown', async () => {
+    await setup();
+    const input = el.querySelector<HTMLInputElement>('input')!;
+    input.value = 'Enter key test';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(chatSvc.sendMessage).toHaveBeenCalledWith('Enter key test');
+  });
+
+  it('renders listing cards when message has listings', async () => {
+    const msgs = [
+      { role: 'user' as const, content: 'Find me a house' },
+      {
+        role: 'assistant' as const,
+        content: 'Here are some options:',
+        listings: [{
+          id: 'test-id-123',
+          street: 'Keizersgracht',
+          houseNumber: '1',
+          city: 'Amsterdam',
+          province: 'Noord-Holland',
+          currentPrice: 450000,
+          bedrooms: 3,
+          livingAreaM2: 85,
+        }]
+      }
+    ];
+    await setup(msgs as any);
+    expect(el.querySelector('app-stat-card')).toBeTruthy();
+    expect(el.querySelector('a[href]') || el.querySelector('[routerLink]') || el.querySelector('a')).toBeTruthy();
+  });
 });

@@ -1,5 +1,5 @@
 <app-section-card padding="p-0" extraClass="w-80 flex flex-col" style="height: 28rem;">
-  <div class="flex-1 overflow-y-auto space-y-3 p-4">
+  <div class="flex-1 overflow-y-auto space-y-3 p-4" aria-live="polite">
     @for (msg of svc.messages(); track $index) {
       <div [class]="msg.role === 'user' ? 'flex justify-end' : 'flex justify-start'">
         <span
@@ -19,14 +19,10 @@
             <a [routerLink]="['/listings', listing.id]" class="block hover:opacity-80 transition-opacity">
               <app-stat-card [label]="(listing.street ?? '') + ' ' + (listing.houseNumber ?? '') + (listing.houseNumberAddition ?? '') + ', ' + (listing.city ?? '')">
                 <p class="text-sm font-semibold text-slate-700 mt-1">
-                  @if (listing.currentPrice) {
-                    {{ listing.currentPrice | euroPrice }}
-                  } @else {
-                    Price unknown
-                  }
+                  {{ listing.currentPrice | euroPrice }}
                 </p>
                 @if (listing.bedrooms) {
-                  <p class="text-xs text-slate-500">{{ listing.bedrooms }} bedrooms &middot; {{ listing.livingAreaM2 }} m&sup2;</p>
+                  <p class="text-xs text-slate-500">{{ listing.bedrooms }} bedrooms @if (listing.livingAreaM2) { &middot; {{ listing.livingAreaM2 }} m&sup2; }</p>
                 }
               </app-stat-card>
             </a>
@@ -41,6 +37,7 @@
       (keydown.enter)="send()"
       [disabled]="svc.isStreaming()"
       placeholder="Ask about properties..."
+      aria-label="Ask about properties"
       class="flex-1 text-sm border border-slate-300 rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-cyan-500 disabled:opacity-50"
     />
     <button
