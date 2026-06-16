@@ -6,5 +6,6 @@ import java.util.UUID;
 
 public record ChatMessageRequest(
         @NotNull UUID sessionId,
-        @NotBlank String message
+        @NotBlank String message,
+        UUID clientId
 ) {}

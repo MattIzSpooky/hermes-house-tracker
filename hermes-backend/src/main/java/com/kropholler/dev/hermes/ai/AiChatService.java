@@ -1,9 +1,7 @@
 package com.kropholler.dev.hermes.ai;
 
-import com.kropholler.dev.hermes.ai.internal.ChatMessage;
-import com.kropholler.dev.hermes.ai.internal.ChatMessageRepository;
-import com.kropholler.dev.hermes.ai.internal.GetListingSummaryTool;
-import com.kropholler.dev.hermes.ai.internal.ListingSearchTool;
+import com.kropholler.dev.hermes.ai.internal.*;
+import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +35,7 @@ public class AiChatService {
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
+    private final FavouriteService favouriteService;
     private final MeterRegistry meterRegistry;
 
     public AiChatService(@Qualifier("chatClient") ChatClient chatClient,
@@ -44,12 +43,14 @@ public class AiChatService {
                           ListingService listingService,
                           ChatListingCardMapper chatListingCardMapper,
                           ListingSummaryService listingSummaryService,
+                          FavouriteService favouriteService,
                           MeterRegistry meterRegistry) {
         this.chatClient = chatClient;
         this.chatMessageRepository = chatMessageRepository;
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
+        this.favouriteService = favouriteService;
         this.meterRegistry = meterRegistry;
     }
 
@@ -90,32 +91,38 @@ public class AiChatService {
      * History is loaded from the DB before the current user message is saved,
      * so the caller must save both user and assistant messages after streaming completes.
      */
-    public StreamHandle startStream(UUID sessionId, String userMessage) {
+    public StreamHandle startStream(UUID sessionId, UUID clientId, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
         List<ChatMessage> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
-        // Cap history at the 20 most recent messages so stale exchanges from earlier
-        // sessions don't bias the model (e.g. old empty-result turns for a city).
         int fromIndex = Math.max(0, allMessages.size() - 20);
         List<Message> history = allMessages.subList(fromIndex, allMessages.size())
                 .stream()
                 .map(m -> switch (m.getRole()) {
                     case "USER"      -> (Message) new UserMessage(m.getContent());
-                    // Scrub Funda.nl references from old assistant messages so the model
-                    // doesn't keep repeating them based on stale history.
                     case "ASSISTANT" -> new AssistantMessage(sanitizeHistory(m.getContent()));
                     default -> throw new IllegalStateException("Unknown chat role: " + m.getRole());
                 })
                 .toList();
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
+
+        // clientId falls back to sessionId so favourites work even if the frontend
+        // hasn't been updated to send a separate clientId yet.
+        UUID effectiveClientId = clientId != null ? clientId : sessionId;
+
         ListingSearchTool searchTool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         GetListingSummaryTool summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
+        GetPriceHistoryTool historyTool = new GetPriceHistoryTool(listingService, meterRegistry);
+        CompareListingsTool compareTool = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        FindPriceDropTool priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        GetFavouriteListingsTool favouritesTool = new GetFavouriteListingsTool(
+                effectiveClientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         Flux<String> tokens = chatClient.prompt()
                 .messages(history)
                 .user(userMessage)
-                .tools(searchTool, summaryTool)
+                .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool)
                 .stream()
                 .content();
 

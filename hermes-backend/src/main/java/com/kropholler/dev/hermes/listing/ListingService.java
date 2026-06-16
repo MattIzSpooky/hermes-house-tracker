@@ -59,6 +59,29 @@ public class ListingService {
     }
 
     @Transactional(readOnly = true)
+    public List<PriceDropResult> findPriceDropListings(String city, double minDropPercent) {
+        List<UUID> ids = listingRepository.findListingIdsWithPriceDrop(city, minDropPercent)
+                .stream().map(UUID::fromString).toList();
+        return listingRepository.findByIdIn(ids).stream()
+                .map(listing -> {
+                    List<PriceHistoryEntryDto> history = priceHistoryRepository
+                            .findByListingIdOrderByTimestampAsc(listing.getId())
+                            .stream()
+                            .filter(e -> "asking_price".equals(e.getStatus()))
+                            .map(mapper::toDto)
+                            .toList();
+                    if (history.size() < 2) return null;
+                    int original = history.get(0).price();
+                    int current = history.get(history.size() - 1).price();
+                    double drop = (original - current) * 100.0 / original;
+                    return new PriceDropResult(toDto(listing), original, current, drop);
+                })
+                .filter(r -> r != null)
+                .sorted((a, b) -> Double.compare(b.dropPercent(), a.dropPercent()))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public Optional<ListingDto> findByAddress(String street, String houseNumber, String city) {
         String s = street != null ? street.strip() : null;
         String n = houseNumber != null ? houseNumber.strip() : null;

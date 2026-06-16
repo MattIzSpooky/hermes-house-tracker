@@ -46,7 +46,7 @@ public class ChatController {
         log.info("AI chat request: session={}, messageLength={}", request.sessionId(), request.message().length());
 
         try {
-            AiChatService.StreamHandle handle = aiChatService.startStream(request.sessionId(), request.message());
+            AiChatService.StreamHandle handle = aiChatService.startStream(request.sessionId(), request.clientId(), request.message());
 
             for (String token : handle.tokens().toIterable()) {
                 if (!leadingResolved) {

@@ -83,7 +83,7 @@ export class ChatService {
     this._isStreaming.set(true);
     this.client.publish({
       destination: '/app/chat',
-      body: JSON.stringify({ sessionId: this.sessionId, message: text }),
+      body: JSON.stringify({ sessionId: this.sessionId, clientId: this.sessionId, message: text }),
     });
   }
 

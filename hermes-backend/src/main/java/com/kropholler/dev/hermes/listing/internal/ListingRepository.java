@@ -17,6 +17,37 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             String street, String houseNumber, String city);
     List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCase(String street, String houseNumber);
     Page<Listing> findAllByDeletedAtIsNull(Pageable pageable);
+    List<Listing> findByIdIn(List<UUID> ids);
+
+    @Query(value = """
+            SELECT l.id::text FROM listings l
+            LEFT JOIN LATERAL (
+                SELECT phe.price
+                FROM price_history_entries phe
+                WHERE phe.listing_id = l.id AND phe.status = 'asking_price'
+                ORDER BY phe.timestamp ASC
+                LIMIT 1
+            ) first_price ON true
+            LEFT JOIN LATERAL (
+                SELECT phe.price
+                FROM price_history_entries phe
+                WHERE phe.listing_id = l.id AND phe.status = 'asking_price'
+                ORDER BY phe.timestamp DESC
+                LIMIT 1
+            ) latest_price ON true
+            WHERE l.deleted_at IS NULL
+            AND first_price.price IS NOT NULL
+            AND latest_price.price IS NOT NULL
+            AND first_price.price > latest_price.price
+            AND (:city IS NULL OR lower(l.city) LIKE lower(concat('%', :city, '%')))
+            AND (CAST(first_price.price - latest_price.price AS float) / first_price.price * 100) >= :minDropPercent
+            ORDER BY (CAST(first_price.price - latest_price.price AS float) / first_price.price * 100) DESC
+            LIMIT 5
+            """, nativeQuery = true)
+    List<String> findListingIdsWithPriceDrop(
+            @Param("city") String city,
+            @Param("minDropPercent") double minDropPercent
+    );
     void deleteAllByDeletedAtIsNotNull();
 
     @Query(value = """

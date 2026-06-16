@@ -1,0 +1,55 @@
+package com.kropholler.dev.hermes.ai.internal;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.kropholler.dev.hermes.listing.ListingService;
+import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.tool.annotation.Tool;
+
+import java.util.List;
+
+@Slf4j
+public class GetPriceHistoryTool {
+
+    public record AddressParams(
+            @JsonPropertyDescription("Street name of the property, e.g. 'Herenstraat'") String street,
+            @JsonPropertyDescription("House number of the property, e.g. '160'") String houseNumber,
+            @JsonPropertyDescription("City where the property is located, e.g. 'Weert'") String city
+    ) {}
+
+    private final ListingService listingService;
+    private final Counter callCounter;
+
+    public GetPriceHistoryTool(ListingService listingService, MeterRegistry meterRegistry) {
+        this.listingService = listingService;
+        this.callCounter = meterRegistry.counter("hermes.ai.tool.calls", "tool", "getPriceHistory");
+    }
+
+    @Tool(description = "Get the full asking-price history for a specific property. "
+            + "Call this when the user asks how the price has changed over time or whether a property got cheaper.")
+    public String getPriceHistory(AddressParams params) {
+        log.info("getPriceHistory called: street={}, houseNumber={}, city={}",
+                params.street(), params.houseNumber(), params.city());
+        callCounter.increment();
+        return listingService.findByAddress(params.street(), params.houseNumber(), params.city())
+                .map(dto -> {
+                    List<PriceHistoryEntryDto> history = listingService.findPriceHistoryByListingId(dto.id())
+                            .stream()
+                            .filter(e -> "asking_price".equals(e.status()))
+                            .toList();
+                    if (history.isEmpty()) return "No price history found for this property.";
+                    StringBuilder sb = new StringBuilder("Price history for ")
+                            .append(dto.street()).append(" ").append(dto.houseNumber())
+                            .append(", ").append(dto.city()).append(":\n");
+                    for (PriceHistoryEntryDto e : history) {
+                        sb.append("- ").append(e.timestamp().toString().substring(0, 10))
+                                .append(": €").append(String.format("%,d", e.price()).replace(",", ".")
+                                ).append("\n");
+                    }
+                    return sb.toString();
+                })
+                .orElse("Property not found. Call searchListings to locate the property first.");
+    }
+}

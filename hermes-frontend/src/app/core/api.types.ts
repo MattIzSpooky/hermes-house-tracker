@@ -116,9 +116,15 @@ export interface ChatListingCard {
   status?: string;
 }
 
+export interface FavouriteDto {
+  listingId: string;
+  savedAt: string;
+}
+
 export interface ChatMessageRequest {
   sessionId: string;
   message: string;
+  clientId?: string;
 }
 
 export interface TokenFrame {
