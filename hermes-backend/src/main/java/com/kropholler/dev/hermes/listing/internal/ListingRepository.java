@@ -55,7 +55,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             LEFT JOIN LATERAL (
                 SELECT phe.price
                 FROM price_history_entries phe
-                WHERE phe.listing_id = l.id
+                WHERE phe.listing_id = l.id AND phe.status = 'asking_price'
                 ORDER BY phe.timestamp DESC
                 LIMIT 1
             ) latest_price ON true

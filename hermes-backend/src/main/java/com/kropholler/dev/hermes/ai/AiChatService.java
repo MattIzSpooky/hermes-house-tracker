@@ -119,6 +119,8 @@ public class AiChatService {
         GetFavouriteListingsTool favouritesTool = new GetFavouriteListingsTool(
                 effectiveClientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
+        log.info("startStream: registering 6 tools for session={}", sessionId);
+
         Flux<String> tokens = chatClient.prompt()
                 .messages(history)
                 .user(userMessage)

@@ -15,6 +15,13 @@
         <captureMdcAttributes>*</captureMdcAttributes>
     </appender>
 
+    <logger name="org.springframework.ai.ollama" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+    <logger name="hermes.ollama.wire" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="OTLP"/>

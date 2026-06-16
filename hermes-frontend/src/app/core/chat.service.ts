@@ -70,7 +70,8 @@ export class ChatService {
             if (last?.role === 'assistant') {
               return [...msgs.slice(0, -1), { ...last, listings: frame.listings }];
             }
-            return msgs;
+            // Tool was called but no text tokens were emitted; create a message to hold the cards
+            return [...msgs, { role: 'assistant', content: '', listings: frame.listings }];
           });
         }
       }
