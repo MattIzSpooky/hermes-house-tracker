@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryDto;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
+import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,51 +22,68 @@ public class ListingSummaryGenerationService {
     private final ListingService listingService;
     private final ChatClient.Builder chatClientBuilder;
 
-    /**
-     * Returns the existing summary for {@code listingId} if one exists, otherwise generates,
-     * persists, and returns a new one. Safe to call on every page load — generation only runs once.
-     */
     @Transactional
-    public Optional<ListingSummaryDto> generateIfAbsent(UUID listingId) {
-        if (summaryRepository.findByListingId(listingId).isPresent()) {
-            return summaryRepository.findByListingId(listingId)
-                    .map(s -> new ListingSummaryDto(s.getListingId(), s.getSummary(), s.getGeneratedAt()));
-        }
-        return listingService.findById(listingId).map(listing -> {
+    public void generate(UUID listingId) {
+        listingService.findById(listingId).ifPresentOrElse(listing -> {
             log.info("Generating AI summary for listing {}", listingId);
-            ChatClient chatClient = chatClientBuilder.build();
-            String text = generateSummary(chatClient, listing);
+            List<PriceHistoryEntryDto> priceHistory = listingService.findPriceHistoryByListingId(listingId)
+                    .stream().filter(e -> "asking_price".equals(e.status())).toList();
+            String text = callLlm(listing, priceHistory);
             upsertSummary(listingId, text);
-            return new ListingSummaryDto(listingId, text, Instant.now());
-        });
+            log.info("AI summary saved for listing {}", listingId);
+        }, () -> log.warn("Cannot generate summary — listing {} not found", listingId));
     }
 
-    private String generateSummary(ChatClient chatClient, ListingDto listing) {
-        String prompt = buildPrompt(listing);
+    private String callLlm(ListingDto listing, List<PriceHistoryEntryDto> priceHistory) {
         try {
-            return chatClient.prompt().user(prompt).call().content();
+            return chatClientBuilder.build()
+                    .prompt()
+                    .user(buildPrompt(listing, priceHistory))
+                    .call()
+                    .content();
         } catch (Exception e) {
-            log.error("Failed to generate AI summary for listing {}", listing.id(), e);
-            return "Summary not available.";
+            log.error("LLM call failed for listing {}", listing.id(), e);
+            return "Summary could not be generated.";
         }
     }
 
-    private String buildPrompt(ListingDto listing) {
-        return String.format(
-            """
-            Write a concise, plain-language summary (2-3 sentences) of this Dutch property listing.
-            Include the key selling points, price, and location.
+    private String buildPrompt(ListingDto listing, List<PriceHistoryEntryDto> priceHistory) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Write a concise, plain-language summary (3-5 sentences) of this Dutch property listing. ")
+          .append("Highlight the most notable features, the price, and the location. ")
+          .append("Write in English.\n\n");
 
-            Address: %s %s%s, %s %s, %s
-            Price: €%,d
-            Status: %s
-            """,
-            listing.street(), listing.houseNumber(),
-            listing.houseNumberAddition() != null ? " " + listing.houseNumberAddition() : "",
-            listing.zipCode(), listing.city(), listing.province(),
-            listing.currentPrice() != null ? listing.currentPrice() : 0,
-            listing.status() != null ? listing.status() : "unknown"
-        );
+        sb.append("Address: ").append(listing.street()).append(" ").append(listing.houseNumber());
+        if (listing.houseNumberAddition() != null) sb.append(listing.houseNumberAddition());
+        sb.append(", ").append(listing.zipCode()).append(" ").append(listing.city())
+          .append(", ").append(listing.province()).append("\n");
+
+        sb.append("Status: ").append(listing.status() != null ? listing.status() : "unknown").append("\n");
+
+        if (listing.currentPrice() != null) {
+            sb.append("Current asking price: €").append(String.format("%,d", listing.currentPrice()).replace(",", ".")).append("\n");
+        }
+
+        if (listing.livingAreaM2() != null) sb.append("Living area: ").append(listing.livingAreaM2()).append(" m²\n");
+        if (listing.plotAreaM2() != null)   sb.append("Plot area: ").append(listing.plotAreaM2()).append(" m²\n");
+        if (listing.rooms() != null)        sb.append("Rooms: ").append(listing.rooms()).append("\n");
+        if (listing.bedrooms() != null)     sb.append("Bedrooms: ").append(listing.bedrooms()).append("\n");
+        if (listing.energyLabel() != null)  sb.append("Energy label: ").append(listing.energyLabel()).append("\n");
+
+        if (!priceHistory.isEmpty()) {
+            sb.append("Price history:\n");
+            for (PriceHistoryEntryDto e : priceHistory) {
+                sb.append("  - ").append(e.timestamp().toString(), 0, 10)
+                  .append(": €").append(e.price() != null ? String.format("%,d", e.price()).replace(",", ".") : "?")
+                  .append("\n");
+            }
+        }
+
+        if (listing.description() != null && !listing.description().isBlank()) {
+            sb.append("Original listing description:\n").append(listing.description()).append("\n");
+        }
+
+        return sb.toString();
     }
 
     private void upsertSummary(UUID listingId, String summaryText) {

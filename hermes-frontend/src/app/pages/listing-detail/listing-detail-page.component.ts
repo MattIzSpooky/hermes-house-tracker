@@ -32,7 +32,7 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
   protected readonly rescrapeLoading = signal(false);
   private pollInterval?: ReturnType<typeof setInterval>;
 
-  private get id(): string {
+  protected get id(): string {
     return this.route.snapshot.paramMap.get('id')!;
   }
 
@@ -111,6 +111,7 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearPoll();
+    this.svc.clearSummaryPoll();
   }
 
   triggerRescrape(): void {

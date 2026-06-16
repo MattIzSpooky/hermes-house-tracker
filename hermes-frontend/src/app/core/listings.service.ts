@@ -92,13 +92,48 @@ export class ListingsService {
     });
   }
 
+  readonly summaryGenerating = signal(false);
+  private summaryPollInterval?: ReturnType<typeof setInterval>;
+
   loadSummary(id: string): void {
     this.summary.set(null);
     this.summaryNotFound.set(false);
+    this.summaryGenerating.set(false);
+    this.clearSummaryPoll();
     this.http.get<AiSummaryResponse>(`/api/listings/${id}/summary`).subscribe({
       next: data => this.summary.set(data),
       error: () => this.summaryNotFound.set(true),
     });
+  }
+
+  requestSummaryGeneration(id: string): void {
+    this.summaryGenerating.set(true);
+    this.summaryNotFound.set(false);
+    this.http.post(`/api/listings/${id}/summary/generate`, {}).subscribe({
+      next: () => this.startSummaryPoll(id),
+      error: () => this.summaryGenerating.set(false),
+    });
+  }
+
+  private startSummaryPoll(id: string): void {
+    this.clearSummaryPoll();
+    this.summaryPollInterval = setInterval(() => {
+      this.http.get<AiSummaryResponse>(`/api/listings/${id}/summary`).subscribe({
+        next: data => {
+          this.summary.set(data);
+          this.summaryGenerating.set(false);
+          this.clearSummaryPoll();
+        },
+        error: () => {},
+      });
+    }, 3000);
+  }
+
+  clearSummaryPoll(): void {
+    if (this.summaryPollInterval !== undefined) {
+      clearInterval(this.summaryPollInterval);
+      this.summaryPollInterval = undefined;
+    }
   }
 
   rescrape(id: string): Observable<ScrapingSessionResponse> {

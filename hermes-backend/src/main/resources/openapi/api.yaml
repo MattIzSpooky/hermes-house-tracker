@@ -218,6 +218,27 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/listings/{id}/summary/generate:
+    post:
+      operationId: requestListingSummaryGeneration
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Generation request accepted
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   schemas:
     CreateScrapingSessionRequest:

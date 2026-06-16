@@ -131,8 +131,20 @@
           @if (svc.summary(); as summary) {
             <p class="text-sm text-slate-700 leading-relaxed">{{ summary.summary }}</p>
             <p class="text-xs text-slate-400 mt-3">Generated {{ summary.generatedAt | date:'medium' }}</p>
+          } @else if (svc.summaryGenerating()) {
+            <div class="space-y-2.5">
+              <div class="h-3 bg-slate-100 rounded-full animate-pulse"></div>
+              <div class="h-3 bg-slate-100 rounded-full animate-pulse w-4/5"></div>
+              <div class="h-3 bg-slate-100 rounded-full animate-pulse w-3/5"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-3">Generating summary…</p>
           } @else if (svc.summaryNotFound()) {
-            <p class="text-sm text-slate-400 italic">No summary available yet.</p>
+            <p class="text-sm text-slate-400 italic mb-4">No summary available yet.</p>
+            <button (click)="svc.requestSummaryGeneration(id)"
+              class="rounded-lg bg-cyan-600 px-4 py-2 text-sm font-semibold text-white
+                     hover:bg-cyan-500 transition-colors">
+              Generate AI Summary
+            </button>
           } @else {
             <div class="space-y-2.5">
               <div class="h-3 bg-slate-100 rounded-full animate-pulse"></div>
