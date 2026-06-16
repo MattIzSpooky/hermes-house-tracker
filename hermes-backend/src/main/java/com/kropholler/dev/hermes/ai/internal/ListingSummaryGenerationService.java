@@ -1,24 +1,45 @@
 package com.kropholler.dev.hermes.ai.internal;
 
+import com.kropholler.dev.hermes.ai.ListingSummaryDto;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
-// TODO: wire up as a JMS listener on a listing.summary.generate queue;
-//       private helpers below are ready, the listener method needs to be added.
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class ListingSummaryGenerationService {
 
     private final ListingSummaryRepository summaryRepository;
     private final ListingService listingService;
     private final ChatClient.Builder chatClientBuilder;
+
+    /**
+     * Returns the existing summary for {@code listingId} if one exists, otherwise generates,
+     * persists, and returns a new one. Safe to call on every page load — generation only runs once.
+     */
+    @Transactional
+    public Optional<ListingSummaryDto> generateIfAbsent(UUID listingId) {
+        if (summaryRepository.findByListingId(listingId).isPresent()) {
+            return summaryRepository.findByListingId(listingId)
+                    .map(s -> new ListingSummaryDto(s.getListingId(), s.getSummary(), s.getGeneratedAt()));
+        }
+        return listingService.findById(listingId).map(listing -> {
+            log.info("Generating AI summary for listing {}", listingId);
+            ChatClient chatClient = chatClientBuilder.build();
+            String text = generateSummary(chatClient, listing);
+            upsertSummary(listingId, text);
+            return new ListingSummaryDto(listingId, text, Instant.now());
+        });
+    }
 
     private String generateSummary(ChatClient chatClient, ListingDto listing) {
         String prompt = buildPrompt(listing);

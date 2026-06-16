@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai;
 
+import com.kropholler.dev.hermes.ai.internal.ListingSummaryGenerationService;
 import com.kropholler.dev.hermes.ai.internal.ListingSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,10 +14,15 @@ import java.util.UUID;
 public class ListingSummaryService {
 
     private final ListingSummaryRepository repository;
+    private final ListingSummaryGenerationService generationService;
 
     @Transactional(readOnly = true)
     public Optional<ListingSummaryDto> findByListingId(UUID listingId) {
         return repository.findByListingId(listingId)
             .map(s -> new ListingSummaryDto(s.getListingId(), s.getSummary(), s.getGeneratedAt()));
+    }
+
+    public Optional<ListingSummaryDto> getOrGenerate(UUID listingId) {
+        return generationService.generateIfAbsent(listingId);
     }
 }

@@ -74,13 +74,13 @@ class ListingController implements ListingsApi {
 
     @Override
     public ResponseEntity<AiSummaryResponse> getListingSummary(UUID id) {
-        return summaryService.findByListingId(id)
+        return summaryService.getOrGenerate(id)
             .map(dto -> ResponseEntity.ok(new AiSummaryResponse()
                 .listingId(dto.listingId())
                 .summary(dto.summary())
                 .generatedAt(dto.generatedAt().atOffset(ZoneOffset.UTC))))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Summary for listing " + id + " not found"));
+                "Listing " + id + " not found"));
     }
 
 }
