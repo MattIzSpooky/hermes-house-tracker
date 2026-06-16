@@ -573,25 +573,25 @@
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "hermes_ai_chat_duration_seconds_max{outcome=\"success\"}",
-          "legendFormat": "max duration"
+          "legendFormat": "max duration (rolling)"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_duration_seconds_sum{outcome=\"success\"} / hermes_ai_chat_duration_seconds_count{outcome=\"success\"}",
-          "legendFormat": "avg duration"
+          "expr": "rate(hermes_ai_chat_duration_seconds_sum{outcome=\"success\"}[5m]) / rate(hermes_ai_chat_duration_seconds_count{outcome=\"success\"}[5m])",
+          "legendFormat": "avg duration (5m window)"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
           "expr": "hermes_ai_chat_time_to_first_token_seconds_max",
-          "legendFormat": "max TTFT"
+          "legendFormat": "max TTFT (rolling)"
         },
         {
           "refId": "D",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_time_to_first_token_seconds_sum / hermes_ai_chat_time_to_first_token_seconds_count",
-          "legendFormat": "avg TTFT"
+          "expr": "rate(hermes_ai_chat_time_to_first_token_seconds_sum[5m]) / rate(hermes_ai_chat_time_to_first_token_seconds_count[5m])",
+          "legendFormat": "avg TTFT (5m window)"
         }
       ]
     },
@@ -608,26 +608,14 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hermes_ai_tool_calls_total{tool=\"searchListings\"}[5m])",
-          "legendFormat": "searchListings / rate"
+          "expr": "rate(hermes_ai_tool_calls_total[5m])",
+          "legendFormat": "{{tool}} / rate"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hermes_ai_tool_calls_total{tool=\"getListingSummary\"}[5m])",
-          "legendFormat": "getListingSummary / rate"
-        },
-        {
-          "refId": "C",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_tool_calls_total{tool=\"searchListings\"}",
-          "legendFormat": "searchListings / total"
-        },
-        {
-          "refId": "D",
-          "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_tool_calls_total{tool=\"getListingSummary\"}",
-          "legendFormat": "getListingSummary / total"
+          "expr": "hermes_ai_tool_calls_total",
+          "legendFormat": "{{tool}} / total"
         }
       ]
     }
