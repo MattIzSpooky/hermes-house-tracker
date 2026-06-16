@@ -38,7 +38,7 @@ public class ListingSearchTool {
             String city,
             @JsonPropertyDescription("Free-text keywords to search in property descriptions, null if not specified")
             String keywords,
-            @JsonPropertyDescription("Set to true to return the most expensive listings first, false (default) for cheapest first")
+            @JsonPropertyDescription("MUST be true when the user asks for 'most expensive', 'highest price', 'priciest', 'luxury', or 'most valuable' listings. MUST be false (default) for 'cheapest', 'budget', 'lowest price', or when no sort order is mentioned.")
             boolean sortByPriceDesc
     ) {}
 

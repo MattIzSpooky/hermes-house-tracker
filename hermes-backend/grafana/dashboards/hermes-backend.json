@@ -54,7 +54,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[2m]))",
+          "expr": "sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "req/s"
         }
       ]
@@ -90,7 +90,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\",outcome!=\"SUCCESS\"}[2m])) / sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[2m]))",
+          "expr": "(sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\",outcome=~\"CLIENT_ERROR|SERVER_ERROR\"}[2m])) or vector(0)) / sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m]))",
           "legendFormat": "error rate"
         }
       ]
@@ -110,14 +110,14 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "ms",
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 0.5 },
-              { "color": "red", "value": 1.0 }
+              { "color": "yellow", "value": 500 },
+              { "color": "red", "value": 1000 }
             ]
           }
         }
@@ -126,7 +126,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         }
       ]
@@ -180,7 +180,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(rate(http_server_requests_seconds_count{service_name=\"$service_name\"}[2m])) by (method, uri, status)",
+          "expr": "sum(rate(http_server_requests_milliseconds_count{service_name=\"$service_name\"}[2m])) by (method, uri, status)",
           "legendFormat": "{{method}} {{uri}} {{status}}"
         }
       ]
@@ -192,25 +192,25 @@
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "fieldConfig": {
-        "defaults": { "unit": "s", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
+        "defaults": { "unit": "ms", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
       },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p99"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p95"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
           "legendFormat": "p50"
         }
       ]
@@ -323,19 +323,19 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_threads_live_threads{service_name=\"$service_name\"}",
+          "expr": "jvm_threads_live{service_name=\"$service_name\"}",
           "legendFormat": "live threads"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "jvm_threads_daemon_threads{service_name=\"$service_name\"}",
+          "expr": "jvm_threads_daemon{service_name=\"$service_name\"}",
           "legendFormat": "daemon threads"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(jvm_gc_pause_seconds_sum{service_name=\"$service_name\"}[1m]) * 1000",
+          "expr": "rate(jvm_gc_pause_milliseconds_sum{service_name=\"$service_name\"}[1m]) * 1000",
           "legendFormat": "GC pause ms/s"
         }
       ]
@@ -374,7 +374,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(hermes_ai_chat_requests_total)",
+          "expr": "sum(hermes_ai_chat_requests_total{service_name=\"$service_name\"})",
           "legendFormat": "requests"
         }
       ]
@@ -410,7 +410,7 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "sum(hermes_ai_chat_requests_total{outcome=\"success\"}) / sum(hermes_ai_chat_requests_total)",
+          "expr": "sum(hermes_ai_chat_requests_total{service_name=\"$service_name\",outcome=\"success\"}) / sum(hermes_ai_chat_requests_total{service_name=\"$service_name\"})",
           "legendFormat": "success rate"
         }
       ]
@@ -430,14 +430,14 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "ms",
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 30 }
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 30000 }
             ]
           }
         }
@@ -446,14 +446,14 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_duration_seconds_sum{outcome=\"success\"} / hermes_ai_chat_duration_seconds_count{outcome=\"success\"}",
+          "expr": "hermes_ai_chat_duration_milliseconds_sum{service_name=\"$service_name\",outcome=\"success\"} / hermes_ai_chat_duration_milliseconds_count{service_name=\"$service_name\",outcome=\"success\"}",
           "legendFormat": "avg duration"
         }
       ]
     },
     {
       "id": 15,
-      "title": "Max LLM Duration",
+      "title": "P99 LLM Duration",
       "type": "stat",
       "gridPos": { "h": 4, "w": 4, "x": 12, "y": 29 },
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
@@ -466,14 +466,14 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "ms",
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 15 },
-              { "color": "red", "value": 45 }
+              { "color": "yellow", "value": 15000 },
+              { "color": "red", "value": 45000 }
             ]
           }
         }
@@ -482,8 +482,8 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_duration_seconds_max{outcome=\"success\"}",
-          "legendFormat": "max duration"
+          "expr": "histogram_quantile(0.99, sum(rate(hermes_ai_chat_duration_milliseconds_bucket{service_name=\"$service_name\",outcome=\"success\"}[5m])) by (le))",
+          "legendFormat": "p99 duration"
         }
       ]
     },
@@ -502,14 +502,14 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "ms",
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 5 },
-              { "color": "red", "value": 15 }
+              { "color": "yellow", "value": 5000 },
+              { "color": "red", "value": 15000 }
             ]
           }
         }
@@ -518,14 +518,14 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_time_to_first_token_seconds_sum / hermes_ai_chat_time_to_first_token_seconds_count",
+          "expr": "hermes_ai_chat_time_to_first_token_milliseconds_sum{service_name=\"$service_name\"} / hermes_ai_chat_time_to_first_token_milliseconds_count{service_name=\"$service_name\"}",
           "legendFormat": "avg TTFT"
         }
       ]
     },
     {
       "id": 17,
-      "title": "Max Time to First Token",
+      "title": "P99 Time to First Token",
       "type": "stat",
       "gridPos": { "h": 4, "w": 4, "x": 20, "y": 29 },
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
@@ -538,14 +538,14 @@
       },
       "fieldConfig": {
         "defaults": {
-          "unit": "s",
+          "unit": "ms",
           "color": { "mode": "thresholds" },
           "thresholds": {
             "mode": "absolute",
             "steps": [
               { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 20 }
+              { "color": "yellow", "value": 10000 },
+              { "color": "red", "value": 20000 }
             ]
           }
         }
@@ -554,8 +554,8 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_time_to_first_token_seconds_max",
-          "legendFormat": "max TTFT"
+          "expr": "histogram_quantile(0.99, sum(rate(hermes_ai_chat_time_to_first_token_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "legendFormat": "p99 TTFT"
         }
       ]
     },
@@ -566,32 +566,32 @@
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
       "datasource": { "type": "prometheus", "uid": "${datasource}" },
       "fieldConfig": {
-        "defaults": { "unit": "s", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
+        "defaults": { "unit": "ms", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
       },
       "targets": [
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_duration_seconds_max{outcome=\"success\"}",
-          "legendFormat": "max duration (rolling)"
+          "expr": "histogram_quantile(0.99, sum(rate(hermes_ai_chat_duration_milliseconds_bucket{service_name=\"$service_name\",outcome=\"success\"}[5m])) by (le))",
+          "legendFormat": "p99 duration (5m)"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hermes_ai_chat_duration_seconds_sum{outcome=\"success\"}[5m]) / rate(hermes_ai_chat_duration_seconds_count{outcome=\"success\"}[5m])",
-          "legendFormat": "avg duration (5m window)"
+          "expr": "rate(hermes_ai_chat_duration_milliseconds_sum{service_name=\"$service_name\",outcome=\"success\"}[5m]) / rate(hermes_ai_chat_duration_milliseconds_count{service_name=\"$service_name\",outcome=\"success\"}[5m])",
+          "legendFormat": "avg duration (5m)"
         },
         {
           "refId": "C",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_chat_time_to_first_token_seconds_max",
-          "legendFormat": "max TTFT (rolling)"
+          "expr": "histogram_quantile(0.99, sum(rate(hermes_ai_chat_time_to_first_token_milliseconds_bucket{service_name=\"$service_name\"}[5m])) by (le))",
+          "legendFormat": "p99 TTFT (5m)"
         },
         {
           "refId": "D",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hermes_ai_chat_time_to_first_token_seconds_sum[5m]) / rate(hermes_ai_chat_time_to_first_token_seconds_count[5m])",
-          "legendFormat": "avg TTFT (5m window)"
+          "expr": "rate(hermes_ai_chat_time_to_first_token_milliseconds_sum{service_name=\"$service_name\"}[5m]) / rate(hermes_ai_chat_time_to_first_token_milliseconds_count{service_name=\"$service_name\"}[5m])",
+          "legendFormat": "avg TTFT (5m)"
         }
       ]
     },
@@ -608,13 +608,13 @@
         {
           "refId": "A",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "rate(hermes_ai_tool_calls_total[5m])",
+          "expr": "rate(hermes_ai_tool_calls_total{service_name=\"$service_name\"}[5m])",
           "legendFormat": "{{tool}} / rate"
         },
         {
           "refId": "B",
           "datasource": { "type": "prometheus", "uid": "${datasource}" },
-          "expr": "hermes_ai_tool_calls_total",
+          "expr": "hermes_ai_tool_calls_total{service_name=\"$service_name\"}",
           "legendFormat": "{{tool}} / total"
         }
       ]
