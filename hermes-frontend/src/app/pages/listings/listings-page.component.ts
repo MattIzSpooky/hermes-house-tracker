@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { ListingsService } from '../../core/listings.service';
+import { FavouritesService } from '../../core/favourites.service';
 import { ListingSearchFilter } from '../../core/api.types';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
@@ -21,6 +22,7 @@ import { SectionCardComponent } from '../../shared/section-card.component';
 
 export class ListingsPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
+  protected readonly favourites = inject(FavouritesService);
   private readonly router = inject(Router);
 
   protected currentPage = 0;
