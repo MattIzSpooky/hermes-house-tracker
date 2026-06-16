@@ -2,6 +2,8 @@ package com.kropholler.dev.hermes.ai;
 
 import com.kropholler.dev.hermes.ai.internal.ResultFrame;
 import com.kropholler.dev.hermes.ai.internal.TokenFrame;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -15,6 +17,7 @@ public class ChatController {
 
     private final AiChatService aiChatService;
     private final SimpMessagingTemplate messaging;
+    private final MeterRegistry meterRegistry;
 
     @MessageMapping("/chat")
     public void handleMessage(ChatMessageRequest request) {
@@ -34,6 +37,14 @@ public class ChatController {
         boolean leadingResolved = false;
         int jsonDepth = 0;
 
+        long startNanos = System.nanoTime();
+        Timer.Sample requestTimer = Timer.start(meterRegistry);
+        Timer.Sample ttftTimer = Timer.start(meterRegistry);
+        boolean firstTokenSeen = false;
+        int chunkCount = 0;
+
+        log.info("AI chat request: session={}, messageLength={}", request.sessionId(), request.message().length());
+
         try {
             AiChatService.StreamHandle handle = aiChatService.startStream(request.sessionId(), request.message());
 
@@ -47,6 +58,15 @@ public class ChatController {
                     if (buf.charAt(0) != '{') {
                         // Definitely not a JSON tool call — flush and proceed normally
                         leadingResolved = true;
+                        if (!firstTokenSeen) {
+                            firstTokenSeen = true;
+                            ttftTimer.stop(Timer.builder("hermes.ai.chat.time_to_first_token")
+                                    .description("Time from request to first text token")
+                                    .register(meterRegistry));
+                            log.info("AI chat first token: session={}, ttft={}ms",
+                                    request.sessionId(), (System.nanoTime() - startNanos) / 1_000_000);
+                        }
+                        chunkCount++;
                         fullResponse.append(buf);
                         messaging.convertAndSend(destination, new TokenFrame("TOKEN", buf));
                         continue;
@@ -59,15 +79,37 @@ public class ChatController {
                     }
 
                     if (jsonDepth <= 0 && buf.contains("\"name\"")) {
-                        // Completed JSON tool-call object — discard it silently
+                        // Completed JSON tool-call object — discard it, but flush any text
+                        // that appeared after the closing brace in the same buffered chunk.
+                        String afterJson = textAfterJson(buf);
                         leadingBuffer.setLength(0);
                         jsonDepth = 0;
                         leadingResolved = true;
+                        if (!afterJson.isEmpty()) {
+                            if (!firstTokenSeen) {
+                                firstTokenSeen = true;
+                                ttftTimer.stop(Timer.builder("hermes.ai.chat.time_to_first_token")
+                                        .description("Time from request to first text token")
+                                        .register(meterRegistry));
+                            }
+                            chunkCount++;
+                            fullResponse.append(afterJson);
+                            messaging.convertAndSend(destination, new TokenFrame("TOKEN", afterJson));
+                        }
                     }
                     // Otherwise keep buffering until the object closes or we know it's not JSON
                     continue;
                 }
 
+                if (!firstTokenSeen) {
+                    firstTokenSeen = true;
+                    ttftTimer.stop(Timer.builder("hermes.ai.chat.time_to_first_token")
+                            .description("Time from request to first text token")
+                            .register(meterRegistry));
+                    log.info("AI chat first token: session={}, ttft={}ms",
+                            request.sessionId(), (System.nanoTime() - startNanos) / 1_000_000);
+                }
+                chunkCount++;
                 fullResponse.append(token);
                 messaging.convertAndSend(destination, new TokenFrame("TOKEN", token));
             }
@@ -77,6 +119,7 @@ public class ChatController {
             if (!leadingResolved && !leadingBuffer.isEmpty()) {
                 String remaining = leadingBuffer.toString().stripLeading();
                 if (!remaining.isEmpty()) {
+                    chunkCount++;
                     fullResponse.append(remaining);
                     messaging.convertAndSend(destination, new TokenFrame("TOKEN", remaining));
                 }
@@ -89,9 +132,37 @@ public class ChatController {
             }
             messaging.convertAndSend(destination, new ResultFrame("RESULT", handle.resultHolder().get()));
 
+            long durationMs = (System.nanoTime() - startNanos) / 1_000_000;
+            log.info("AI chat completed: session={}, chunks={}, duration={}ms", request.sessionId(), chunkCount, durationMs);
+            requestTimer.stop(Timer.builder("hermes.ai.chat.duration")
+                    .description("Total AI chat streaming duration")
+                    .tag("outcome", "success")
+                    .register(meterRegistry));
+            meterRegistry.counter("hermes.ai.chat.requests", "outcome", "success").increment();
+
         } catch (Exception e) {
-            log.error("Error handling chat for session {}", request.sessionId(), e);
+            long durationMs = (System.nanoTime() - startNanos) / 1_000_000;
+            log.error("AI chat error: session={}, duration={}ms", request.sessionId(), durationMs, e);
             messaging.convertAndSend(destination, new TokenFrame("ERROR", "Something went wrong. Please try again."));
+            requestTimer.stop(Timer.builder("hermes.ai.chat.duration")
+                    .description("Total AI chat streaming duration")
+                    .tag("outcome", "error")
+                    .register(meterRegistry));
+            meterRegistry.counter("hermes.ai.chat.requests", "outcome", "error").increment();
         }
+    }
+
+    /** Returns the text that appears after the first complete top-level JSON object in {@code s}. */
+    private static String textAfterJson(String s) {
+        int depth = 0;
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '{') depth++;
+            else if (c == '}') {
+                depth--;
+                if (depth == 0) return s.substring(i + 1).stripLeading();
+            }
+        }
+        return "";
     }
 }

@@ -2,9 +2,10 @@ package com.kropholler.dev.hermes.ai;
 
 import com.kropholler.dev.hermes.ai.internal.ResultFrame;
 import com.kropholler.dev.hermes.ai.internal.TokenFrame;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -23,7 +24,12 @@ class ChatControllerTest {
 
     @Mock AiChatService aiChatService;
     @Mock SimpMessagingTemplate messaging;
-    @InjectMocks ChatController controller;
+    ChatController controller;
+
+    @BeforeEach
+    void setUp() {
+        controller = new ChatController(aiChatService, messaging, new SimpleMeterRegistry());
+    }
 
     @Test
     void handleMessage_streamsTokensAndSendsEmptyResult() {

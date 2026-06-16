@@ -13,6 +13,8 @@ import java.util.UUID;
 
 public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpecificationExecutor<Listing> {
     Optional<Listing> findByFundaId(String fundaId);
+    List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(
+            String street, String houseNumber, String city);
     Page<Listing> findAllByDeletedAtIsNull(Pageable pageable);
     void deleteAllByDeletedAtIsNotNull();
 

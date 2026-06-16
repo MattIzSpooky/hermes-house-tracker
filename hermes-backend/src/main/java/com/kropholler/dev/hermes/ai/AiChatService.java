@@ -2,8 +2,10 @@ package com.kropholler.dev.hermes.ai;
 
 import com.kropholler.dev.hermes.ai.internal.ChatMessage;
 import com.kropholler.dev.hermes.ai.internal.ChatMessageRepository;
+import com.kropholler.dev.hermes.ai.internal.GetListingSummaryTool;
 import com.kropholler.dev.hermes.ai.internal.ListingSearchTool;
 import com.kropholler.dev.hermes.listing.ListingService;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -34,18 +36,32 @@ public class AiChatService {
     private final ChatMessageRepository chatMessageRepository;
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
+    private final ListingSummaryService listingSummaryService;
+    private final MeterRegistry meterRegistry;
 
     public AiChatService(@Qualifier("chatClient") ChatClient chatClient,
                           ChatMessageRepository chatMessageRepository,
                           ListingService listingService,
-                          ChatListingCardMapper chatListingCardMapper) {
+                          ChatListingCardMapper chatListingCardMapper,
+                          ListingSummaryService listingSummaryService,
+                          MeterRegistry meterRegistry) {
         this.chatClient = chatClient;
         this.chatMessageRepository = chatMessageRepository;
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
+        this.listingSummaryService = listingSummaryService;
+        this.meterRegistry = meterRegistry;
     }
 
     public record StreamHandle(Flux<String> tokens, AtomicReference<List<ChatListingCard>> resultHolder) {}
+
+    private static String sanitizeHistory(String content) {
+        return content
+                .replaceAll("(?i)[^.!?]*funda\\.nl[^.!?]*[.!?]?", "")
+                .replaceAll("(?i)[^.!?]*clicking on the [\"']?url[\"']?[^.!?]*[.!?]?", "")
+                .replaceAll("\\s{2,}", " ")
+                .trim();
+    }
 
     @Transactional
     public void saveUserMessage(UUID sessionId, String content) {
@@ -85,18 +101,21 @@ public class AiChatService {
                 .stream()
                 .map(m -> switch (m.getRole()) {
                     case "USER"      -> (Message) new UserMessage(m.getContent());
-                    case "ASSISTANT" -> new AssistantMessage(m.getContent());
+                    // Scrub Funda.nl references from old assistant messages so the model
+                    // doesn't keep repeating them based on stale history.
+                    case "ASSISTANT" -> new AssistantMessage(sanitizeHistory(m.getContent()));
                     default -> throw new IllegalStateException("Unknown chat role: " + m.getRole());
                 })
                 .toList();
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
-        ListingSearchTool tool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder);
+        ListingSearchTool searchTool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        GetListingSummaryTool summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
 
         Flux<String> tokens = chatClient.prompt()
                 .messages(history)
                 .user(userMessage)
-                .tools(tool)
+                .tools(searchTool, summaryTool)
                 .stream()
                 .content();
 

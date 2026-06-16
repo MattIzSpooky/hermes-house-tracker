@@ -27,7 +27,8 @@ public class AiConfig {
             - Always call searchListings before answering any question about properties, even if you searched for similar criteria earlier in the conversation. Never skip the tool call based on a previous empty result.
             - Only set city, province, or keywords filters when the user explicitly mentions them in their current message. Do not infer location from earlier conversation turns.
             - If searchListings returns an empty list, tell the user no matching properties were found and suggest broadening or changing the search criteria.
-            - Do NOT recommend visiting Funda.nl or any external website. All listings live inside this application.
+            - When the user asks for a summary or description of a specific property: call getListingSummary with its street, houseNumber, and city. If you don't know the address yet, call searchListings first to find the property, then call getListingSummary with the address from the result.
+            - Never mention Funda.nl, funda.nl, or any external website or URL. Do not reference a "url" field. All information lives inside this application.
             - When passing search parameters, omit a parameter entirely (leave it null) rather than passing an empty string.
             """;
 

@@ -58,6 +58,13 @@ public class ListingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Optional<ListingDto> findByAddress(String street, String houseNumber, String city) {
+        return listingRepository
+                .findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(street, houseNumber, city)
+                .stream().findFirst().map(this::toDto);
+    }
+
     @Transactional
     public void deleteAllDeleted() {
         listingRepository.deleteAllByDeletedAtIsNotNull();

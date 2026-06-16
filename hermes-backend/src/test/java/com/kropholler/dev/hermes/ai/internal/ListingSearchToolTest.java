@@ -5,6 +5,7 @@ import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,7 +56,7 @@ class ListingSearchToolTest {
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder);
+        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(params);
 
@@ -74,7 +75,7 @@ class ListingSearchToolTest {
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder);
+        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(params);
 
@@ -92,7 +93,7 @@ class ListingSearchToolTest {
                 .thenThrow(new RuntimeException("DB error"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder);
+        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         assertThatThrownBy(() -> tool.searchListings(params))
                 .isInstanceOf(RuntimeException.class)

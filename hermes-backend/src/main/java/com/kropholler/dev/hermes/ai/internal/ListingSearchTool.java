@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.kropholler.dev.hermes.ai.ChatListingCard;
 import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.ListingService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 
 import java.util.List;
@@ -15,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * be shared across concurrent requests because {@code resultHolder} is written
  * once per call and read by the caller after streaming completes.
  */
+@Slf4j
 public class ListingSearchTool {
 
     public record SearchParams(
@@ -39,23 +43,30 @@ public class ListingSearchTool {
     private final ListingService listingService;
     private final ChatListingCardMapper mapper;
     private final AtomicReference<List<ChatListingCard>> resultHolder;
+    private final Counter callCounter;
 
     public ListingSearchTool(ListingService listingService,
                               ChatListingCardMapper mapper,
-                              AtomicReference<List<ChatListingCard>> resultHolder) {
+                              AtomicReference<List<ChatListingCard>> resultHolder,
+                              MeterRegistry meterRegistry) {
         this.listingService = listingService;
         this.mapper = mapper;
         this.resultHolder = resultHolder;
+        this.callCounter = meterRegistry.counter("hermes.ai.tool.calls", "tool", "searchListings");
     }
 
     @Tool(description = "Search for property listings matching the user's criteria. "
             + "Call this whenever the user expresses a housing preference or asks to see listings.")
     public List<ChatListingCard> searchListings(SearchParams params) {
+        log.info("searchListings called: city={}, province={}, minBedrooms={}, minPrice={}, maxPrice={}",
+                params.city(), params.province(), params.minBedrooms(), params.minPrice(), params.maxPrice());
+        callCounter.increment();
         List<ChatListingCard> cards = listingService.findForChat(
                 params.minPrice(), params.maxPrice(),
                 params.minBedrooms(), params.minRooms(), params.minLivingAreaM2(),
                 blankToNull(params.province()), blankToNull(params.city()), blankToNull(params.keywords())
         ).stream().map(mapper::toChatListingCard).toList();
+        log.info("searchListings returned {} results", cards.size());
         resultHolder.set(cards);
         return cards;
     }
