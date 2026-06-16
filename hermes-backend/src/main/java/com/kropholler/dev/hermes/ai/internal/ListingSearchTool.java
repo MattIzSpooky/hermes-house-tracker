@@ -54,9 +54,13 @@ public class ListingSearchTool {
         List<ChatListingCard> cards = listingService.findForChat(
                 params.minPrice(), params.maxPrice(),
                 params.minBedrooms(), params.minRooms(), params.minLivingAreaM2(),
-                params.province(), params.city(), params.keywords()
+                blankToNull(params.province()), blankToNull(params.city()), blankToNull(params.keywords())
         ).stream().map(mapper::toChatListingCard).toList();
         resultHolder.set(cards);
         return cards;
+    }
+
+    private static String blankToNull(String s) {
+        return (s == null || s.isBlank()) ? null : s;
     }
 }

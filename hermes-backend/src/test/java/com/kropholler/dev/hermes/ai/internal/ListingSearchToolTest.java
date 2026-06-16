@@ -45,8 +45,7 @@ class ListingSearchToolTest {
         UUID id = UUID.randomUUID();
         ListingDto listing = dto(id);
         ChatListingCard card = new ChatListingCard(id, "Teststraat", "1", null,
-                "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE",
-                "https://funda.nl/listing/1");
+                "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
                 null, 500000, 3, null, null, null, "Amsterdam", null);

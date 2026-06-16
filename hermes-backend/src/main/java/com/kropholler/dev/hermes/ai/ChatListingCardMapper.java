@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(config = MapStructConfig.class)
 public interface ChatListingCardMapper {
 
-    @BeanMapping(ignoreUnmappedSourceProperties = {"fundaId", "zipCode", "firstSeenAt", "lastSeenAt", "description", "rooms", "plotAreaM2", "status"})
+    @BeanMapping(ignoreUnmappedSourceProperties = {"fundaId", "url", "zipCode", "firstSeenAt", "lastSeenAt", "description", "rooms", "plotAreaM2", "status"})
     @Mapping(target = "status", expression = "java(dto.status() != null ? dto.status().name() : null)")
     ChatListingCard toChatListingCard(ListingDto dto);
 }

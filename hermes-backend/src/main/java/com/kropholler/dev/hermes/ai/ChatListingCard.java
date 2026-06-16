@@ -13,6 +13,5 @@ public record ChatListingCard(
         Integer bedrooms,
         Integer livingAreaM2,
         String energyLabel,
-        String status,
-        String url
+        String status
 ) {}

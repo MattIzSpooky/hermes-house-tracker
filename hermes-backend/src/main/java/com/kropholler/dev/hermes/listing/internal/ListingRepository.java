@@ -36,7 +36,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
                  plainto_tsquery('dutch', :keywords))
             AND (:minPrice IS NULL OR latest_price.price >= :minPrice)
             AND (:maxPrice IS NULL OR latest_price.price <= :maxPrice)
-            ORDER BY l.last_updated_at DESC
+            ORDER BY latest_price.price ASC NULLS LAST
             LIMIT 5
             """, nativeQuery = true)
     List<Listing> searchForChat(

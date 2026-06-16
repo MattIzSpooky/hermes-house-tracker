@@ -77,8 +77,11 @@ public class AiChatService {
     public StreamHandle startStream(UUID sessionId, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
-        List<Message> history = chatMessageRepository
-                .findBySessionIdOrderByCreatedAtAsc(sessionId)
+        List<ChatMessage> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        // Cap history at the 20 most recent messages so stale exchanges from earlier
+        // sessions don't bias the model (e.g. old empty-result turns for a city).
+        int fromIndex = Math.max(0, allMessages.size() - 20);
+        List<Message> history = allMessages.subList(fromIndex, allMessages.size())
                 .stream()
                 .map(m -> switch (m.getRole()) {
                     case "USER"      -> (Message) new UserMessage(m.getContent());

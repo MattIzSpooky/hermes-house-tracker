@@ -1,4 +1,5 @@
-import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -23,6 +24,7 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly rescrapeSession = signal<ScrapingSessionResponse | null>(null);
   protected readonly rescrapeLoading = signal(false);
@@ -96,8 +98,13 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    this.svc.loadListingAndReport(this.id);
-    this.svc.loadSummary(this.id);
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const id = params.get('id')!;
+      this.clearPoll();
+      this.rescrapeSession.set(null);
+      this.svc.loadListingAndReport(id);
+      this.svc.loadSummary(id);
+    });
   }
 
   ngOnDestroy(): void {

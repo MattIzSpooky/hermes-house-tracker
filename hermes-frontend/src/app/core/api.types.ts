@@ -114,7 +114,6 @@ export interface ChatListingCard {
   livingAreaM2?: number;
   energyLabel?: string;
   status?: string;
-  url?: string;
 }
 
 export interface ChatMessageRequest {

@@ -59,8 +59,7 @@ class ChatControllerTest {
         ChatMessageRequest request = new ChatMessageRequest(sessionId, "3 bedrooms Amsterdam");
 
         ChatListingCard card = new ChatListingCard(UUID.randomUUID(), "Keizersgracht", "1",
-                null, "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE",
-                "https://funda.nl/listing/1");
+                null, "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of(card));
         AiChatService.StreamHandle handle = new AiChatService.StreamHandle(Flux.just("Here you go."), holder);
 

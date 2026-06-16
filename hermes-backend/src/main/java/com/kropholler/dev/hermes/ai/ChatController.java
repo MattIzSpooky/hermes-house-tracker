@@ -26,16 +26,67 @@ public class ChatController {
         String destination = "/topic/chat/" + request.sessionId();
         StringBuilder fullResponse = new StringBuilder();
 
+        // llama3.2 sometimes leaks the tool-call JSON as text tokens before Spring AI
+        // intercepts the structured tool invocation. We buffer the leading characters
+        // until we can determine whether they form a JSON tool-call object, and if so
+        // we suppress them rather than forwarding to the client or saving to history.
+        StringBuilder leadingBuffer = new StringBuilder();
+        boolean leadingResolved = false;
+        int jsonDepth = 0;
+
         try {
             AiChatService.StreamHandle handle = aiChatService.startStream(request.sessionId(), request.message());
 
             for (String token : handle.tokens().toIterable()) {
+                if (!leadingResolved) {
+                    leadingBuffer.append(token);
+                    String buf = leadingBuffer.toString().stripLeading();
+
+                    if (buf.isEmpty()) continue;
+
+                    if (buf.charAt(0) != '{') {
+                        // Definitely not a JSON tool call — flush and proceed normally
+                        leadingResolved = true;
+                        fullResponse.append(buf);
+                        messaging.convertAndSend(destination, new TokenFrame("TOKEN", buf));
+                        continue;
+                    }
+
+                    // Count braces to detect when the top-level JSON object closes
+                    for (char c : token.toCharArray()) {
+                        if (c == '{') jsonDepth++;
+                        else if (c == '}') jsonDepth--;
+                    }
+
+                    if (jsonDepth <= 0 && buf.contains("\"name\"")) {
+                        // Completed JSON tool-call object — discard it silently
+                        leadingBuffer.setLength(0);
+                        jsonDepth = 0;
+                        leadingResolved = true;
+                    }
+                    // Otherwise keep buffering until the object closes or we know it's not JSON
+                    continue;
+                }
+
                 fullResponse.append(token);
                 messaging.convertAndSend(destination, new TokenFrame("TOKEN", token));
             }
 
+            // If something was buffered and never identified as a tool call JSON,
+            // flush it now (e.g. a response that starts with '{' but isn't a tool call)
+            if (!leadingResolved && !leadingBuffer.isEmpty()) {
+                String remaining = leadingBuffer.toString().stripLeading();
+                if (!remaining.isEmpty()) {
+                    fullResponse.append(remaining);
+                    messaging.convertAndSend(destination, new TokenFrame("TOKEN", remaining));
+                }
+            }
+
             aiChatService.saveUserMessage(request.sessionId(), request.message());
-            aiChatService.saveAssistantMessage(request.sessionId(), fullResponse.toString());
+            String text = fullResponse.toString().strip();
+            if (!text.isEmpty()) {
+                aiChatService.saveAssistantMessage(request.sessionId(), text);
+            }
             messaging.convertAndSend(destination, new ResultFrame("RESULT", handle.resultHolder().get()));
 
         } catch (Exception e) {
