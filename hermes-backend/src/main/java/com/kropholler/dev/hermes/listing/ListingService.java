@@ -60,8 +60,15 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public Optional<ListingDto> findByAddress(String street, String houseNumber, String city) {
-        return listingRepository
-                .findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(street, houseNumber, city)
+        String s = street != null ? street.strip() : null;
+        String n = houseNumber != null ? houseNumber.strip() : null;
+        String c = city != null && !city.isBlank() ? city.strip() : null;
+        if (c != null) {
+            List<Listing> withCity = listingRepository
+                    .findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(s, n, c);
+            if (!withCity.isEmpty()) return Optional.of(toDto(withCity.get(0)));
+        }
+        return listingRepository.findByStreetIgnoreCaseAndHouseNumberIgnoreCase(s, n)
                 .stream().findFirst().map(this::toDto);
     }
 

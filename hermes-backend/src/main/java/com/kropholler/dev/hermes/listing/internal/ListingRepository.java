@@ -15,6 +15,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
     Optional<Listing> findByFundaId(String fundaId);
     List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(
             String street, String houseNumber, String city);
+    List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCase(String street, String houseNumber);
     Page<Listing> findAllByDeletedAtIsNull(Pageable pageable);
     void deleteAllByDeletedAtIsNotNull();
 
