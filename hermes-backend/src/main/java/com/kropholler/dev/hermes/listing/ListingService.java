@@ -50,9 +50,10 @@ public class ListingService {
     public List<ListingDto> findForChat(Integer minPrice, Integer maxPrice,
                                          Integer minBedrooms, Integer minRooms,
                                          Integer minLivingAreaM2, String province,
-                                         String city, String keywords) {
+                                         String city, String keywords,
+                                         boolean sortByPriceDesc) {
         return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
-                        province, city, keywords, minPrice, maxPrice)
+                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc)
                 .stream()
                 .map(this::toDto)
                 .toList();

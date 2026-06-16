@@ -49,9 +49,9 @@ class ListingSearchToolTest {
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, 500000, 3, null, null, null, "Amsterdam", null);
+                null, 500000, 3, null, null, null, "Amsterdam", null, false);
 
-        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null))
+        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false))
                 .thenReturn(List.of(listing));
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
@@ -69,9 +69,9 @@ class ListingSearchToolTest {
     @Test
     void searchListings_emptyResults_holderIsSetToEmpty() {
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, null, null, null, null, null, null, "south-facing garden");
+                null, null, null, null, null, null, null, "south-facing garden", false);
 
-        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden"))
+        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -87,9 +87,9 @@ class ListingSearchToolTest {
     @Test
     void searchListings_serviceThrows_exceptionPropagatesAndHolderUnchanged() {
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, false);
 
-        when(listingService.findForChat(null, null, null, null, null, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false))
                 .thenThrow(new RuntimeException("DB error"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());

@@ -37,7 +37,9 @@ public class ListingSearchTool {
             @JsonPropertyDescription("City to filter by, null if not specified")
             String city,
             @JsonPropertyDescription("Free-text keywords to search in property descriptions, null if not specified")
-            String keywords
+            String keywords,
+            @JsonPropertyDescription("Set to true to return the most expensive listings first, false (default) for cheapest first")
+            boolean sortByPriceDesc
     ) {}
 
     private final ListingService listingService;
@@ -64,7 +66,8 @@ public class ListingSearchTool {
         List<ChatListingCard> cards = listingService.findForChat(
                 params.minPrice(), params.maxPrice(),
                 params.minBedrooms(), params.minRooms(), params.minLivingAreaM2(),
-                blankToNull(params.province()), blankToNull(params.city()), blankToNull(params.keywords())
+                blankToNull(params.province()), blankToNull(params.city()), blankToNull(params.keywords()),
+                params.sortByPriceDesc()
         ).stream().map(mapper::toChatListingCard).toList();
         log.info("searchListings returned {} results", cards.size());
         resultHolder.set(cards);
