@@ -339,6 +339,297 @@
           "legendFormat": "GC pause ms/s"
         }
       ]
+    },
+    {
+      "id": 11,
+      "title": "AI Chat",
+      "type": "row",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 28 }
+    },
+    {
+      "id": 12,
+      "title": "Total Chat Requests",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "blue", "value": null }]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(hermes_ai_chat_requests_total)",
+          "legendFormat": "requests"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "Chat Success Rate",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "none"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.9 },
+              { "color": "green", "value": 0.99 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "sum(hermes_ai_chat_requests_total{outcome=\"success\"}) / sum(hermes_ai_chat_requests_total)",
+          "legendFormat": "success rate"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "Avg LLM Duration",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 30 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_duration_seconds_sum{outcome=\"success\"} / hermes_ai_chat_duration_seconds_count{outcome=\"success\"}",
+          "legendFormat": "avg duration"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "Max LLM Duration",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 15 },
+              { "color": "red", "value": 45 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_duration_seconds_max{outcome=\"success\"}",
+          "legendFormat": "max duration"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "Avg Time to First Token",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 15 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_time_to_first_token_seconds_sum / hermes_ai_chat_time_to_first_token_seconds_count",
+          "legendFormat": "avg TTFT"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "Max Time to First Token",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 29 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "area"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_time_to_first_token_seconds_max",
+          "legendFormat": "max TTFT"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "LLM Response Duration",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 33 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": { "unit": "s", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_duration_seconds_max{outcome=\"success\"}",
+          "legendFormat": "max duration"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_duration_seconds_sum{outcome=\"success\"} / hermes_ai_chat_duration_seconds_count{outcome=\"success\"}",
+          "legendFormat": "avg duration"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_time_to_first_token_seconds_max",
+          "legendFormat": "max TTFT"
+        },
+        {
+          "refId": "D",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_chat_time_to_first_token_seconds_sum / hermes_ai_chat_time_to_first_token_seconds_count",
+          "legendFormat": "avg TTFT"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "Tool Calls",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 33 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": { "unit": "short", "custom": { "lineWidth": 1, "fillOpacity": 10 } }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "rate(hermes_ai_tool_calls_total{tool=\"searchListings\"}[5m])",
+          "legendFormat": "searchListings / rate"
+        },
+        {
+          "refId": "B",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "rate(hermes_ai_tool_calls_total{tool=\"getListingSummary\"}[5m])",
+          "legendFormat": "getListingSummary / rate"
+        },
+        {
+          "refId": "C",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_tool_calls_total{tool=\"searchListings\"}",
+          "legendFormat": "searchListings / total"
+        },
+        {
+          "refId": "D",
+          "datasource": { "type": "prometheus", "uid": "${datasource}" },
+          "expr": "hermes_ai_tool_calls_total{tool=\"getListingSummary\"}",
+          "legendFormat": "getListingSummary / total"
+        }
+      ]
     }
   ],
   "schemaVersion": 38
