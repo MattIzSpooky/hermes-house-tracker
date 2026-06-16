@@ -105,7 +105,7 @@ The backend configures the proxy URL via `funda.proxy.url` (defaults to `http://
 |---|---|
 | PostgreSQL | Primary database |
 | ActiveMQ Artemis | JMS message broker for async price history fetching |
-| Ollama | Local LLM server |
+| Ollama | Local LLM server (optional — see [Ollama setup](#ollama-setup)) |
 | Funda Proxy | Python/FastAPI sidecar that scrapes Funda.nl |
 | Grafana LGTM | Logs, traces, and metrics (OpenTelemetry) |
 
@@ -146,10 +146,37 @@ hermes-house-tracker/
 - Maven 3.9+
 - Docker + Docker Compose
 - Node.js 20+
+- [Ollama](https://ollama.com) (recommended on Windows — see [Ollama setup](#ollama-setup))
+
+### Ollama setup
+
+The AI module uses [Ollama](https://ollama.com) to run `llama3.2:3b` locally for listing summaries.
+
+#### Option 1: Local Ollama (recommended on Windows, especially AMD GPU)
+
+GPU acceleration for Ollama does not work in a Docker Compose container on Windows, including with AMD GPUs (tested on AMD Radeon RX 7900 XT). For GPU-accelerated inference on Windows, install Ollama natively instead.
+
+1. [Download and install Ollama](https://ollama.com/download)
+2. Pull the model:
+   ```bash
+   ollama pull llama3.2:3b
+   ```
+3. Ollama starts automatically on `http://localhost:11434`. The backend connects to it via `host.docker.internal:11434` from inside Docker.
+
+No extra flags are needed — local Ollama is the default when you run `docker compose up -d`.
+
+#### Option 2: Dockerized Ollama (Linux / CPU-only)
+
+On Linux or when GPU acceleration is not required, you can run Ollama inside Docker Compose using the `ollama` profile. The container will pull the model on first start.
+
+```bash
+cd hermes-backend
+SPRING_AI_OLLAMA_BASE_URL=http://ollama:11434 docker compose --profile ollama up -d
+```
 
 ### Run locally
 
-**Start infrastructure:**
+**Start infrastructure (with local Ollama — default):**
 ```bash
 cd hermes-backend
 docker compose up -d

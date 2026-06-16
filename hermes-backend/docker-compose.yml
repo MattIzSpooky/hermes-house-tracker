@@ -7,7 +7,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydatabase
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: secret
-      SPRING_AI_OLLAMA_BASE_URL: http://ollama:11434
+      SPRING_AI_OLLAMA_BASE_URL: ${SPRING_AI_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       MANAGEMENT_OTLP_METRICS_EXPORT_URL: http://grafana-lgtm:4318/v1/metrics
       MANAGEMENT_OPENTELEMETRY_TRACING_EXPORT_OTLP_ENDPOINT: http://grafana-lgtm:4318/v1/traces
@@ -19,8 +19,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      ollama:
-        condition: service_started
       funda-proxy:
         condition: service_started
       grafana-lgtm:
@@ -61,12 +59,13 @@ services:
       - ./grafana/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/hermes.yaml:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards/hermes:ro
   ollama:
+    profiles: ["ollama"]
     image: 'ollama/ollama:latest'
     ports:
       - '11434'
     volumes:
       - ollama_data:/root/.ollama
-    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull qwen3.5:0.8b && wait"]
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.2:3b && wait"]
   postgres:
     image: 'postgres:latest'
     environment:
