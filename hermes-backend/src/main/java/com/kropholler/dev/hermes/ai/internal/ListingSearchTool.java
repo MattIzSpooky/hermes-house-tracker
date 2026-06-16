@@ -21,6 +21,13 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class ListingSearchTool {
 
+    /**
+     * Sort direction for price ordering. Must always be set explicitly — never omit this field.
+     * Use DESC for most expensive / highest price. Use ASC for cheapest / lowest price or when
+     * the user has not expressed a price sort preference.
+     */
+    public enum SortOrder { ASC, DESC }
+
     public record SearchParams(
             @JsonPropertyDescription("Minimum asking price in euros, null if no minimum")
             Integer minPrice,
@@ -38,9 +45,13 @@ public class ListingSearchTool {
             String city,
             @JsonPropertyDescription("Free-text keywords to search in property descriptions, null if not specified")
             String keywords,
-            @JsonPropertyDescription("MUST be true when the user asks for 'most expensive', 'highest price', 'priciest', 'luxury', or 'most valuable' listings. MUST be false (default) for 'cheapest', 'budget', 'lowest price', or when no sort order is mentioned.")
-            boolean sortByPriceDesc
-    ) {}
+            @JsonPropertyDescription("Price sort direction. Set to DESC when user asks for 'most expensive', 'highest price', 'priciest', 'luxury', or 'most valuable'. Set to ASC (default) for 'cheapest', 'lowest price', or when no sort preference is mentioned. NEVER omit this field.")
+            SortOrder priceSort
+    ) {
+        public SearchParams {
+            if (priceSort == null) priceSort = SortOrder.ASC;
+        }
+    }
 
     private final ListingService listingService;
     private final ChatListingCardMapper mapper;
@@ -58,16 +69,17 @@ public class ListingSearchTool {
     }
 
     @Tool(description = "Search for property listings matching the user's criteria. "
-            + "Call this whenever the user expresses a housing preference or asks to see listings.")
+            + "ALWAYS call this tool before describing any listings — never invent property details. "
+            + "Set priceSort=DESC for 'most expensive'/'highest price'/'luxury'; set priceSort=ASC for 'cheapest'/'lowest price' or no preference.")
     public List<ChatListingCard> searchListings(SearchParams params) {
-        log.info("searchListings called: city={}, province={}, minBedrooms={}, minPrice={}, maxPrice={}",
-                params.city(), params.province(), params.minBedrooms(), params.minPrice(), params.maxPrice());
+        log.info("searchListings called: city={}, province={}, minBedrooms={}, minPrice={}, maxPrice={}, priceSort={}",
+                params.city(), params.province(), params.minBedrooms(), params.minPrice(), params.maxPrice(), params.priceSort());
         callCounter.increment();
         List<ChatListingCard> cards = listingService.findForChat(
                 params.minPrice(), params.maxPrice(),
                 params.minBedrooms(), params.minRooms(), params.minLivingAreaM2(),
                 blankToNull(params.province()), blankToNull(params.city()), blankToNull(params.keywords()),
-                params.sortByPriceDesc()
+                params.priceSort() == SortOrder.DESC
         ).stream().map(mapper::toChatListingCard).toList();
         log.info("searchListings returned {} results", cards.size());
         resultHolder.set(cards);

@@ -49,7 +49,7 @@ class ListingSearchToolTest {
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, 500000, 3, null, null, null, "Amsterdam", null, false);
+                null, 500000, 3, null, null, null, "Amsterdam", null, ListingSearchTool.SortOrder.ASC);
 
         when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false))
                 .thenReturn(List.of(listing));
@@ -69,7 +69,7 @@ class ListingSearchToolTest {
     @Test
     void searchListings_emptyResults_holderIsSetToEmpty() {
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, null, null, null, null, null, null, "south-facing garden", false);
+                null, null, null, null, null, null, null, "south-facing garden", ListingSearchTool.SortOrder.ASC);
 
         when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false))
                 .thenReturn(List.of());
@@ -87,7 +87,7 @@ class ListingSearchToolTest {
     @Test
     void searchListings_serviceThrows_exceptionPropagatesAndHolderUnchanged() {
         ListingSearchTool.SearchParams params = new ListingSearchTool.SearchParams(
-                null, null, null, null, null, null, null, null, false);
+                null, null, null, null, null, null, null, null, ListingSearchTool.SortOrder.ASC);
 
         when(listingService.findForChat(null, null, null, null, null, null, null, null, false))
                 .thenThrow(new RuntimeException("DB error"));

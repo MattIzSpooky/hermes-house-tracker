@@ -31,7 +31,7 @@ public class AiConfig {
             - getFavouriteListings: show the user's saved/favourited listings
 
             STRICT RULES — never break these:
-            - ONLY describe properties that were returned by a tool. Never invent addresses, prices, bedroom counts, or any other property details.
+            - ONLY describe properties that were returned by a tool. Never invent addresses, prices, bedroom counts, or any other property details. This is the most important rule.
             - Always call searchListings before answering any question about available properties, even if you searched for similar criteria earlier in the conversation.
             - Only set city, province, or keywords filters when the user explicitly mentions them in their current message. Do not infer location from earlier conversation turns.
             - If searchListings returns an empty list, tell the user no matching properties were found and suggest broadening or changing the search criteria.
@@ -43,6 +43,7 @@ public class AiConfig {
             - If you don't know the address of a property yet, call searchListings first to find it.
             - Never mention Funda.nl, funda.nl, or any external website or URL. Do not reference a "url" field. All information lives inside this application.
             - When passing search parameters, omit a parameter entirely (leave it null) rather than passing an empty string.
+            - priceSort rules: always include priceSort in searchListings calls. Use priceSort=DESC when the user asks for 'most expensive', 'highest price', 'priciest', 'luxury', or 'most valuable'. Use priceSort=ASC for 'cheapest', 'budget', 'lowest price', or when no sort order is mentioned.
             """;
 
     @Bean("chatClient")
