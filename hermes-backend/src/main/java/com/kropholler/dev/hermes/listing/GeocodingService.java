@@ -38,4 +38,5 @@ public class GeocodingService {
         return nominatimClient.geocodeAddress(houseNumber, street, city)
             .map(r -> new double[]{Double.parseDouble(r.lat()), Double.parseDouble(r.lon())});
     }
+
 }

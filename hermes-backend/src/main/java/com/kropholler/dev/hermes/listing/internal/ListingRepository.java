@@ -63,38 +63,6 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
 
     @Query(value = """
             SELECT l.* FROM listings l
-            WHERE l.deleted_at IS NULL
-              AND l.location IS NOT NULL
-              AND ST_DWithin(
-                  l.location::geography,
-                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-                  :radiusMeters
-              )
-            ORDER BY ST_Distance(
-                l.location::geography,
-                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
-            ) ASC
-            """,
-            countQuery = """
-            SELECT count(l.id) FROM listings l
-            WHERE l.deleted_at IS NULL
-              AND l.location IS NOT NULL
-              AND ST_DWithin(
-                  l.location::geography,
-                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
-                  :radiusMeters
-              )
-            """,
-            nativeQuery = true)
-    Page<Listing> findNearby(
-            @Param("lon") double lon,
-            @Param("lat") double lat,
-            @Param("radiusMeters") int radiusMeters,
-            Pageable pageable
-    );
-
-    @Query(value = """
-            SELECT l.* FROM listings l
             LEFT JOIN LATERAL (
                 SELECT phe.price
                 FROM price_history_entries phe

@@ -29,7 +29,7 @@ public class NominatimClient {
         log.debug("Geocoding address: {}", query);
         try {
             List<NominatimResponse> results = restClient.get()
-                .uri("/search?q={q}&format=jsonv2&limit=1", query)
+                .uri("/search?q={q}&format=jsonv2&countrycodes=nl&limit=1", query)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
             return results == null || results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));

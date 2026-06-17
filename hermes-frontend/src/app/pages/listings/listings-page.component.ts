@@ -36,9 +36,8 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
   protected minBedrooms: number | null = null;
   protected minRooms: number | null = null;
   protected minLivingAreaM2: number | null = null;
+  protected city = '';
   protected energyLabel = '';
-  protected nearAddress = '';
-  protected nearCity = '';
   protected radiusKm: number | null = null;
 
   private readonly filterChange$ = new Subject<void>();
@@ -69,9 +68,8 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
     this.minBedrooms = null;
     this.minRooms = null;
     this.minLivingAreaM2 = null;
+    this.city = '';
     this.energyLabel = '';
-    this.nearAddress = '';
-    this.nearCity = '';
     this.radiusKm = null;
     this.currentPage = 0;
     this.svc.loadListings(0, this.pageSize);
@@ -108,9 +106,8 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
       minBedrooms: this.minBedrooms,
       minRooms: this.minRooms,
       minLivingAreaM2: this.minLivingAreaM2,
+      city: this.city || undefined,
       energyLabel: this.energyLabel || undefined,
-      nearAddress: this.nearAddress || undefined,
-      nearCity: this.nearCity || undefined,
       radiusKm: this.radiusKm,
     };
   }

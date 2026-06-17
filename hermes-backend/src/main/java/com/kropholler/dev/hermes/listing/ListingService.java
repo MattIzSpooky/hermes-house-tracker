@@ -7,6 +7,7 @@ import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,27 +26,37 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
-        if (params.hasRadiusSearch()) {
-            double[] latLon = resolveLatLon(params.nearAddress(), params.nearCity());
-            if (latLon != null) {
-                return listingRepository.findNearby(latLon[1], latLon[0], params.radiusKm() * 1000, pageable)
-                    .map(this::toDto);
-            }
-        }
         if (params.isEmpty()) {
             return listingRepository.findAll(pageable).map(this::toDto);
         }
-        return listingRepository.findAll(ListingSpecifications.withParams(params), pageable)
-            .map(this::toDto);
+        Specification<Listing> spec = params.hasRadiusSearch()
+            ? ListingSpecifications.withParamsForRadius(params)
+            : ListingSpecifications.withParams(params);
+        if (params.hasRadiusSearch()) {
+            double[] latLon = resolveRadiusCenter(params);
+            if (latLon != null) {
+                spec = spec.and(ListingSpecifications.withinRadius(latLon[1], latLon[0], params.radiusKm() * 1000));
+            }
+        }
+        return listingRepository.findAll(spec, pageable).map(this::toDto);
+    }
+
+    private double[] resolveRadiusCenter(ListingSearchParams params) {
+        if (params.street() != null && !params.street().isBlank()) {
+            return geocodingService.geocodeAddress(
+                params.houseNumber() != null ? params.houseNumber() : "",
+                params.street(),
+                params.city() != null ? params.city() : ""
+            ).orElse(null);
+        }
+        return geocodingService.findOrFetchCity(params.city())
+            .map(c -> new double[]{c.getLatitude(), c.getLongitude()})
+            .orElse(null);
     }
 
     private double[] resolveLatLon(String nearAddress, String nearCity) {
         if (nearAddress != null && !nearAddress.isBlank()) {
-            String[] parts = nearAddress.split(",", 3);
-            String houseNumber = parts.length > 0 ? parts[0].strip() : "";
-            String street      = parts.length > 1 ? parts[1].strip() : "";
-            String city        = parts.length > 2 ? parts[2].strip() : "";
-            return geocodingService.geocodeAddress(houseNumber, street, city).orElse(null);
+            return geocodingService.geocodeAddress(nearAddress, "", "").orElse(null);
         }
         if (nearCity != null && !nearCity.isBlank()) {
             return geocodingService.findOrFetchCity(nearCity)

@@ -7,13 +7,12 @@ export interface ListingSearchFilter {
   houseNumber?: string;
   houseNumberAddition?: string;
   zipCode?: string;
+  city?: string;
   province?: string;
   minBedrooms?: number | null;
   minRooms?: number | null;
   minLivingAreaM2?: number | null;
   energyLabel?: string | null;
-  nearAddress?: string | null;
-  nearCity?: string | null;
   radiusKm?: number | null;
 }
 

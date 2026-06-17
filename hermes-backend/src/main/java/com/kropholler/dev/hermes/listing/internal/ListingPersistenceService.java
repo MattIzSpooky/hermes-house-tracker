@@ -11,8 +11,13 @@ import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +29,8 @@ public class ListingPersistenceService {
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onScrapingSessionCompleted(ScrapingSessionCompleted event) {
+        List<Runnable> afterCommit = new ArrayList<>();
+
         for (RawListing raw : event.listings()) {
             boolean isNew = listingRepository.findByFundaId(raw.fundaId()).isEmpty();
             Listing listing = listingRepository.findByFundaId(raw.fundaId())
@@ -32,22 +39,31 @@ public class ListingPersistenceService {
             listing.setLastSeenAt(Instant.now());
             listing.setLastUpdatedAt(Instant.now());
             listing.setStatus(parseStatus(raw.status()));
-            Listing saved = listingRepository.save(listing);
+            Listing saved = listingRepository.saveAndFlush(listing);
 
-            // Always enqueue detail fetch — runs on both initial scrape and rescrape
-            jmsTemplate.convertAndSend(JmsQueues.LISTING_DETAILS_FETCH,
-                new FetchListingDetailsCommand(saved.getId(), saved.getFundaId()));
+            UUID savedId = saved.getId();
+            String savedFundaId = saved.getFundaId();
+
+            afterCommit.add(() -> jmsTemplate.convertAndSend(JmsQueues.LISTING_DETAILS_FETCH,
+                new FetchListingDetailsCommand(savedId, savedFundaId)));
 
             if (isNew || event.type() == ScrapingSessionType.RESCRAPE) {
-                jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
-                    new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
+                afterCommit.add(() -> jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
+                    new FetchPriceHistoryCommand(savedId, savedFundaId)));
             }
 
             if (isNew) {
-                jmsTemplate.convertAndSend(JmsQueues.GEOCODING_FETCH,
-                    new FetchGeocodingCommand(saved.getId()));
+                afterCommit.add(() -> jmsTemplate.convertAndSend(JmsQueues.GEOCODING_FETCH,
+                    new FetchGeocodingCommand(savedId)));
             }
         }
+
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                afterCommit.forEach(Runnable::run);
+            }
+        });
     }
 
     @ApplicationModuleListener

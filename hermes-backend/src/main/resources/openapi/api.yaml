@@ -82,6 +82,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: city
+          in: query
+          schema:
+            type: string
         - name: province
           in: query
           schema:
@@ -110,24 +114,10 @@ paths:
           schema:
             type: string
             nullable: true
-        - name: nearAddress
-          in: query
-          required: false
-          description: "Address to search near, format: 'houseNumber, street, city'"
-          schema:
-            type: string
-            nullable: true
-        - name: nearCity
-          in: query
-          required: false
-          description: City name to search near
-          schema:
-            type: string
-            nullable: true
         - name: radiusKm
           in: query
           required: false
-          description: Search radius in kilometres (required with nearAddress or nearCity)
+          description: Search radius in kilometres — uses street+houseNumber as centre if set, otherwise city
           schema:
             type: integer
             nullable: true

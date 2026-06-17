@@ -33,11 +33,11 @@ class ListingController implements ListingsApi {
     @Override
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
             String street, String houseNumber, String houseNumberAddition,
-            String zipCode, String province,
+            String zipCode, String city, String province,
             Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String energyLabel,
-            String nearAddress, String nearCity, Integer radiusKm) {
-        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province,
-            minBedrooms, minRooms, minLivingAreaM2, energyLabel, nearAddress, nearCity, radiusKm);
+            Integer radiusKm) {
+        ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, city, province,
+            minBedrooms, minRooms, minLivingAreaM2, energyLabel, radiusKm);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
             .content(result.getContent().stream().map(apiMapper::toSummaryResponse).toList())

@@ -5,24 +5,23 @@ public record ListingSearchParams(
     String houseNumber,
     String houseNumberAddition,
     String zipCode,
+    String city,
     String province,
     Integer minBedrooms,
     Integer minRooms,
     Integer minLivingAreaM2,
     String energyLabel,
-    String nearAddress,
-    String nearCity,
     Integer radiusKm
 ) {
     public boolean isEmpty() {
         return isBlank(street) && isBlank(houseNumber) && isBlank(houseNumberAddition)
-            && isBlank(zipCode) && isBlank(province)
+            && isBlank(zipCode) && isBlank(city) && isBlank(province)
             && minBedrooms == null && minRooms == null && minLivingAreaM2 == null
             && isBlank(energyLabel) && !hasRadiusSearch();
     }
 
     public boolean hasRadiusSearch() {
-        return radiusKm != null && (!isBlank(nearAddress) || !isBlank(nearCity));
+        return radiusKm != null && (!isBlank(street) || !isBlank(city));
     }
 
     private static boolean isBlank(String s) {
