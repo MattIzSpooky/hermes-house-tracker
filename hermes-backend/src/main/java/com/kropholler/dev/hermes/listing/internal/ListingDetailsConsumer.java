@@ -23,17 +23,33 @@ class ListingDetailsConsumer {
     @Transactional
     public void onMessage(FetchListingDetailsCommand command) {
         RATE_LIMITER.acquire();
-        log.debug("Fetching listing details for {}", command.listingId());
-        proxyFacade.getListing(command.fundaId()).ifPresent(raw ->
-            listingRepository.findById(command.listingId()).ifPresent(listing -> {
-                listing.setDescription(raw.description());
-                listing.setLivingAreaM2(raw.livingAreaM2());
-                listing.setRooms(raw.rooms());
-                listing.setBedrooms(raw.bedrooms());
-                listing.setEnergyLabel(raw.energyLabel());
-                listing.setPlotAreaM2(raw.plotAreaM2());
-                listingRepository.save(listing);
-            })
-        );
+        log.info("Fetching listing details for {}", command.listingId());
+
+        var externalListingOptional = proxyFacade.getListing(command.fundaId());
+
+        if (externalListingOptional.isEmpty()) {
+            log.error("Proxy could not find listing {}", command.listingId());
+            return;
+        }
+
+        var listingInDatabaseOptional = listingRepository.findById(command.listingId());
+
+        if (listingInDatabaseOptional.isEmpty()) {
+            log.error("Database could not find listing {}", command.listingId());
+            return;
+        }
+
+        final var externalListing = externalListingOptional.get();
+        final var listing = listingInDatabaseOptional.get();
+
+        listing.setDescription(externalListing.description());
+        listing.setLivingAreaM2(externalListing.livingAreaM2());
+        listing.setRooms(externalListing.rooms());
+        listing.setBedrooms(externalListing.bedrooms());
+        listing.setEnergyLabel(externalListing.energyLabel());
+        listing.setPlotAreaM2(externalListing.plotAreaM2());
+        listingRepository.save(listing);
+
+        log.info("Successfully fetched listing details for {}", command.listingId());
     }
 }

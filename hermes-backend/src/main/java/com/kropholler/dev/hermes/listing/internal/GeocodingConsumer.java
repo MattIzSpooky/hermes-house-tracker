@@ -24,18 +24,36 @@ class GeocodingConsumer {
     @Transactional
     public void onMessage(FetchGeocodingCommand command) {
         RATE_LIMITER.acquire();
-        listingRepository.findById(command.listingId()).ifPresent(listing -> {
-            if (listing.getStreet() == null || listing.getCity() == null) return;
-            nominatimClient.geocodeAddress(
-                listing.getHouseNumber(), listing.getStreet(), listing.getCity()
-            ).ifPresent(response -> {
-                double lon = Double.parseDouble(response.lon());
-                double lat = Double.parseDouble(response.lat());
-                listingRepository.updateLocation(command.listingId(), lon, lat);
-                updateBoundingBox(command.listingId(), response.boundingbox());
-                log.debug("Geocoded listing {} to {},{}", command.listingId(), lat, lon);
-            });
-        });
+        log.info("Fetching listing geolocation for {}", command.listingId());
+
+        final var listingOptional = listingRepository.findById(command.listingId());
+
+        if (listingOptional.isEmpty()) {
+            log.error("Could not find listing {}", command.listingId());
+            return;
+        }
+
+        final var listing = listingOptional.get();
+
+        if (listing.getStreet() == null || listing.getCity() == null) {
+            log.error("Listing {} has no street or city", command.listingId());
+            return;
+        }
+
+        final var geocodingResultOptional = nominatimClient.geocodeAddress( listing.getHouseNumber(), listing.getStreet(), listing.getCity());
+
+        if (geocodingResultOptional.isEmpty()) {
+            log.error("Could not find geo location for {}", command.listingId());
+            return;
+        }
+
+        final var response = geocodingResultOptional.get();
+
+        double lon = Double.parseDouble(response.lon());
+        double lat = Double.parseDouble(response.lat());
+        listingRepository.updateLocation(command.listingId(), lon, lat);
+        updateBoundingBox(command.listingId(), response.boundingbox());
+        log.info("Successfully geocoded listing {} to {},{}", command.listingId(), lat, lon);
     }
 
     private void updateBoundingBox(java.util.UUID listingId, List<String> bbox) {
