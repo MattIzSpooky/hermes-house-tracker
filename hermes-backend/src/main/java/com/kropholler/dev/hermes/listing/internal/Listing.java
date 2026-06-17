@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -57,4 +59,10 @@ public class Listing {
     private Instant lastUpdatedAt;
 
     private Instant deletedAt;
+
+    @Column(columnDefinition = "geometry(Point,4326)")
+    private Point location;
+
+    @Column(columnDefinition = "geometry(Polygon,4326)")
+    private Polygon boundingBox;
 }

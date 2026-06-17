@@ -9,7 +9,7 @@ import org.mapstruct.Mapper;
 @Mapper(config = MapStructConfig.class)
 interface ListingMapper {
 
-    @BeanMapping(ignoreUnmappedSourceProperties = {"lastUpdatedAt", "deletedAt"})
+    @BeanMapping(ignoreUnmappedSourceProperties = {"lastUpdatedAt", "deletedAt", "location", "boundingBox"})
     ListingDto toDto(Listing listing, Integer currentPrice);
 
     @BeanMapping(ignoreUnmappedSourceProperties = {"listingId"})
