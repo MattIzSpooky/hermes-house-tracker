@@ -27,6 +27,7 @@ class ListingSpecifications {
 
     static Specification<Listing> withParamsForRadius(ListingSearchParams params) {
         Specification<Listing> spec = (root, query, cb) -> cb.conjunction();
+        spec = andIfExact(spec, "city", params.city());
         spec = andIfPresent(spec, "zipCode", params.zipCode());
         spec = andIfPresent(spec, "province", params.province());
         spec = andIfPresent(spec, "energyLabel", params.energyLabel());
@@ -50,6 +51,11 @@ class ListingSpecifications {
         String pattern = "%" + value.toLowerCase() + "%";
         Specification<Listing> predicate = (root, query, cb) -> cb.like(cb.lower(root.get(field)), pattern);
         return base.and(predicate);
+    }
+
+    private static Specification<Listing> andIfExact(Specification<Listing> base, String field, String value) {
+        if (value == null || value.isBlank()) return base;
+        return base.and((root, query, cb) -> cb.equal(cb.lower(root.get(field)), value.toLowerCase()));
     }
 
     private static Specification<Listing> andIfAtLeast(Specification<Listing> base, String field, Integer value) {
