@@ -42,6 +42,11 @@ public class ListingPersistenceService {
                 jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                     new FetchPriceHistoryCommand(saved.getId(), saved.getFundaId()));
             }
+
+            if (isNew) {
+                jmsTemplate.convertAndSend(JmsQueues.GEOCODING_FETCH,
+                    new FetchGeocodingCommand(saved.getId()));
+            }
         }
     }
 
