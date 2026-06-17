@@ -52,6 +52,83 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
 
     @Query(value = """
             SELECT l.* FROM listings l
+            WHERE l.deleted_at IS NULL
+              AND l.location IS NOT NULL
+              AND ST_DWithin(
+                  l.location::geography,
+                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
+                  :radiusMeters
+              )
+            ORDER BY ST_Distance(
+                l.location::geography,
+                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
+            ) ASC
+            """,
+            countQuery = """
+            SELECT count(l.id) FROM listings l
+            WHERE l.deleted_at IS NULL
+              AND l.location IS NOT NULL
+              AND ST_DWithin(
+                  l.location::geography,
+                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
+                  :radiusMeters
+              )
+            """,
+            nativeQuery = true)
+    Page<Listing> findNearby(
+            @Param("lon") double lon,
+            @Param("lat") double lat,
+            @Param("radiusMeters") int radiusMeters,
+            Pageable pageable
+    );
+
+    @Query(value = """
+            SELECT l.* FROM listings l
+            LEFT JOIN LATERAL (
+                SELECT phe.price
+                FROM price_history_entries phe
+                WHERE phe.listing_id = l.id AND phe.status = 'asking_price'
+                ORDER BY phe.timestamp DESC
+                LIMIT 1
+            ) latest_price ON true
+            WHERE l.deleted_at IS NULL
+              AND l.location IS NOT NULL
+              AND ST_DWithin(
+                  l.location::geography,
+                  ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography,
+                  :radiusMeters
+              )
+              AND (:minBedrooms IS NULL OR l.bedrooms >= :minBedrooms)
+              AND (:minRooms IS NULL OR l.rooms >= :minRooms)
+              AND (:minLivingAreaM2 IS NULL OR l.living_area_m2 >= :minLivingAreaM2)
+              AND (:province IS NULL OR lower(l.province) LIKE lower(concat('%', :province, '%')))
+              AND (:keywords IS NULL OR
+                   to_tsvector('dutch', coalesce(l.description, '')) @@
+                   plainto_tsquery('dutch', :keywords))
+              AND (:minPrice IS NULL OR latest_price.price >= :minPrice)
+              AND (:maxPrice IS NULL OR latest_price.price <= :maxPrice)
+            ORDER BY ST_Distance(
+                l.location::geography,
+                ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
+            ) ASC
+            LIMIT 5
+            """,
+            nativeQuery = true)
+    List<Listing> searchForChatNearLocation(
+            @Param("minBedrooms") Integer minBedrooms,
+            @Param("minRooms") Integer minRooms,
+            @Param("minLivingAreaM2") Integer minLivingAreaM2,
+            @Param("province") String province,
+            @Param("keywords") String keywords,
+            @Param("minPrice") Integer minPrice,
+            @Param("maxPrice") Integer maxPrice,
+            @Param("lon") double lon,
+            @Param("lat") double lat,
+            @Param("radiusMeters") int radiusMeters
+    );
+
+    @Query(value = """
+            SELECT l.* FROM listings l
             LEFT JOIN LATERAL (
                 SELECT phe.price
                 FROM price_history_entries phe

@@ -25,6 +25,7 @@ class ListingServiceFindForChatTest {
     @Mock private ListingRepository listingRepository;
     @Mock private PriceHistoryEntryRepository priceHistoryRepository;
     @Mock private ListingMapper mapper;
+    @Mock private GeocodingService geocodingService;
 
     @InjectMocks
     private ListingService service;
@@ -68,7 +69,7 @@ class ListingServiceFindForChatTest {
         Listing expensive = listingWithPrice(300_000);
         stubSearchForChat(List.of(exact, expensive));
 
-        List<ListingDto> result = service.findForChat(200_000, null, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(200_000, null, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(dto -> dto.currentPrice() >= 200_000);
@@ -81,7 +82,7 @@ class ListingServiceFindForChatTest {
         Listing exact = listingWithPrice(200_000);
         stubSearchForChat(List.of(cheap, exact));
 
-        List<ListingDto> result = service.findForChat(null, 200_000, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(null, 200_000, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(dto -> dto.currentPrice() <= 200_000);
@@ -93,7 +94,7 @@ class ListingServiceFindForChatTest {
         Listing withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
-        List<ListingDto> result = service.findForChat(100_000, null, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(100_000, null, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).currentPrice()).isEqualTo(200_000);
@@ -105,7 +106,7 @@ class ListingServiceFindForChatTest {
         Listing withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
-        List<ListingDto> result = service.findForChat(null, 300_000, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(null, 300_000, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).currentPrice()).isEqualTo(200_000);
@@ -117,7 +118,7 @@ class ListingServiceFindForChatTest {
         Listing b = listingWithPrice(200_000);
         stubSearchForChat(List.of(a, b));
 
-        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(2);
     }
@@ -129,7 +130,7 @@ class ListingServiceFindForChatTest {
         Listing withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(noPrice, withPrice));
 
-        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false);
+        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(2);
     }

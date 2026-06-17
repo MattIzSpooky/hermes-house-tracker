@@ -21,14 +21,38 @@ public class ListingService {
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
     private final ListingMapper mapper;
+    private final GeocodingService geocodingService;
 
     @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
+        if (params.hasRadiusSearch()) {
+            double[] latLon = resolveLatLon(params.nearAddress(), params.nearCity());
+            if (latLon != null) {
+                return listingRepository.findNearby(latLon[1], latLon[0], params.radiusKm() * 1000, pageable)
+                    .map(this::toDto);
+            }
+        }
         if (params.isEmpty()) {
             return listingRepository.findAll(pageable).map(this::toDto);
         }
         return listingRepository.findAll(ListingSpecifications.withParams(params), pageable)
             .map(this::toDto);
+    }
+
+    private double[] resolveLatLon(String nearAddress, String nearCity) {
+        if (nearAddress != null && !nearAddress.isBlank()) {
+            String[] parts = nearAddress.split(",", 3);
+            String houseNumber = parts.length > 0 ? parts[0].strip() : "";
+            String street      = parts.length > 1 ? parts[1].strip() : "";
+            String city        = parts.length > 2 ? parts[2].strip() : "";
+            return geocodingService.geocodeAddress(houseNumber, street, city).orElse(null);
+        }
+        if (nearCity != null && !nearCity.isBlank()) {
+            return geocodingService.findOrFetchCity(nearCity)
+                .map(c -> new double[]{c.getLocation().getY(), c.getLocation().getX()})
+                .orElse(null);
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)
@@ -51,7 +75,18 @@ public class ListingService {
                                          Integer minBedrooms, Integer minRooms,
                                          Integer minLivingAreaM2, String province,
                                          String city, String keywords,
-                                         boolean sortByPriceDesc) {
+                                         boolean sortByPriceDesc,
+                                         String nearAddress, String nearCity, Integer radiusKm) {
+        if (radiusKm != null && (nearAddress != null || nearCity != null)) {
+            double[] latLon = resolveLatLon(nearAddress, nearCity);
+            if (latLon != null) {
+                return listingRepository.searchForChatNearLocation(
+                        minBedrooms, minRooms, minLivingAreaM2,
+                        province, keywords, minPrice, maxPrice,
+                        latLon[1], latLon[0], radiusKm * 1000)
+                    .stream().map(this::toDto).toList();
+            }
+        }
         return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
                         province, city, keywords, minPrice, maxPrice, sortByPriceDesc)
                 .stream()

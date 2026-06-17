@@ -110,6 +110,27 @@ paths:
           schema:
             type: string
             nullable: true
+        - name: nearAddress
+          in: query
+          required: false
+          description: "Address to search near, format: 'houseNumber, street, city'"
+          schema:
+            type: string
+            nullable: true
+        - name: nearCity
+          in: query
+          required: false
+          description: City name to search near
+          schema:
+            type: string
+            nullable: true
+        - name: radiusKm
+          in: query
+          required: false
+          description: Search radius in kilometres (required with nearAddress or nearCity)
+          schema:
+            type: integer
+            nullable: true
       responses:
         '200':
           description: Paginated listing results

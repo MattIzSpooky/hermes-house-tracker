@@ -48,14 +48,14 @@ class ListingSearchToolTest {
         ChatListingCard card = new ChatListingCard(id, "Teststraat", "1", null,
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
-        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false))
+        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false, null, null, null))
                 .thenReturn(List.of(listing));
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        List<ChatListingCard> result = tool.searchListings("Amsterdam", null, null, 500000, 3, null, null, null, "asc");
+        List<ChatListingCard> result = tool.searchListings("Amsterdam", null, null, 500000, 3, null, null, null, "asc", null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).id()).isEqualTo(id);
@@ -70,40 +70,40 @@ class ListingSearchToolTest {
         ChatListingCard card = new ChatListingCard(id, "Teststraat", "1", null,
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, true))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, true, null, null, null))
                 .thenReturn(List.of(listing));
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, null, "desc");
+        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, null, "desc", null, null, null);
 
         assertThat(result).hasSize(1);
     }
 
     @Test
     void searchListings_nullPriceSort_defaultsToAscending() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, false))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, null, null);
+        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertThat(result).isEmpty();
     }
 
     @Test
     void searchListings_emptyResults_holderIsSetToEmpty() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false))
+        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false, null, null, null))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, "south-facing garden", null);
+        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, "south-facing garden", null, null, null, null);
 
         assertThat(result).isEmpty();
         assertThat(holder.get()).isEmpty();
@@ -112,13 +112,13 @@ class ListingSearchToolTest {
 
     @Test
     void searchListings_serviceThrows_exceptionPropagatesAndHolderUnchanged() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, false))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
                 .thenThrow(new RuntimeException("DB error"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        assertThatThrownBy(() -> tool.searchListings(null, null, null, null, null, null, null, null, null))
+        assertThatThrownBy(() -> tool.searchListings(null, null, null, null, null, null, null, null, null, null, null, null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB error");
         assertThat(holder.get()).isEmpty();

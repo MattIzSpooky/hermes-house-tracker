@@ -24,13 +24,15 @@ class ListingServiceSearchTest {
 
     @Mock private ListingRepository listingRepository;
     @Mock private PriceHistoryEntryRepository priceHistoryRepository;
+    @Mock private ListingMapper mapper;
+    @Mock private GeocodingService geocodingService;
 
     @InjectMocks
     private ListingService service;
 
     @Test
     void findAll_withNonEmptyParams_usesSpecificationPath() {
-        var params = new ListingSearchParams("Teststraat", null, null, null, null, null, null, null, null);
+        var params = new ListingSearchParams("Teststraat", null, null, null, null, null, null, null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 20);
         when(listingRepository.findAll(any(Specification.class), eq(pageable)))
             .thenReturn(new PageImpl<>(List.of()));
@@ -43,7 +45,7 @@ class ListingServiceSearchTest {
 
     @Test
     void findAll_withEmptyParams_usesSimplePath() {
-        var params = new ListingSearchParams(null, null, null, null, null, null, null, null, null);
+        var params = new ListingSearchParams(null, null, null, null, null, null, null, null, null, null, null, null);
         Pageable pageable = PageRequest.of(0, 20);
         when(listingRepository.findAll(eq(pageable)))
             .thenReturn(new PageImpl<>(List.of()));
@@ -56,25 +58,25 @@ class ListingServiceSearchTest {
 
     @Test
     void listingSearchParams_isEmpty_trueWhenAllBlank() {
-        var params = new ListingSearchParams("", " ", null, "", null, null, null, null, null);
+        var params = new ListingSearchParams("", " ", null, "", null, null, null, null, null, null, null, null);
         assertThat(params.isEmpty()).isTrue();
     }
 
     @Test
     void listingSearchParams_isEmpty_falseWhenAnyNonBlank() {
-        var params = new ListingSearchParams(null, null, null, "1234AB", null, null, null, null, null);
+        var params = new ListingSearchParams(null, null, null, "1234AB", null, null, null, null, null, null, null, null);
         assertThat(params.isEmpty()).isFalse();
     }
 
     @Test
     void listingSearchParams_isEmpty_falseWhenMinBedroomsSet() {
-        var params = new ListingSearchParams(null, null, null, null, null, 2, null, null, null);
+        var params = new ListingSearchParams(null, null, null, null, null, 2, null, null, null, null, null, null);
         assertThat(params.isEmpty()).isFalse();
     }
 
     @Test
     void listingSearchParams_isEmpty_falseWhenMinLivingAreaSet() {
-        var params = new ListingSearchParams(null, null, null, null, null, null, null, 80, null);
+        var params = new ListingSearchParams(null, null, null, null, null, null, null, 80, null, null, null, null);
         assertThat(params.isEmpty()).isFalse();
     }
 }

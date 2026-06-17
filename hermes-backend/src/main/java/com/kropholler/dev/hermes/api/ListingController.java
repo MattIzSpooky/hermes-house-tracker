@@ -34,9 +34,10 @@ class ListingController implements ListingsApi {
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
             String street, String houseNumber, String houseNumberAddition,
             String zipCode, String province,
-            Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String energyLabel) {
+            Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String energyLabel,
+            String nearAddress, String nearCity, Integer radiusKm) {
         ListingSearchParams params = new ListingSearchParams(street, houseNumber, houseNumberAddition, zipCode, province,
-            minBedrooms, minRooms, minLivingAreaM2, energyLabel);
+            minBedrooms, minRooms, minLivingAreaM2, energyLabel, nearAddress, nearCity, radiusKm);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
             .content(result.getContent().stream().map(apiMapper::toSummaryResponse).toList())
