@@ -49,7 +49,7 @@ public class ListingService {
         }
         if (nearCity != null && !nearCity.isBlank()) {
             return geocodingService.findOrFetchCity(nearCity)
-                .map(c -> new double[]{c.getLocation().getY(), c.getLocation().getX()})
+                .map(c -> new double[]{c.getLatitude(), c.getLongitude()})
                 .orElse(null);
         }
         return null;

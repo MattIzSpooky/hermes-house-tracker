@@ -5,10 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.Polygon;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -62,11 +58,4 @@ public class Listing {
 
     private Instant deletedAt;
 
-    @JdbcTypeCode(SqlTypes.GEOMETRY)
-    @Column(columnDefinition = "geometry(Point,4326)")
-    private Point location;
-
-    @JdbcTypeCode(SqlTypes.GEOMETRY)
-    @Column(columnDefinition = "geometry(Polygon,4326)")
-    private Polygon boundingBox;
 }

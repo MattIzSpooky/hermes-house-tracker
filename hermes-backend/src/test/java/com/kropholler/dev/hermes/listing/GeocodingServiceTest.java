@@ -6,7 +6,6 @@ import com.kropholler.dev.hermes.listing.internal.NominatimClient;
 import com.kropholler.dev.hermes.listing.internal.NominatimResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.locationtech.jts.geom.Point;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -52,7 +51,8 @@ class GeocodingServiceTest {
         Optional<City> result = service.findOrFetchCity("Weert");
 
         assertThat(result).isPresent();
-        assertThat(result.get().getLocation()).isInstanceOf(Point.class);
+        assertThat(result.get().getLatitude()).isEqualTo(51.2355829, within(0.0001));
+        assertThat(result.get().getLongitude()).isEqualTo(5.7050797, within(0.0001));
         verify(cityRepository).save(any(City.class));
     }
 

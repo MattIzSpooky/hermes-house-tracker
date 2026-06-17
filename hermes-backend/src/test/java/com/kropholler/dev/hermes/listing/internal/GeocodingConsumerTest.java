@@ -2,8 +2,6 @@ package com.kropholler.dev.hermes.listing.internal;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.locationtech.jts.geom.Point;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -12,8 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,7 +22,7 @@ class GeocodingConsumerTest {
     @InjectMocks private GeocodingConsumer consumer;
 
     @Test
-    void onMessage_geocodesListingAndSavesLocation() {
+    void onMessage_geocodesListingAndUpdatesGeometry() {
         UUID listingId = UUID.randomUUID();
         Listing listing = new Listing();
         listing.setHouseNumber("9");
@@ -43,14 +41,13 @@ class GeocodingConsumerTest {
 
         consumer.onMessage(new FetchGeocodingCommand(listingId));
 
-        ArgumentCaptor<Listing> captor = ArgumentCaptor.forClass(Listing.class);
-        verify(listingRepository).save(captor.capture());
-        assertThat(captor.getValue().getLocation()).isInstanceOf(Point.class);
-        assertThat(captor.getValue().getBoundingBox()).isNotNull();
+        verify(listingRepository).updateLocation(listingId, 5.6972390, 51.2574224);
+        verify(listingRepository).updateBoundingBox(listingId, 5.6971890, 51.2573724, 5.6972890, 51.2574724);
+        verify(listingRepository, never()).save(any());
     }
 
     @Test
-    void onMessage_nominatimReturnsEmpty_doesNotSave() {
+    void onMessage_nominatimReturnsEmpty_doesNotUpdateGeometry() {
         UUID listingId = UUID.randomUUID();
         Listing listing = new Listing();
         listing.setHouseNumber("1");
@@ -62,6 +59,7 @@ class GeocodingConsumerTest {
 
         consumer.onMessage(new FetchGeocodingCommand(listingId));
 
+        verify(listingRepository, never()).updateLocation(any(), anyDouble(), anyDouble());
         verify(listingRepository, never()).save(any());
     }
 }

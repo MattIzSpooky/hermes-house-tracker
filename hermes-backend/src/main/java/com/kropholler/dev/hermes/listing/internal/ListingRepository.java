@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -49,6 +50,16 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             @Param("minDropPercent") double minDropPercent
     );
     void deleteAllByDeletedAtIsNotNull();
+
+    @Modifying
+    @Query(value = "UPDATE listings SET location = ST_SetSRID(ST_MakePoint(:lon, :lat), 4326) WHERE id = :id", nativeQuery = true)
+    void updateLocation(@Param("id") UUID id, @Param("lon") double lon, @Param("lat") double lat);
+
+    @Modifying
+    @Query(value = "UPDATE listings SET bounding_box = ST_MakeEnvelope(:lonMin, :latMin, :lonMax, :latMax, 4326) WHERE id = :id", nativeQuery = true)
+    void updateBoundingBox(@Param("id") UUID id,
+                           @Param("lonMin") double lonMin, @Param("latMin") double latMin,
+                           @Param("lonMax") double lonMax, @Param("latMax") double latMax);
 
     @Query(value = """
             SELECT l.* FROM listings l
