@@ -41,6 +41,9 @@ export class ListingsService {
     if (filter?.minRooms) params = params.set('minRooms', filter.minRooms);
     if (filter?.minLivingAreaM2) params = params.set('minLivingAreaM2', filter.minLivingAreaM2);
     if (filter?.energyLabel?.trim()) params = params.set('energyLabel', filter.energyLabel.trim());
+    if (filter?.nearAddress?.trim()) params = params.set('nearAddress', filter.nearAddress.trim());
+    if (filter?.nearCity?.trim()) params = params.set('nearCity', filter.nearCity.trim());
+    if (filter?.radiusKm) params = params.set('radiusKm', filter.radiusKm);
     this.http.get<ListingPage>('/api/listings', { params }).subscribe({
       next: data => {
         this.listings.set(data);

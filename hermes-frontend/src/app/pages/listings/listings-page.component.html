@@ -35,8 +35,23 @@
       placeholder="Energy label"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
   </div>
+  <div class="border-t border-slate-100 pt-3 mt-1">
+    <p class="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Radius search</p>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <input [(ngModel)]="nearAddress" (input)="onFilterChange()"
+        placeholder="Near address (e.g. 1, Teststraat, Amsterdam)"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none sm:col-span-2" />
+      <input [(ngModel)]="nearCity" (input)="onFilterChange()"
+        placeholder="Or near city"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+      <input type="number" [(ngModel)]="radiusKm" (input)="onFilterChange()"
+        placeholder="Radius (km)"
+        min="1"
+        class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
+    </div>
+  </div>
   <button (click)="clearFilters()"
-    class="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors">
+    class="text-xs font-medium text-slate-400 hover:text-slate-600 transition-colors mt-3 block">
     Clear filters
   </button>
 </app-section-card>
