@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-class NominatimClient {
+public class NominatimClient {
 
     private static final String BASE_URL = "https://nominatim.openstreetmap.org";
     private static final String USER_AGENT = "HermesHouseTracker/1.0 (https://github.com/MattIzSpooky/hermes-house-tracker)";
@@ -24,7 +24,7 @@ class NominatimClient {
             .build();
     }
 
-    Optional<NominatimResponse> geocodeAddress(String houseNumber, String street, String city) {
+    public Optional<NominatimResponse> geocodeAddress(String houseNumber, String street, String city) {
         String query = houseNumber + " " + street + " " + city;
         log.debug("Geocoding address: {}", query);
         try {
@@ -39,7 +39,7 @@ class NominatimClient {
         }
     }
 
-    Optional<NominatimResponse> geocodeCity(String cityName) {
+    public Optional<NominatimResponse> geocodeCity(String cityName) {
         log.debug("Geocoding city: {}", cityName);
         try {
             List<NominatimResponse> results = restClient.get()

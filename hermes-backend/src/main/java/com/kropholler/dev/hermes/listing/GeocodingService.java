@@ -1,6 +1,8 @@
-package com.kropholler.dev.hermes.listing.internal;
+package com.kropholler.dev.hermes.listing;
 
-import com.google.common.util.concurrent.RateLimiter;
+import com.kropholler.dev.hermes.listing.internal.City;
+import com.kropholler.dev.hermes.listing.internal.CityRepository;
+import com.kropholler.dev.hermes.listing.internal.NominatimClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;
@@ -8,41 +10,42 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.springframework.jms.annotation.JmsListener;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-class GeocodingConsumer {
-
-    @SuppressWarnings("UnstableApiUsage")
-    private static final RateLimiter RATE_LIMITER = RateLimiter.create(1.0);
+public class GeocodingService {
 
     private static final GeometryFactory GEOMETRY_FACTORY =
         new GeometryFactory(new PrecisionModel(), 4326);
 
-    private final ListingRepository listingRepository;
+    private final CityRepository cityRepository;
     private final NominatimClient nominatimClient;
 
-    @JmsListener(destination = JmsQueues.GEOCODING_FETCH)
     @Transactional
-    public void onMessage(FetchGeocodingCommand command) {
-        RATE_LIMITER.acquire();
-        listingRepository.findById(command.listingId()).ifPresent(listing -> {
-            if (listing.getStreet() == null || listing.getCity() == null) return;
-            nominatimClient.geocodeAddress(
-                listing.getHouseNumber(), listing.getStreet(), listing.getCity()
-            ).ifPresent(response -> {
-                listing.setLocation(toPoint(response.lat(), response.lon()));
-                listing.setBoundingBox(toBoundingBox(response.boundingbox()));
-                listingRepository.save(listing);
-                log.debug("Geocoded listing {} to {},{}", command.listingId(), response.lat(), response.lon());
-            });
+    public Optional<City> findOrFetchCity(String cityName) {
+        Optional<City> cached = cityRepository.findByNameIgnoreCase(cityName);
+        if (cached.isPresent()) return cached;
+
+        return nominatimClient.geocodeCity(cityName).map(response -> {
+            City city = new City();
+            city.setName(cityName);
+            city.setLocation(toPoint(response.lat(), response.lon()));
+            city.setBoundingBox(toBoundingBox(response.boundingbox()));
+            city.setFetchedAt(Instant.now());
+            return cityRepository.save(city);
         });
+    }
+
+    public Optional<double[]> geocodeAddress(String houseNumber, String street, String city) {
+        return nominatimClient.geocodeAddress(houseNumber, street, city)
+            .map(r -> new double[]{Double.parseDouble(r.lat()), Double.parseDouble(r.lon())});
     }
 
     private static Point toPoint(String lat, String lon) {
