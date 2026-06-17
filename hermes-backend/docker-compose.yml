@@ -67,7 +67,7 @@ services:
       - ollama_data:/root/.ollama
     entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.2:3b && wait"]
   postgres:
-    image: 'postgres:latest'
+    image: 'postgis/postgis:16-3.4'
     environment:
       - 'POSTGRES_DB=mydatabase'
       - 'POSTGRES_PASSWORD=secret'
