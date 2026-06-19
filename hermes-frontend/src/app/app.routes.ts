@@ -23,4 +23,11 @@ export const routes: Routes = [
         m => m.ScrapingPageComponent
       ),
   },
+  {
+    path: 'watches',
+    loadComponent: () =>
+      import('./pages/watches/watches-page.component').then(
+        m => m.WatchesPageComponent
+      ),
+  },
 ];

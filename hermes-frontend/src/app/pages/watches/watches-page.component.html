@@ -1,0 +1,46 @@
+<div class="p-6 max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold text-gray-800 mb-6">Active Watches</h1>
+  <p class="text-sm text-gray-500 mb-4">
+    Watches are created through the AI chat. Ask something like
+    <em>"Alert me when a 3-bed house in Utrecht appears under &euro;400,000."</em>
+  </p>
+
+  @if (tasks().length === 0) {
+    <div class="text-gray-500 text-sm bg-gray-50 rounded-lg p-6 text-center">
+      No active watches. Open the chat and ask to be alerted when matching listings appear.
+    </div>
+  } @else {
+    <div class="overflow-x-auto rounded-lg border border-gray-200">
+      <table class="min-w-full divide-y divide-gray-200 text-sm">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-gray-600 font-medium">Name</th>
+            <th class="px-4 py-3 text-left text-gray-600 font-medium">Type</th>
+            <th class="px-4 py-3 text-left text-gray-600 font-medium">Schedule</th>
+            <th class="px-4 py-3 text-left text-gray-600 font-medium">Last run</th>
+            <th class="px-4 py-3 text-left text-gray-600 font-medium">Next run</th>
+            <th class="px-4 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 bg-white">
+          @for (task of tasks(); track task.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 font-medium text-gray-800">{{ task.name }}</td>
+              <td class="px-4 py-3 text-gray-600">{{ task.type }}</td>
+              <td class="px-4 py-3 text-gray-500 text-xs">{{ task.schedule ?? 'one-shot' }}</td>
+              <td class="px-4 py-3 text-gray-500">{{ task.lastRunAt ? (task.lastRunAt | date:'short') : '&mdash;' }}</td>
+              <td class="px-4 py-3 text-gray-500">{{ task.nextRunAt | date:'short' }}</td>
+              <td class="px-4 py-3 text-right">
+                <button
+                  (click)="delete(task.id)"
+                  class="text-red-500 hover:text-red-700 text-xs font-medium">
+                  Cancel
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
