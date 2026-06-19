@@ -27,18 +27,18 @@
 
 | Task | Status | Commit |
 |------|--------|--------|
-| Task 1: DB migration V9 + `spring-boot-starter-mail` dependency | ⬜ Pending | — |
-| Task 2: Domain — AgentTask + Notification entities, repos, DTOs, enums | ⬜ Pending | — |
-| Task 3: AgentTaskService (public service: create, list, delete, markRan) | ⬜ Pending | — |
-| Task 4: AgentTaskHandler interface + WatchTaskHandler | ⬜ Pending | — |
-| Task 5: ResearchTaskHandler | ⬜ Pending | — |
-| Task 6: DigestTaskHandler | ⬜ Pending | — |
-| Task 7: NotificationService (persist + WebSocket push + email) | ⬜ Pending | — |
-| Task 8: AgentTaskExecutor + AgentTaskScheduler | ⬜ Pending | — |
-| Task 9: OpenAPI additions + AgentTaskController + NotificationController | ⬜ Pending | — |
-| Task 10: Chat tools — SaveWatchTool, TriggerResearchTool, ListWatchesTool | ⬜ Pending | — |
-| Task 11: Frontend — types, NotificationsService, notification bell | ⬜ Pending | — |
-| Task 12: Frontend — AgentTaskService + WatchesPage | ⬜ Pending | — |
+| Task 1: DB migration V9 + `spring-boot-starter-mail` dependency | ✅ Complete | `00eefbb` |
+| Task 2: Domain — AgentTask + Notification entities, repos, DTOs, enums | ✅ Complete | `0b7b055` |
+| Task 3: AgentTaskService (public service: create, list, delete, markRan) | ✅ Complete | `6587ab9` |
+| Task 4: AgentTaskHandler interface + WatchTaskHandler | ✅ Complete | `03e623a` |
+| Task 5: ResearchTaskHandler | ✅ Complete | `8045895` |
+| Task 6: DigestTaskHandler | ✅ Complete | `e1b18a1` |
+| Task 7: NotificationService (persist + WebSocket push + email) | ✅ Complete | `41c810a` |
+| Task 8: AgentTaskExecutor + AgentTaskScheduler | ✅ Complete | `c10cadc` |
+| Task 9: OpenAPI additions + AgentTaskController + NotificationController | ✅ Complete | `335b27e` |
+| Task 10: Chat tools — SaveWatchTool, TriggerResearchTool, ListWatchesTool | ✅ Complete | `9971f44` |
+| Task 11: Frontend — types, NotificationsService, notification bell | ✅ Complete | `7ac14cd` |
+| Task 12: Frontend — AgentTaskService + WatchesPage | ✅ Complete | `8b74f7b` |
 
 ---
 
