@@ -250,6 +250,97 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /api/agent-tasks:
+    get:
+      tags: [agent-tasks]
+      operationId: getAgentTasks
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of active agent tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AgentTaskResponse'
+
+  /api/agent-tasks/{id}:
+    delete:
+      tags: [agent-tasks]
+      operationId: deleteAgentTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+
+  /api/notifications:
+    get:
+      tags: [notifications]
+      operationId: getNotifications
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recent notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationResponse'
+
+  /api/notifications/unread-count:
+    get:
+      tags: [notifications]
+      operationId: getUnreadCount
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Unread notification count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+
+  /api/notifications/{id}/read:
+    patch:
+      tags: [notifications]
+      operationId: markNotificationRead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Marked read
+
 components:
   schemas:
     CreateScrapingSessionRequest:
@@ -452,3 +543,67 @@ components:
           type: string
         detail:
           type: string
+
+    AgentTaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        status:
+          type: string
+        clientId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        schedule:
+          type: string
+        lastRunAt:
+          type: string
+          format: date-time
+        nextRunAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        taskId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        listingIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        emailSentAt:
+          type: string
+          format: date-time
+
+    UnreadCountResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
