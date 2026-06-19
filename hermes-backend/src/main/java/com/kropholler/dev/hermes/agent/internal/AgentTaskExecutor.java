@@ -36,9 +36,10 @@ public class AgentTaskExecutor {
         try {
             handler.handle(task).ifPresent(content ->
                 notificationService.save(task.getId(), task.getClientId(), content));
-            agentTaskService.markRan(task);
         } catch (Exception e) {
             log.error("Error executing task {}: {}", task.getId(), e.getMessage(), e);
+        } finally {
+            agentTaskService.markRan(task);
         }
     }
 }

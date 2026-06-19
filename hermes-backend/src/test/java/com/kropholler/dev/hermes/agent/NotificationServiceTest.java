@@ -1,10 +1,10 @@
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kropholler.dev.hermes.agent.internal.EmailNotificationSender;
 import com.kropholler.dev.hermes.agent.internal.Notification;
 import com.kropholler.dev.hermes.agent.internal.NotificationContent;
 import com.kropholler.dev.hermes.agent.internal.NotificationRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,10 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,15 +27,9 @@ class NotificationServiceTest {
 
     @Mock NotificationRepository repo;
     @Mock SimpMessagingTemplate messaging;
-    @Mock JavaMailSender mailSender;
+    @Mock EmailNotificationSender emailSender;
     @Spy ObjectMapper objectMapper;
     @InjectMocks NotificationService service;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(service, "fromEmail", "from@test.com");
-        ReflectionTestUtils.setField(service, "toEmail", "to@test.com");
-    }
 
     @Test
     void savePersistsAndPushesOverWebSocket() {
