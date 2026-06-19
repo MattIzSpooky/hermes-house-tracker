@@ -46,4 +46,18 @@ class ListWatchesToolTest {
 
         assertThat(result).contains("no active watches");
     }
+
+    @Test
+    void cancelWatchWhenCancelIdProvided() {
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+        UUID cancelId = UUID.randomUUID();
+
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        String result = tool.listWatches(cancelId);
+
+        verify(agentTaskService).delete(cancelId);
+        assertThat(result).contains("cancelled");
+        assertThat(result).contains(cancelId.toString());
+    }
 }
