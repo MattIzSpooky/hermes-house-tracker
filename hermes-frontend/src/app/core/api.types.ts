@@ -138,3 +138,31 @@ export interface ResultFrame {
   type: 'RESULT';
   listings: ChatListingCard[];
 }
+
+export interface AgentTaskResponse {
+  id: string;
+  type: string;
+  status: string;
+  clientId: string;
+  name: string;
+  schedule?: string;
+  lastRunAt?: string;
+  nextRunAt?: string;
+  createdAt?: string;
+}
+
+export interface NotificationResponse {
+  id: string;
+  taskId?: string;
+  clientId: string;
+  title: string;
+  body: string;
+  listingIds: string[];
+  read: boolean;
+  createdAt: string;
+  emailSentAt?: string;
+}
+
+export interface UnreadCountResponse {
+  count: number;
+}
