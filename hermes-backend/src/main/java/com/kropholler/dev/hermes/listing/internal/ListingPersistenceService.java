@@ -32,12 +32,13 @@ public class ListingPersistenceService {
         List<Runnable> afterCommit = new ArrayList<>();
 
         for (RawListing raw : event.listings()) {
-            boolean isNew = listingRepository.findByFundaId(raw.fundaId()).isEmpty();
-            Listing listing = listingRepository.findByFundaId(raw.fundaId())
-                .orElseGet(() -> createListing(raw));
+            var existing = listingRepository.findByFundaId(raw.fundaId());
+            boolean isNew = existing.isEmpty();
+            Listing listing = existing.orElseGet(() -> createListing(raw));
 
-            listing.setLastSeenAt(Instant.now());
-            listing.setLastUpdatedAt(Instant.now());
+            Instant now = Instant.now();
+            listing.setLastSeenAt(now);
+            listing.setLastUpdatedAt(now);
             listing.setStatus(parseStatus(raw.status()));
             Listing saved = listingRepository.saveAndFlush(listing);
 

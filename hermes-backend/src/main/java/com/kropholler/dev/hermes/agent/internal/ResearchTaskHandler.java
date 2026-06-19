@@ -77,7 +77,11 @@ public class ResearchTaskHandler implements AgentTaskHandler {
 
         if (result == null || result.isBlank()) return Optional.empty();
 
+        List<UUID> listingIds = resultHolder.get().stream()
+            .map(ChatListingCard::id)
+            .toList();
+
         return Optional.of(new NotificationContent(
-            "Research complete: " + task.getName(), result, List.of()));
+            "Research complete: " + task.getName(), result, listingIds));
     }
 }
