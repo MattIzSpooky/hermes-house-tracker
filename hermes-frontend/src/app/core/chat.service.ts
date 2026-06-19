@@ -91,4 +91,9 @@ export class ChatService {
   toggle(): void {
     this._isOpen.update(open => !open);
   }
+
+  seedAndOpen(assistantContent: string): void {
+    this._messages.update(msgs => [...msgs, { role: 'assistant', content: assistantContent }]);
+    this._isOpen.set(true);
+  }
 }
