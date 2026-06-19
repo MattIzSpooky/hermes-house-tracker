@@ -1,10 +1,11 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { catchError, of } from 'rxjs';
 import { NotificationResponse } from './api.types';
 
 @Injectable({ providedIn: 'root' })
-export class NotificationsService {
+export class NotificationsService implements OnDestroy {
   private readonly http = inject(HttpClient);
 
   private readonly clientId: string;
@@ -26,6 +27,10 @@ export class NotificationsService {
     this.stompClient.activate();
   }
 
+  ngOnDestroy(): void {
+    this.stompClient.deactivate();
+  }
+
   private subscribeAndLoad(): void {
     this.loadNotifications();
     this.subscription?.unsubscribe();
@@ -40,14 +45,31 @@ export class NotificationsService {
 
   private loadNotifications(): void {
     this.http.get<NotificationResponse[]>(`/api/notifications?clientId=${this.clientId}`)
+      .pipe(
+        catchError(() => of([]))
+      )
       .subscribe(items => this._notifications.set(items));
   }
 
   markRead(id: string): void {
-    this.http.patch(`/api/notifications/${id}/read`, {}).subscribe(() => {
-      this._notifications.update(prev =>
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
-      );
-    });
+    this.http.patch(`/api/notifications/${id}/read`, {})
+      .pipe(
+        catchError(() => of(null))
+      )
+      .subscribe(() => {
+        this._notifications.update(prev =>
+          prev.map(n => n.id === id ? { ...n, read: true } : n)
+        );
+      });
+  }
+
+  delete(id: string): void {
+    this.http.delete(`/api/notifications/${id}`)
+      .pipe(
+        catchError(() => of(null))
+      )
+      .subscribe(() => {
+        this._notifications.update(prev => prev.filter(n => n.id !== id));
+      });
   }
 }
