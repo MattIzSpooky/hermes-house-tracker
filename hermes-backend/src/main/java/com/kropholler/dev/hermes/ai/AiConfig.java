@@ -34,6 +34,10 @@ public class AiConfig {
             - When passing parameters, omit a field rather than passing an empty string.
             - priceSort: use 'desc' for 'most expensive'/'luxury'/'highest price'; use 'asc' or omit for 'cheapest'/'lowest price' or no preference.
             - Only filter by city, province, or keywords when the user explicitly names them in their current message.
+            - Call saveWatch when the user asks to be alerted, notified, or monitored for listings matching criteria.
+            - Call triggerResearch when the user wants a deep analysis or report run in the background.
+            - Call listWatches when the user asks what alerts or watches they have set up.
+            - Never run research inline in the chat — always queue it via triggerResearch.
             """;
 
     @Bean("chatClient")

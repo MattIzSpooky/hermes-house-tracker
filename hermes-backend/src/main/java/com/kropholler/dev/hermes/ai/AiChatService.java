@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class AiChatService {
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
     private final FavouriteService favouriteService;
+    private final List<ChatToolProvider> chatToolProviders;
     private final MeterRegistry meterRegistry;
 
     public AiChatService(@Qualifier("chatClient") ChatClient chatClient,
@@ -44,6 +46,7 @@ public class AiChatService {
                           ChatListingCardMapper chatListingCardMapper,
                           ListingSummaryService listingSummaryService,
                           FavouriteService favouriteService,
+                          List<ChatToolProvider> chatToolProviders,
                           MeterRegistry meterRegistry) {
         this.chatClient = chatClient;
         this.chatMessageRepository = chatMessageRepository;
@@ -51,6 +54,7 @@ public class AiChatService {
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
         this.favouriteService = favouriteService;
+        this.chatToolProviders = chatToolProviders;
         this.meterRegistry = meterRegistry;
     }
 
@@ -119,12 +123,18 @@ public class AiChatService {
         GetFavouriteListingsTool favouritesTool = new GetFavouriteListingsTool(
                 effectiveClientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
-        log.info("startStream: registering 6 tools for session={}", sessionId);
+        List<Object> allTools = new ArrayList<>(List.of(
+                searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool));
+        for (ChatToolProvider provider : chatToolProviders) {
+            allTools.addAll(provider.provideTools(effectiveClientId));
+        }
+
+        log.info("startStream: registering {} tools for session={}", allTools.size(), sessionId);
 
         Flux<String> tokens = chatClient.prompt()
                 .messages(history)
                 .user(userMessage)
-                .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool)
+                .tools(allTools.toArray())
                 .stream()
                 .content();
 
