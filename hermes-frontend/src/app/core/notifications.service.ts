@@ -63,13 +63,4 @@ export class NotificationsService implements OnDestroy {
       });
   }
 
-  delete(id: string): void {
-    this.http.delete(`/api/notifications/${id}`)
-      .pipe(
-        catchError(() => of(null))
-      )
-      .subscribe(() => {
-        this._notifications.update(prev => prev.filter(n => n.id !== id));
-      });
-  }
 }

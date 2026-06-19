@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,26 +44,56 @@ public class WatchTaskHandler implements AgentTaskHandler {
         );
 
         Instant since = task.getLastRunAt() != null ? task.getLastRunAt() : task.getCreatedAt();
-        List<ListingDto> newListings = matches.stream()
-            .filter(l -> l.firstSeenAt() != null && l.firstSeenAt().isAfter(since))
-            .toList();
 
-        if (newListings.isEmpty()) {
-            log.info("Watch task {}: no new listings found", task.getId());
+        List<ListingDto> newListings = new ArrayList<>();
+        List<ListingDto> priceChangedListings = new ArrayList<>();
+        for (ListingDto l : matches) {
+            if (l.firstSeenAt() != null && l.firstSeenAt().isAfter(since)) {
+                newListings.add(l);
+            } else {
+                boolean priceChanged = listingService.findPriceHistoryByListingId(l.id())
+                    .stream()
+                    .filter(e -> "asking_price".equals(e.status()))
+                    .anyMatch(e -> e.timestamp() != null && e.timestamp().isAfter(since));
+                if (priceChanged) priceChangedListings.add(l);
+            }
+        }
+
+        if (newListings.isEmpty() && priceChangedListings.isEmpty()) {
+            log.info("Watch task {}: no new or price-changed listings found", task.getId());
             return Optional.empty();
         }
 
-        String title = newListings.size() + " new listing(s) match watch: " + task.getName();
+        List<ListingDto> all = new ArrayList<>(newListings);
+        all.addAll(priceChangedListings);
+
+        StringBuilder title = new StringBuilder();
+        if (!newListings.isEmpty()) title.append(newListings.size()).append(" new listing(s)");
+        if (!priceChangedListings.isEmpty()) {
+            if (!title.isEmpty()) title.append(", ");
+            title.append(priceChangedListings.size()).append(" price change(s)");
+        }
+        title.append(" for watch: ").append(task.getName());
+
         StringBuilder body = new StringBuilder();
-        for (ListingDto l : newListings) {
-            body.append("- ").append(l.street()).append(" ").append(l.houseNumber())
-                .append(", ").append(l.city());
-            if (l.currentPrice() != null)
-                body.append(" — €").append(String.format("%,d", l.currentPrice()).replace(",", "."));
-            body.append("\n");
+        if (!newListings.isEmpty()) {
+            body.append("New listings:\n");
+            for (ListingDto l : newListings) appendLine(body, l);
+        }
+        if (!priceChangedListings.isEmpty()) {
+            body.append("Price changes:\n");
+            for (ListingDto l : priceChangedListings) appendLine(body, l);
         }
 
-        List<UUID> ids = newListings.stream().map(ListingDto::id).toList();
-        return Optional.of(new NotificationContent(title, body.toString(), ids));
+        List<UUID> ids = all.stream().map(ListingDto::id).toList();
+        return Optional.of(new NotificationContent(title.toString(), body.toString(), ids));
+    }
+
+    private void appendLine(StringBuilder sb, ListingDto l) {
+        sb.append("- ").append(l.street()).append(" ").append(l.houseNumber())
+            .append(", ").append(l.city());
+        if (l.currentPrice() != null)
+            sb.append(" — €").append(String.format("%,d", l.currentPrice()).replace(",", "."));
+        sb.append("\n");
     }
 }

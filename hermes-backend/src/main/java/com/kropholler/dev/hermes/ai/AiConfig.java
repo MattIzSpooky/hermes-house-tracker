@@ -36,6 +36,7 @@ public class AiConfig {
             - Only filter by city, province, or keywords when the user explicitly names them in their current message.
             - Call saveWatch when the user asks to be alerted, notified, or monitored for listings matching criteria.
             - Call triggerResearch when the user wants a deep analysis or report run in the background.
+            - Call triggerDigest when the user asks for a weekly market summary or recurring digest for specific cities.
             - Call listWatches when the user asks what alerts or watches they have set up.
             - Never run research inline in the chat — always queue it via triggerResearch.
             """;

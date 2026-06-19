@@ -26,6 +26,7 @@ public class AgentChatToolProvider implements ChatToolProvider {
         return List.of(
             new SaveWatchTool(clientId, agentTaskService),
             new TriggerResearchTool(clientId, agentTaskService),
+            new TriggerDigestTool(clientId, agentTaskService),
             new ListWatchesTool(clientId, agentTaskService)
         );
     }
