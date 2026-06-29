@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.scraping.schedule;
+package com.kropholler.dev.hermes.listing.schedule;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;

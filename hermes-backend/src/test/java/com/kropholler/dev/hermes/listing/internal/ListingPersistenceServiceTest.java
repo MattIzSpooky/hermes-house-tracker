@@ -11,6 +11,8 @@ import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,7 +20,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jms.core.JmsTemplate;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,6 +41,21 @@ class ListingPersistenceServiceTest {
 
     @InjectMocks
     private ListingPersistenceService service;
+
+    @BeforeEach
+    void setUp() {
+        TransactionSynchronizationManager.initSynchronization();
+    }
+
+    @AfterEach
+    void tearDown() {
+        TransactionSynchronizationManager.clearSynchronization();
+    }
+
+    private void fireAfterCommit() {
+        new ArrayList<>(TransactionSynchronizationManager.getSynchronizations())
+            .forEach(TransactionSynchronization::afterCommit);
+    }
 
     private static RawListing rawListing(String fundaId, String status) {
         return new RawListing(
@@ -55,12 +75,13 @@ class ListingPersistenceServiceTest {
         saved.setId(UUID.randomUUID());
         saved.setFundaId("12345678");
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.empty());
-        when(listingRepository.save(any())).thenReturn(saved);
+        when(listingRepository.saveAndFlush(any())).thenReturn(saved);
 
         service.onScrapingSessionCompleted(event);
+        fireAfterCommit();
 
         ArgumentCaptor<Listing> listingCaptor = ArgumentCaptor.forClass(Listing.class);
-        verify(listingRepository).save(listingCaptor.capture());
+        verify(listingRepository).saveAndFlush(listingCaptor.capture());
         assertThat(listingCaptor.getValue().getStatus()).isEqualTo(ListingStatus.FOR_SALE);
         assertThat(listingCaptor.getValue().getLastUpdatedAt()).isNotNull();
 
@@ -88,9 +109,10 @@ class ListingPersistenceServiceTest {
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.RESCRAPE, List.of(raw));
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
-        when(listingRepository.save(any())).thenReturn(existing);
+        when(listingRepository.saveAndFlush(any())).thenReturn(existing);
 
         service.onScrapingSessionCompleted(event);
+        fireAfterCommit();
 
         assertThat(existing.getStatus()).isEqualTo(ListingStatus.UNDER_OFFER);
         verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH), any(FetchListingDetailsCommand.class));
@@ -107,9 +129,10 @@ class ListingPersistenceServiceTest {
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.SEARCH, List.of(raw));
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(existing));
-        when(listingRepository.save(any())).thenReturn(existing);
+        when(listingRepository.saveAndFlush(any())).thenReturn(existing);
 
         service.onScrapingSessionCompleted(event);
+        fireAfterCommit();
 
         verify(jmsTemplate).convertAndSend(eq(JmsQueues.LISTING_DETAILS_FETCH), any(FetchListingDetailsCommand.class));
         verify(jmsTemplate, never()).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(Object.class));
