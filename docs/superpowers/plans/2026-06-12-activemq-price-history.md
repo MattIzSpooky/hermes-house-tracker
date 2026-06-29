@@ -239,8 +239,8 @@ git commit -m "feat(hermes-backend): add FetchPriceHistoryCommand JMS message re
 ```java
 package com.kropholler.dev.hermes.listing.internal;
 
-import com.kropholler.dev.hermes.listing.PriceHistoryService;
-import com.kropholler.dev.hermes.listing.PriceHistoryUpdated;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryUpdated;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -293,8 +293,8 @@ Expected: FAIL — `PriceHistoryConsumer` does not exist yet.
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.kropholler.dev.hermes.listing.PriceHistoryService;
-import com.kropholler.dev.hermes.listing.PriceHistoryUpdated;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryUpdated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -359,13 +359,13 @@ Replace the entire file content:
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -479,13 +479,13 @@ Replace the entire file:
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -575,8 +575,8 @@ Replace the entire file:
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -684,8 +684,8 @@ Replace the entire file:
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jms.core.JmsTemplate;

@@ -10,7 +10,7 @@ import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.report.ListingReport;
 import com.kropholler.dev.hermes.report.PricePoint;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

@@ -1,13 +1,14 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
-import com.kropholler.dev.hermes.listing.internal.JmsQueues;
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.async.JmsQueues;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

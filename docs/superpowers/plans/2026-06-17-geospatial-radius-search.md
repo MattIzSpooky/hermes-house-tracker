@@ -718,10 +718,10 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/Geocoding
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.City;
-import com.kropholler.dev.hermes.listing.internal.CityRepository;
-import com.kropholler.dev.hermes.listing.internal.NominatimClient;
-import com.kropholler.dev.hermes.listing.internal.NominatimResponse;
+import com.kropholler.dev.hermes.listing.city.City;
+import com.kropholler.dev.hermes.listing.city.CityRepository;
+import com.kropholler.dev.hermes.listing.geocoding.NominatimClient;
+import com.kropholler.dev.hermes.listing.geocoding.NominatimResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.Point;
@@ -818,10 +818,10 @@ Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/listing/Geocoding
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.City;
-import com.kropholler.dev.hermes.listing.internal.CityRepository;
-import com.kropholler.dev.hermes.listing.internal.NominatimClient;
-import com.kropholler.dev.hermes.listing.internal.NominatimResponse;
+import com.kropholler.dev.hermes.listing.city.City;
+import com.kropholler.dev.hermes.listing.city.CityRepository;
+import com.kropholler.dev.hermes.listing.geocoding.NominatimClient;
+import com.kropholler.dev.hermes.listing.geocoding.NominatimResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.Coordinate;

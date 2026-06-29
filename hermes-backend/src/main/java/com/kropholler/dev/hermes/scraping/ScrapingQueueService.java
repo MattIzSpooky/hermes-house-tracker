@@ -1,7 +1,9 @@
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSession;
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSessionRepository;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,10 +1,12 @@
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.internal.EmailNotificationSender;
-import com.kropholler.dev.hermes.agent.internal.Notification;
-import com.kropholler.dev.hermes.agent.internal.NotificationContent;
-import com.kropholler.dev.hermes.agent.internal.NotificationRepository;
+import com.kropholler.dev.hermes.ai.agent.notification.EmailNotificationSender;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationDto;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
+import com.kropholler.dev.hermes.ai.agent.task.data.Notification;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.ai.agent.task.data.NotificationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,9 +29,11 @@ class NotificationServiceTest {
 
     @Mock NotificationRepository repo;
     @Mock SimpMessagingTemplate messaging;
-    @Mock EmailNotificationSender emailSender;
+    @Mock
+    EmailNotificationSender emailSender;
     @Spy ObjectMapper objectMapper;
-    @InjectMocks NotificationService service;
+    @InjectMocks
+    NotificationService service;
 
     @Test
     void savePersistsAndPushesOverWebSocket() {

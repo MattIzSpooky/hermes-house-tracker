@@ -339,8 +339,8 @@ public interface ScrapingSessionRepository extends JpaRepository<ScrapingSession
 ```java
 package com.kropholler.dev.hermes.scraping.internal;
 
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSession;
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSessionRepository;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -689,7 +689,7 @@ Expected: FAIL — `FundaScraperService` does not exist.
 ```java
 package com.kropholler.dev.hermes.scraping.internal;
 
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -891,7 +891,7 @@ public record ScrapingSessionDto(
 ```java
 package com.kropholler.dev.hermes.scraping.internal;
 
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionFailed;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
@@ -1038,8 +1038,8 @@ class ScrapingTimeoutWatchdog {
 ```java
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSession;
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSessionRepository;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1119,7 +1119,7 @@ public class ScrapingQueueService {
 ```java
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.internal.ScrapingSessionRepository;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -1141,7 +1141,7 @@ class ScrapingQueueServiceTest {
 
     @Test
     void enqueueSearch_clampsPageLimitToFive() {
-        var session = new com.kropholler.dev.hermes.scraping.internal.ScrapingSession();
+        var session = new com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession();
         session.setType(ScrapingSessionType.SEARCH);
         session.setCity("amsterdam");
         session.setPageLimit(5);
@@ -1341,10 +1341,10 @@ public interface ListingSnapshotRepository extends JpaRepository<ListingSnapshot
 ```java
 package com.kropholler.dev.hermes.listing.internal;
 
-import com.kropholler.dev.hermes.listing.internal.ListingPersistenceService;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
+import com.kropholler.dev.hermes.listing.data.ListingPersistenceService;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.ListingSnapshotRepository;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1381,7 +1381,7 @@ class ListingPersistenceServiceTest {
         );
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), List.of(raw));
 
-        var listing = new com.kropholler.dev.hermes.listing.internal.Listing();
+        var listing = new com.kropholler.dev.hermes.listing.data.Listing();
         listing.setFundaId("12345678");
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.empty());
         when(listingRepository.save(any())).thenReturn(listing);
@@ -1396,7 +1396,7 @@ class ListingPersistenceServiceTest {
 
     @Test
     void onScrapingCompleted_updatesLastSeenAtForExistingListing() {
-        var existing = new com.kropholler.dev.hermes.listing.internal.Listing();
+        var existing = new com.kropholler.dev.hermes.listing.data.Listing();
         existing.setFundaId("12345678");
         var originalLastSeen = existing.getLastSeenAt();
 
@@ -1434,7 +1434,7 @@ package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingSnapshotsCreated;
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -1585,8 +1585,8 @@ public record ListingSnapshotDto(
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.internal.ListingSnapshot;
 import com.kropholler.dev.hermes.listing.internal.ListingSnapshotRepository;
 import lombok.RequiredArgsConstructor;
@@ -2135,8 +2135,8 @@ public interface ListingSummaryRepository extends JpaRepository<ListingSummary, 
 ```java
 package com.kropholler.dev.hermes.ai;
 
-import com.kropholler.dev.hermes.ai.internal.ListingSummary;
-import com.kropholler.dev.hermes.ai.internal.ListingSummaryRepository;
+import com.kropholler.dev.hermes.listing.summary.ListingSummary;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -2197,7 +2197,7 @@ Expected: FAIL — `ListingSummaryService` does not exist.
 ```java
 package com.kropholler.dev.hermes.ai;
 
-import com.kropholler.dev.hermes.ai.internal.ListingSummaryRepository;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -2813,7 +2813,7 @@ import com.kropholler.dev.hermes.api.generated.ScrapingSessionsApi;
 import com.kropholler.dev.hermes.api.generated.model.CreateScrapingSessionRequest;
 import com.kropholler.dev.hermes.api.generated.model.ScrapingSessionResponse;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -2868,7 +2868,7 @@ class ScrapingSessionController implements ScrapingSessionsApi {
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.api.generated.ListingsApi;
 import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
@@ -2877,7 +2877,7 @@ import com.kropholler.dev.hermes.listing.ListingSnapshotDto;
 import com.kropholler.dev.hermes.report.ListingReport;
 import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

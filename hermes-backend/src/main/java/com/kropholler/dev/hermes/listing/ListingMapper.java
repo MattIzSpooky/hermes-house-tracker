@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.config.MapStructConfig;
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 

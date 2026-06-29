@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.api.generated.AgentTasksApi;
 import com.kropholler.dev.hermes.api.generated.model.AgentTaskResponse;
 import lombok.RequiredArgsConstructor;

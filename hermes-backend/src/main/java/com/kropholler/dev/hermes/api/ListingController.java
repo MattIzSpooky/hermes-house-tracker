@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.api.generated.ListingsApi;
 import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
@@ -8,7 +8,7 @@ import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

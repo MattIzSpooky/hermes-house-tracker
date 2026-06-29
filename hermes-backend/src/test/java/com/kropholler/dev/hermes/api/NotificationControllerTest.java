@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.NotificationDto;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationDto;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

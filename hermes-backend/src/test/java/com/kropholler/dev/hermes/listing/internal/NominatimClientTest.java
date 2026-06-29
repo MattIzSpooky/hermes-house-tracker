@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.listing.internal;
 
+import com.kropholler.dev.hermes.listing.geocoding.NominatimClient;
+import com.kropholler.dev.hermes.listing.geocoding.NominatimResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;

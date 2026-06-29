@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ReportService;

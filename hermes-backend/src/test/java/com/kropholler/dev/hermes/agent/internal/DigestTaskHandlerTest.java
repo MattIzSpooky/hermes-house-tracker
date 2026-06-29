@@ -1,10 +1,14 @@
 package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
+import com.kropholler.dev.hermes.ai.agent.task.handler.DigestTaskHandler;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;

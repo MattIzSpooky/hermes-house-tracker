@@ -1,9 +1,12 @@
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.internal.AgentTask;
-import com.kropholler.dev.hermes.agent.internal.AgentTaskRepository;
-import com.kropholler.dev.hermes.agent.internal.WatchPayload;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.data.AgentTaskRepository;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -13,7 +16,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +28,8 @@ class AgentTaskServiceTest {
 
     @Mock AgentTaskRepository repo;
     @Spy ObjectMapper objectMapper;
-    @InjectMocks AgentTaskService service;
+    @InjectMocks
+    AgentTaskService service;
 
     @Test
     void createWatchPersistsTaskWithDailySchedule() {

@@ -1,9 +1,11 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
+    private final PriceHistoryService priceHistoryService;
     private final ListingMapper mapper;
     private final GeocodingService geocodingService;
 
@@ -140,6 +143,10 @@ public class ListingService {
         }
         return listingRepository.findByStreetIgnoreCaseAndHouseNumberIgnoreCase(s, n)
                 .stream().findFirst().map(this::toDto);
+    }
+
+    public void refreshAllPriceHistory() {
+        priceHistoryService.refreshAll();
     }
 
     @Transactional

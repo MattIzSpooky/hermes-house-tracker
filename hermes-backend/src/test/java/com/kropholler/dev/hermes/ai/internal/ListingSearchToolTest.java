@@ -1,7 +1,8 @@
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.ai.ChatListingCard;
-import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
+import com.kropholler.dev.hermes.ai.tool.ListingSearchTool;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;

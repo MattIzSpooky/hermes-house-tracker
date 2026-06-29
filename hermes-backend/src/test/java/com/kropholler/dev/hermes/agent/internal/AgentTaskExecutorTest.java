@@ -1,9 +1,13 @@
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
+import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskExecutor;
+import com.kropholler.dev.hermes.ai.agent.task.handler.AgentTaskHandler;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

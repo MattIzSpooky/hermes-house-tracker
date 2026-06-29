@@ -1,9 +1,9 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

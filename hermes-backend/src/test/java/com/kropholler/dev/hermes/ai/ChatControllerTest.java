@@ -1,7 +1,11 @@
 package com.kropholler.dev.hermes.ai;
 
-import com.kropholler.dev.hermes.ai.internal.ResultFrame;
-import com.kropholler.dev.hermes.ai.internal.TokenFrame;
+import com.kropholler.dev.hermes.ai.chat.AiChatService;
+import com.kropholler.dev.hermes.ai.chat.ChatController;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
+import com.kropholler.dev.hermes.ai.chat.ChatMessageRequest;
+import com.kropholler.dev.hermes.ai.chat.ResultFrame;
+import com.kropholler.dev.hermes.ai.chat.TokenFrame;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

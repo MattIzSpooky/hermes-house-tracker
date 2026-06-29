@@ -1,0 +1,49 @@
+package com.kropholler.dev.hermes.ai.agent.task.data;
+
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "agent_tasks")
+@Getter @Setter @NoArgsConstructor
+public class AgentTask {
+
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AgentTaskType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private AgentTaskStatus status = AgentTaskStatus.ACTIVE;
+
+    @Column(nullable = false)
+    private UUID clientId;
+
+    @Column(nullable = false)
+    private String name;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(nullable = false)
+    private String payload = "{}";
+
+    private String schedule;
+    private Instant lastRunAt;
+
+    @Column(nullable = false)
+    private Instant nextRunAt;
+
+    @Column(nullable = false)
+    private Instant createdAt = Instant.now();
+}

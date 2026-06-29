@@ -1,8 +1,12 @@
 package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
+import com.kropholler.dev.hermes.ai.agent.task.handler.WatchTaskHandler;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -27,7 +31,8 @@ class WatchTaskHandlerTest {
 
     @Mock ListingService listingService;
     @Spy ObjectMapper objectMapper;
-    @InjectMocks WatchTaskHandler handler;
+    @InjectMocks
+    WatchTaskHandler handler;
 
     @Test
     void returnsEmptyWhenNoNewListings() throws Exception {

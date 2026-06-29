@@ -1,9 +1,11 @@
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
+import com.kropholler.dev.hermes.ai.agent.tool.SaveWatchTool;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;

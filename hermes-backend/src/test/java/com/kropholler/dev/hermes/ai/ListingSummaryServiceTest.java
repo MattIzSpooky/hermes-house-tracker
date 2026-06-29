@@ -1,7 +1,9 @@
 package com.kropholler.dev.hermes.ai;
 
-import com.kropholler.dev.hermes.ai.internal.ListingSummary;
-import com.kropholler.dev.hermes.ai.internal.ListingSummaryRepository;
+import com.kropholler.dev.hermes.listing.summary.ListingSummary;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryRepository;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryDto;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

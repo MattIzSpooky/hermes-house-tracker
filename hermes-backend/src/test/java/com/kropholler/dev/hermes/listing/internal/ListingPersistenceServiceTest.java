@@ -1,8 +1,14 @@
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
+import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.async.JmsQueues;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingPersistenceService;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import org.junit.jupiter.api.Test;

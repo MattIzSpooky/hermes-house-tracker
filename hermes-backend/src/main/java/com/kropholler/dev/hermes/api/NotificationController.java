@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.NotificationDto;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationDto;
+import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
 import com.kropholler.dev.hermes.api.generated.NotificationsApi;
 import com.kropholler.dev.hermes.api.generated.model.NotificationResponse;
 import com.kropholler.dev.hermes.api.generated.model.UnreadCountResponse;

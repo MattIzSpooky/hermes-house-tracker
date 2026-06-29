@@ -63,8 +63,8 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/ListingSe
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -171,7 +171,7 @@ Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/listing/ListingSp
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
+import com.kropholler.dev.hermes.listing.data.Listing;
 import org.springframework.data.jpa.domain.Specification;
 
 class ListingSpecifications {
@@ -268,7 +268,7 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/api/ListingContro
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ReportService;
