@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.notification.openapi.NotificationResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

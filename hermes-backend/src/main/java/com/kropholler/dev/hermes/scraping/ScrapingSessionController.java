@@ -1,5 +1,8 @@
 package com.kropholler.dev.hermes.scraping;
 
+import com.kropholler.dev.hermes.scraping.openapi.CreateScrapingSessionRequest;
+import com.kropholler.dev.hermes.scraping.openapi.ScrapingSessionResponse;
+import com.kropholler.dev.hermes.scraping.openapi.ScrapingSessionsApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

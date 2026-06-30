@@ -327,8 +327,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/listing.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.listing</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.listing</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.listing.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.listing.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -346,8 +346,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/scraping.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.scraping</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.scraping</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.scraping.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.scraping.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -365,8 +365,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/report.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.report</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.report</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.report.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.report.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -384,8 +384,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/favourites.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.favourites</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.favourites</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.favourites.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.favourites.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -403,8 +403,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/agent-tasks.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.ai.agent.task</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.ai.agent.task</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.ai.agent.task.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.ai.agent.task.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -422,8 +422,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/notifications.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.notification</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.notification</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.notification.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.notification.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
@@ -496,6 +496,30 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.13</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <excludes>
+                        <!-- OpenAPI generated classes (models, interfaces, ApiUtil) -->
+                        <exclude>**/openapi/**</exclude>
+                        <!-- MapStruct generated implementations -->
+                        <exclude>**/*MapperImpl.class</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

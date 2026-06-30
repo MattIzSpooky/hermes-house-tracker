@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.openapi.ScrapingSessionResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
 import org.mapstruct.Mapper;

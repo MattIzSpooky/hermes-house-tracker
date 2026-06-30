@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.favourites;
 
+import com.kropholler.dev.hermes.favourites.openapi.FavouriteResponse;
+import com.kropholler.dev.hermes.favourites.openapi.FavouritesApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

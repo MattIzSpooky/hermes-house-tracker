@@ -1,5 +1,8 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.notification.openapi.NotificationResponse;
+import com.kropholler.dev.hermes.notification.openapi.NotificationsApi;
+import com.kropholler.dev.hermes.notification.openapi.UnreadCountResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

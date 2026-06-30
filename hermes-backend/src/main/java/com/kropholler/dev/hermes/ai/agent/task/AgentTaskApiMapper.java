@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
+import com.kropholler.dev.hermes.ai.agent.task.openapi.AgentTaskResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.Mapper;
 

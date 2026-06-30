@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.notification.openapi.NotificationResponse;
 import com.kropholler.dev.hermes.notification.NotificationApiMapper;
 import com.kropholler.dev.hermes.notification.NotificationController;
 import com.kropholler.dev.hermes.notification.NotificationDto;

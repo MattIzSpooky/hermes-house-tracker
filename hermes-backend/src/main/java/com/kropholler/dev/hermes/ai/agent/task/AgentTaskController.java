@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
+import com.kropholler.dev.hermes.ai.agent.task.openapi.AgentTaskResponse;
+import com.kropholler.dev.hermes.ai.agent.task.openapi.AgentTasksApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.openapi.ListingDetailResponse;
+import com.kropholler.dev.hermes.listing.openapi.ListingSummaryResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;

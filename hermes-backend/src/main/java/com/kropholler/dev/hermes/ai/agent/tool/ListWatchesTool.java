@@ -2,8 +2,6 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
@@ -42,8 +40,4 @@ class ListWatchesTool extends TaskTool {
         return sb.toString();
     }
 
-    @Override
-    public String execute(Object param) {
-        return "";
-    }
 }

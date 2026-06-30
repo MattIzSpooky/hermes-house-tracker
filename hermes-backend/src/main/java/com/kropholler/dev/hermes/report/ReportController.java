@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.report;
 
+import com.kropholler.dev.hermes.report.openapi.ListingReportResponse;
+import com.kropholler.dev.hermes.report.openapi.ReportsApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

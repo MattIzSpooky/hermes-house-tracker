@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.favourites;
 
+import com.kropholler.dev.hermes.favourites.openapi.FavouriteResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.Mapper;
 

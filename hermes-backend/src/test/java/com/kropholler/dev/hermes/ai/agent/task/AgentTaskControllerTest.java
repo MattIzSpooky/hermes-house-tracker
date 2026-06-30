@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
+import com.kropholler.dev.hermes.ai.agent.task.openapi.AgentTaskResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
