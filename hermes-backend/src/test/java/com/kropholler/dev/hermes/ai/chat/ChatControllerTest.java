@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai;
+package com.kropholler.dev.hermes.ai.chat;
 
 import com.kropholler.dev.hermes.ai.chat.AiChatService;
 import com.kropholler.dev.hermes.ai.chat.ChatController;

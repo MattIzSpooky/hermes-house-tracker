@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai;
+package com.kropholler.dev.hermes.listing.summary;
 
 import com.kropholler.dev.hermes.listing.summary.ListingSummary;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryRepository;

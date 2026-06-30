@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.internal;
+package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;

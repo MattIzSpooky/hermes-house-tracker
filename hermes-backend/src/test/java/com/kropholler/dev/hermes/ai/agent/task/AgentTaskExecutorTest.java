@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.agent.internal;
+package com.kropholler.dev.hermes.ai.agent.task;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;

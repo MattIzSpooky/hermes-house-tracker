@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.agent.internal;
+package com.kropholler.dev.hermes.ai.agent.task.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;

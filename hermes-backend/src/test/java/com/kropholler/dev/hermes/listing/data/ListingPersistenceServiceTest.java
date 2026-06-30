@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.listing.internal;
+package com.kropholler.dev.hermes.listing.data;
 
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
