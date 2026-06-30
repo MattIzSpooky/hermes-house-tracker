@@ -1,9 +1,5 @@
-package com.kropholler.dev.hermes.api;
+package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -14,6 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -26,6 +23,7 @@ class AgentTaskControllerTest {
 
     @Autowired MockMvc mockMvc;
     @MockitoBean AgentTaskService agentTaskService;
+    @MockitoBean AgentTaskApiMapper agentTaskApiMapper;
 
     @Test
     void getAgentTasks_returnsMappedList() throws Exception {
@@ -35,7 +33,15 @@ class AgentTaskControllerTest {
             clientId, "My watch", "0 0 8 * * *", Instant.parse("2026-06-01T08:00:00Z"),
             Instant.parse("2026-06-20T08:00:00Z"), Instant.parse("2026-05-01T00:00:00Z"));
 
+        AgentTaskResponse response = new AgentTaskResponse();
+        response.setId(taskId);
+        response.setType("WATCH");
+        response.setStatus("ACTIVE");
+        response.setName("My watch");
+        response.setSchedule("0 0 8 * * *");
+
         when(agentTaskService.findByClientId(clientId)).thenReturn(List.of(dto));
+        when(agentTaskApiMapper.toResponse(any())).thenReturn(response);
 
         mockMvc.perform(get("/api/agent-tasks").param("clientId", clientId.toString()))
             .andExpect(status().isOk())

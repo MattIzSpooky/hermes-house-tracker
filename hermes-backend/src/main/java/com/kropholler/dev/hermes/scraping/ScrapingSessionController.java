@@ -1,10 +1,5 @@
-package com.kropholler.dev.hermes.api;
+package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.api.generated.ScrapingSessionsApi;
-import com.kropholler.dev.hermes.api.generated.model.CreateScrapingSessionRequest;
-import com.kropholler.dev.hermes.api.generated.model.ScrapingSessionResponse;
-import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +10,10 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-class ScrapingSessionController implements ScrapingSessionsApi {
+public class ScrapingSessionController implements ScrapingSessionsApi {
 
     private final ScrapingQueueService queueService;
-    private final ApiMapper apiMapper;
+    private final ScrapingSessionApiMapper scrapingSessionApiMapper;
 
     @Override
     public ResponseEntity<ScrapingSessionResponse> createScrapingSession(
@@ -31,13 +26,13 @@ class ScrapingSessionController implements ScrapingSessionsApi {
             request.getMaxArea(),
             request.getPageLimit()
         );
-        return ResponseEntity.status(HttpStatus.CREATED).body(apiMapper.toSessionResponse(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(scrapingSessionApiMapper.toResponse(dto));
     }
 
     @Override
     public ResponseEntity<ScrapingSessionResponse> getScrapingSession(UUID id) {
         return queueService.findById(id)
-            .map(dto -> ResponseEntity.ok(apiMapper.toSessionResponse(dto)))
+            .map(dto -> ResponseEntity.ok(scrapingSessionApiMapper.toResponse(dto)))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Scraping session " + id + " not found"));
     }

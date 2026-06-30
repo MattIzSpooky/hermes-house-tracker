@@ -1,12 +1,6 @@
-package com.kropholler.dev.hermes.api;
+package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.api.generated.ListingsApi;
-import com.kropholler.dev.hermes.api.generated.model.*;
-import com.kropholler.dev.hermes.listing.ListingDto;
-import com.kropholler.dev.hermes.listing.ListingSearchParams;
-import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +16,13 @@ import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
-class ListingController implements ListingsApi {
+public class ListingController implements ListingsApi {
 
     private final ListingService listingService;
     private final ScrapingQueueService queueService;
-    private final ReportService reportService;
     private final ListingSummaryService summaryService;
-    private final ApiMapper apiMapper;
+    private final ListingApiMapper listingApiMapper;
+    private final RescrapeMapper rescrapeMapper;
 
     @Override
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
@@ -40,7 +34,7 @@ class ListingController implements ListingsApi {
             minBedrooms, minRooms, minLivingAreaM2, energyLabel, radiusKm);
         Page<ListingDto> result = listingService.findAll(params, PageRequest.of(page, size));
         ListingPage response = new ListingPage()
-            .content(result.getContent().stream().map(apiMapper::toSummaryResponse).toList())
+            .content(result.getContent().stream().map(listingApiMapper::toSummaryResponse).toList())
             .totalElements(result.getTotalElements())
             .totalPages(result.getTotalPages())
             .page(result.getNumber())
@@ -51,7 +45,7 @@ class ListingController implements ListingsApi {
     @Override
     public ResponseEntity<ListingDetailResponse> getListing(UUID id) {
         return listingService.findById(id)
-            .map(dto -> ResponseEntity.ok(apiMapper.toDetailResponse(dto)))
+            .map(dto -> ResponseEntity.ok(listingApiMapper.toDetailResponse(dto)))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
     }
@@ -62,15 +56,7 @@ class ListingController implements ListingsApi {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Listing " + id + " not found"));
         ScrapingSessionDto session = queueService.enqueueRescrape(listing.url(), listing.city());
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(apiMapper.toSessionResponse(session));
-    }
-
-    @Override
-    public ResponseEntity<ListingReportResponse> getListingReport(UUID id) {
-        return reportService.generateReport(id)
-            .map(report -> ResponseEntity.ok(apiMapper.toReportResponse(report)))
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Listing " + id + " not found"));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(rescrapeMapper.toResponse(session));
     }
 
     @Override

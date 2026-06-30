@@ -97,9 +97,12 @@ export interface AiSummaryResponse {
   generatedAt: string;
 }
 
-export interface ErrorResponse {
-  error: string;
-  detail: string;
+export interface ProblemDetail {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
 }
 
 export const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];

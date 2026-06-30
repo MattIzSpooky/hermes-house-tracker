@@ -1,9 +1,6 @@
-package com.kropholler.dev.hermes.api;
+package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.listing.ListingSearchParams;
-import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,9 +25,9 @@ class ListingControllerSearchTest {
     @Autowired MockMvc mockMvc;
     @MockitoBean ListingService listingService;
     @MockitoBean ScrapingQueueService queueService;
-    @MockitoBean ReportService reportService;
     @MockitoBean ListingSummaryService summaryService;
-    @MockitoBean ApiMapper apiMapper;
+    @MockitoBean ListingApiMapper listingApiMapper;
+    @MockitoBean RescrapeMapper rescrapeMapper;
 
     @Test
     void getListings_passesStreetParamToService() throws Exception {

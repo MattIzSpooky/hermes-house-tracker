@@ -1,33 +1,35 @@
 package com.kropholler.dev.hermes.favourites;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/favourites")
 @RequiredArgsConstructor
-public class FavouriteController {
+public class FavouriteController implements FavouritesApi {
 
     private final FavouriteService favouriteService;
+    private final FavouriteApiMapper favouriteApiMapper;
 
-    @GetMapping("/{clientId}")
-    public List<FavouriteDto> getFavourites(@PathVariable UUID clientId) {
-        return favouriteService.findByClientId(clientId);
+    @Override
+    public ResponseEntity<List<FavouriteResponse>> getFavourites(UUID clientId) {
+        List<FavouriteResponse> responses = favouriteService.findByClientId(clientId)
+            .stream().map(favouriteApiMapper::toResponse).toList();
+        return ResponseEntity.ok(responses);
     }
 
-    @PutMapping("/{clientId}/{listingId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addFavourite(@PathVariable UUID clientId, @PathVariable UUID listingId) {
+    @Override
+    public ResponseEntity<Void> addFavourite(UUID clientId, UUID listingId) {
         favouriteService.addFavourite(clientId, listingId);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{clientId}/{listingId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeFavourite(@PathVariable UUID clientId, @PathVariable UUID listingId) {
+    @Override
+    public ResponseEntity<Void> removeFavourite(UUID clientId, UUID listingId) {
         favouriteService.removeFavourite(clientId, listingId);
+        return ResponseEntity.noContent().build();
     }
 }

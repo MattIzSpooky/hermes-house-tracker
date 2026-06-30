@@ -1,7 +1,5 @@
-package com.kropholler.dev.hermes.api;
+package com.kropholler.dev.hermes.ai.agent.notification;
 
-import com.kropholler.dev.hermes.ai.agent.notification.NotificationDto;
-import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -12,6 +10,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -24,6 +23,7 @@ class NotificationControllerTest {
 
     @Autowired MockMvc mockMvc;
     @MockitoBean NotificationService notificationService;
+    @MockitoBean NotificationApiMapper notificationApiMapper;
 
     @Test
     void getNotifications_returnsMappedList() throws Exception {
@@ -35,7 +35,17 @@ class NotificationControllerTest {
             "New listing found", "Check it out", List.of(listingId),
             false, Instant.parse("2026-06-19T08:00:00Z"), null);
 
+        NotificationResponse response = new NotificationResponse();
+        response.setId(notifId);
+        response.setTaskId(taskId);
+        response.setClientId(clientId);
+        response.setTitle("New listing found");
+        response.setBody("Check it out");
+        response.setListingIds(List.of(listingId));
+        response.setRead(false);
+
         when(notificationService.findByClientId(clientId)).thenReturn(List.of(dto));
+        when(notificationApiMapper.toResponse(any())).thenReturn(response);
 
         mockMvc.perform(get("/api/notifications").param("clientId", clientId.toString()))
             .andExpect(status().isOk())

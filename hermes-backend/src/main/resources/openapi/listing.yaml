@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Hermes Listings API
+  version: 1.0.0
+
+paths:
+  /api/listings:
+    get:
+      operationId: getListings
+      tags: [Listings]
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: size
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: street
+          in: query
+          schema:
+            type: string
+        - name: houseNumber
+          in: query
+          schema:
+            type: string
+        - name: houseNumberAddition
+          in: query
+          schema:
+            type: string
+        - name: zipCode
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: province
+          in: query
+          schema:
+            type: string
+        - name: minBedrooms
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: minRooms
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: minLivingAreaM2
+          in: query
+          required: false
+          schema:
+            type: integer
+            nullable: true
+        - name: energyLabel
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+        - name: radiusKm
+          in: query
+          required: false
+          description: Search radius in kilometres
+          schema:
+            type: integer
+            nullable: true
+      responses:
+        '200':
+          description: Paginated listing results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingPage'
+
+  /api/listings/{id}:
+    get:
+      operationId: getListing
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Listing found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingDetailResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/listings/{id}/rescrape:
+    post:
+      operationId: rescrapeListing
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Rescrape session enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScrapingSessionResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/listings/{id}/summary:
+    get:
+      operationId: getListingSummary
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: AI summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiSummaryResponse'
+        '404':
+          description: Listing or summary not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+  /api/listings/{id}/summary/generate:
+    post:
+      operationId: requestListingSummaryGeneration
+      tags: [Listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Generation request accepted
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    ListingPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListingSummaryResponse'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        page:
+          type: integer
+        size:
+          type: integer
+
+    ListingSummaryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        street:
+          type: string
+        houseNumber:
+          type: string
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        askingPrice:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        firstSeenAt:
+          type: string
+          format: date-time
+
+    ListingDetailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        fundaId:
+          type: string
+        url:
+          type: string
+        street:
+          type: string
+        houseNumber:
+          type: string
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+        city:
+          type: string
+        province:
+          type: string
+        firstSeenAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        currentPrice:
+          type: integer
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        livingAreaM2:
+          type: integer
+          nullable: true
+        plotAreaM2:
+          type: integer
+          nullable: true
+        rooms:
+          type: integer
+          nullable: true
+        bedrooms:
+          type: integer
+          nullable: true
+        energyLabel:
+          type: string
+          nullable: true
+
+    ScrapingSessionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [PENDING, IN_PROGRESS, COMPLETED, FAILED, TIMED_OUT]
+        type:
+          type: string
+          enum: [SEARCH, RESCRAPE]
+        createdAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    AiSummaryResponse:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        summary:
+          type: string
+        generatedAt:
+          type: string
+          format: date-time
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
