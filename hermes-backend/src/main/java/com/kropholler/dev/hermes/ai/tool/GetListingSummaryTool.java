@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai.tool;
 
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryDto;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.ai.tool.json.AddressParams;
 import com.kropholler.dev.hermes.listing.ListingService;
@@ -36,7 +37,7 @@ public class GetListingSummaryTool {
         callCounter.increment();
         return listingService.findByAddress(params.street(), params.houseNumber(), params.city())
                 .map(dto -> listingSummaryService.findByListingId(dto.id())
-                        .map(summary -> summary.summary())
+                        .map(ListingSummaryDto::summary)
                         .orElseGet(() -> dto.description() != null && !dto.description().isBlank()
                                 ? dto.description()
                                 : "No description is available for this property yet."))

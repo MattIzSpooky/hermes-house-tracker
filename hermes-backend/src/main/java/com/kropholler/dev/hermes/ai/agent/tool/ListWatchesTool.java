@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -9,11 +10,11 @@ import org.springframework.ai.tool.annotation.ToolParam;
 import java.util.List;
 import java.util.UUID;
 
-@RequiredArgsConstructor
-public class ListWatchesTool {
+class ListWatchesTool extends TaskTool {
 
-    private final UUID clientId;
-    private final AgentTaskService agentTaskService;
+    protected ListWatchesTool(UUID clientId, AgentTaskService agentTaskService) {
+        super(clientId, agentTaskService);
+    }
 
     @Tool(description = "List the user's active watches (listing alerts). "
         + "Call this when the user asks what alerts or watches they have set up. "
@@ -39,5 +40,10 @@ public class ListWatchesTool {
               .append("\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public String execute(Object param) {
+        return "";
     }
 }

@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class AgentTaskExecutor {
+class AgentTaskExecutor {
 
     private final Map<AgentTaskType, AgentTaskHandler> handlers;
     private final AgentTaskService agentTaskService;
     private final NotificationService notificationService;
 
-    public AgentTaskExecutor(List<AgentTaskHandler> handlerList,
+    AgentTaskExecutor(List<AgentTaskHandler> handlerList,
                               AgentTaskService agentTaskService,
                               NotificationService notificationService) {
         this.handlers = handlerList.stream()
@@ -26,7 +26,7 @@ public class AgentTaskExecutor {
         this.notificationService = notificationService;
     }
 
-    public void execute(AgentTask task) {
+    void execute(AgentTask task) {
         AgentTaskHandler handler = handlers.get(task.getType());
         if (handler == null) {
             log.warn("No handler registered for task type {}, skipping task {}", task.getType(), task.getId());

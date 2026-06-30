@@ -37,7 +37,7 @@ public class GetPriceHistoryTool {
                             .append(dto.street()).append(" ").append(dto.houseNumber())
                             .append(", ").append(dto.city()).append(":\n");
                     for (PriceHistoryEntryDto e : history) {
-                        sb.append("- ").append(e.timestamp().toString().substring(0, 10))
+                        sb.append("- ").append(e.timestamp().toString(), 0, 10)
                                 .append(": €").append(String.format("%,d", e.price()).replace(",", ".")
                                 ).append("\n");
                     }

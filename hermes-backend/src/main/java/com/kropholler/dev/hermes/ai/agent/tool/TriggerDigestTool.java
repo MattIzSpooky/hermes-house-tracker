@@ -9,11 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-@RequiredArgsConstructor
-public class TriggerDigestTool {
+class TriggerDigestTool extends TaskTool {
 
-    private final UUID clientId;
-    private final AgentTaskService agentTaskService;
+    protected TriggerDigestTool(UUID clientId, AgentTaskService agentTaskService) {
+        super(clientId, agentTaskService);
+    }
 
     @Tool(description = "Schedule a weekly market digest for one or more cities. "
         + "Call this when the user asks for a weekly summary, market digest, or recurring market update for specific cities. "

@@ -14,26 +14,27 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
-public class FindPriceDropTool {
+public class FindPriceDropTool implements AITool<PriceDropParams> {
     private final ListingService listingService;
     private final ChatListingCardMapper mapper;
     private final AtomicReference<List<ChatListingCard>> resultHolder;
     private final Counter callCounter;
 
     public FindPriceDropTool(ListingService listingService,
-                              ChatListingCardMapper mapper,
-                              AtomicReference<List<ChatListingCard>> resultHolder,
-                              MeterRegistry meterRegistry) {
+                             ChatListingCardMapper mapper,
+                             AtomicReference<List<ChatListingCard>> resultHolder,
+                             MeterRegistry meterRegistry) {
         this.listingService = listingService;
         this.mapper = mapper;
         this.resultHolder = resultHolder;
         this.callCounter = meterRegistry.counter("hermes.ai.tool.calls", "tool", "findPriceDrop");
     }
 
+    @Override
     @Tool(description = "Find properties whose asking price has dropped since they were first tracked. "
             + "Call this when the user asks about price reductions, bargains, or properties that got cheaper. "
             + "Returns up to 5 listings with the largest percentage price drops.")
-    public String findPriceDrop(PriceDropParams params) {
+    public String execute(PriceDropParams params) {
         String city = params.city() != null && !params.city().isBlank() ? params.city().strip() : null;
         double minDrop = params.minDropPercent() != null ? params.minDropPercent() : 1.0;
         log.info("findPriceDrop called: city={}, minDropPercent={}", city, minDrop);

@@ -1,17 +1,16 @@
 package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
-@RequiredArgsConstructor
-public class TriggerResearchTool {
+class TriggerResearchTool extends TaskTool {
 
-    private final UUID clientId;
-    private final AgentTaskService agentTaskService;
+    protected TriggerResearchTool(UUID clientId, AgentTaskService agentTaskService) {
+        super(clientId, agentTaskService);
+    }
 
     @Tool(description = "Queue a background research task. "
         + "Call this when the user wants a deep analysis, a full market report, or asks to 'research' something. "

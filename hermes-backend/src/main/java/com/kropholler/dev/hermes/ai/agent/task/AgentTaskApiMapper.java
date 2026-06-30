@@ -8,12 +8,11 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(config = MapStructConfig.class)
-public interface AgentTaskApiMapper {
+interface AgentTaskApiMapper {
 
     AgentTaskResponse toResponse(AgentTaskDto dto);
 
     default OffsetDateTime toOffsetDateTime(Instant instant) {
         return instant != null ? instant.atOffset(ZoneOffset.UTC) : null;
     }
-
 }

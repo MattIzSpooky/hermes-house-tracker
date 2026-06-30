@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class DigestTaskHandler implements AgentTaskHandler {
+class DigestTaskHandler implements AgentTaskHandler {
 
     private final ChatClient chatClient;
     private final ListingService listingService;

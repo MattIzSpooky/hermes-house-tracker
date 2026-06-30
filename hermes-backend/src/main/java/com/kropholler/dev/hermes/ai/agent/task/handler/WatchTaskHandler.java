@@ -21,7 +21,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class WatchTaskHandler implements AgentTaskHandler {
+class WatchTaskHandler implements AgentTaskHandler {
 
     private final ListingService listingService;
     private final ObjectMapper objectMapper;

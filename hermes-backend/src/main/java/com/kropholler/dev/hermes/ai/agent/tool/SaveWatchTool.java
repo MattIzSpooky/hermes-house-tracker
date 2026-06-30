@@ -8,11 +8,11 @@ import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
-@RequiredArgsConstructor
-public class SaveWatchTool {
+class SaveWatchTool extends TaskTool {
 
-    private final UUID clientId;
-    private final AgentTaskService agentTaskService;
+    protected SaveWatchTool(UUID clientId, AgentTaskService agentTaskService) {
+        super(clientId, agentTaskService);
+    }
 
     @Tool(description = "Save a listing watch that runs daily and sends a notification when new properties matching your criteria appear. "
         + "Call this when the user asks to be alerted, notified, or monitored for listings. "
@@ -45,7 +45,7 @@ public class SaveWatchTool {
         if (city != null) sb.append(city).append(" ");
         if (minBedrooms != null) sb.append(minBedrooms).append("-bed ");
         if (maxPrice != null) sb.append("under €").append(String.format("%,d", maxPrice).replace(",", "."));
-        return sb.toString().strip().isEmpty() ? "New watch" : sb.toString().strip();
+        return sb.toString().isBlank() ? "New watch" : sb.toString().strip();
     }
 
     private static String blankToNull(String s) {

@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 @Component
-public class ResearchTaskHandler implements AgentTaskHandler {
+class ResearchTaskHandler implements AgentTaskHandler {
 
     private final ChatClient chatClient;
     private final ListingService listingService;

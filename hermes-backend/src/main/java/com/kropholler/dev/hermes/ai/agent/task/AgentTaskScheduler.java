@@ -10,13 +10,13 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AgentTaskScheduler {
+class AgentTaskScheduler {
 
     private final AgentTaskService agentTaskService;
     private final AgentTaskExecutor executor;
 
     @Scheduled(fixedDelay = 60_000)
-    public void tick() {
+    void tick() {
         List<AgentTask> due = agentTaskService.findDueTasks();
         if (!due.isEmpty()) {
             log.info("AgentTaskScheduler: executing {} due task(s)", due.size());
