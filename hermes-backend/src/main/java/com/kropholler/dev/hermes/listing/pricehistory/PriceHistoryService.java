@@ -1,11 +1,11 @@
 package com.kropholler.dev.hermes.listing.pricehistory;
 
+import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
 import com.kropholler.dev.hermes.listing.data.Listing;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
+import com.kropholler.dev.hermes.funda.RawPriceChange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ public class PriceHistoryService {
 
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
-    private final FundaProxyFacade proxyFacade;
+    private final FundaClient fundaClient;
     private final JmsTemplate jmsTemplate;
 
     public void refreshAll() {
@@ -50,7 +50,7 @@ public class PriceHistoryService {
     // is held during the proxyFacade HTTP call below.
     @Transactional
     public void fetchAndStore(UUID listingId, String fundaId) {
-        List<RawPriceChange> changes = proxyFacade.getPriceHistory(fundaId);
+        List<RawPriceChange> changes = fundaClient.getPriceHistory(fundaId);
         for (RawPriceChange change : changes) {
             if (change.timestamp() == null) continue;
             if (priceHistoryRepository.existsByListingIdAndTimestamp(listingId, change.timestamp())) {

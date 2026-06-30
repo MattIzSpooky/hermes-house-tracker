@@ -1,10 +1,10 @@
 package com.kropholler.dev.hermes.listing.async.consumer;
 
+import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
 import com.kropholler.dev.hermes.listing.data.Listing;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.funda.RawListing;
+import com.kropholler.dev.hermes.funda.RawListing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 class ListingDetailsConsumerTest {
 
     @Mock private ListingRepository listingRepository;
-    @Mock private FundaProxyFacade proxyFacade;
+    @Mock private FundaClient fundaClient;
 
     @InjectMocks
     private ListingDetailsConsumer consumer;
@@ -42,7 +42,7 @@ class ListingDetailsConsumerTest {
         FetchListingDetailsCommand command = new FetchListingDetailsCommand(listingId, "12345678");
 
         RawListing raw = richListing("12345678");
-        when(proxyFacade.getListing("12345678")).thenReturn(Optional.of(raw));
+        when(fundaClient.getListing("12345678")).thenReturn(Optional.of(raw));
 
         Listing listing = new Listing();
         listing.setId(listingId);
@@ -67,7 +67,7 @@ class ListingDetailsConsumerTest {
         UUID listingId = UUID.randomUUID();
         FetchListingDetailsCommand command = new FetchListingDetailsCommand(listingId, "99999999");
 
-        when(proxyFacade.getListing("99999999")).thenReturn(Optional.empty());
+        when(fundaClient.getListing("99999999")).thenReturn(Optional.empty());
 
         consumer.onMessage(command);
 
@@ -80,7 +80,7 @@ class ListingDetailsConsumerTest {
         FetchListingDetailsCommand command = new FetchListingDetailsCommand(listingId, "12345678");
 
         RawListing raw = richListing("12345678");
-        when(proxyFacade.getListing("12345678")).thenReturn(Optional.of(raw));
+        when(fundaClient.getListing("12345678")).thenReturn(Optional.of(raw));
         when(listingRepository.findById(listingId)).thenReturn(Optional.empty());
 
         consumer.onMessage(command);

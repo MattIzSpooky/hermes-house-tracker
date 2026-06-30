@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.scraping.schedule.session;
 
-import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.funda.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyClient;
+import com.kropholler.dev.hermes.funda.FundaClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class ScrapingWorkerTest {
 
     @Mock private ScrapingSessionStore sessionStore;
-    @Mock private FundaProxyClient proxyClient;
+    @Mock private FundaClient proxyClient;
     @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks

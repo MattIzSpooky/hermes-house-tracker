@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
 import com.kropholler.dev.hermes.listing.data.Listing;
@@ -7,8 +8,7 @@ import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
+import com.kropholler.dev.hermes.funda.RawPriceChange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -34,7 +34,7 @@ class PriceHistoryServiceTest {
 
     @Mock private ListingRepository listingRepository;
     @Mock private PriceHistoryEntryRepository priceHistoryRepository;
-    @Mock private FundaProxyFacade proxyFacade;
+    @Mock private FundaClient fundaClient;
     @Mock private JmsTemplate jmsTemplate;
 
     @InjectMocks
@@ -47,7 +47,7 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), ts);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
         when(priceHistoryRepository.existsByListingIdAndTimestamp(listingId, ts)).thenReturn(false);
 
         service.fetchAndStore(listingId, "12345678");
@@ -66,7 +66,7 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), ts);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
         when(priceHistoryRepository.existsByListingIdAndTimestamp(listingId, ts)).thenReturn(true);
 
         service.fetchAndStore(listingId, "12345678");
@@ -80,7 +80,7 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), null);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
 
         service.fetchAndStore(listingId, "12345678");
 

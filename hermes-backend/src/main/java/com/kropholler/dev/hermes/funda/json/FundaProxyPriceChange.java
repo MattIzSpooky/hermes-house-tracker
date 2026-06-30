@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.scraping.funda.json;
+package com.kropholler.dev.hermes.funda.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

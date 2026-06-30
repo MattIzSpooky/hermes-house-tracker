@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.scraping.funda;
+package com.kropholler.dev.hermes.funda;
 
 public record RawListing(
     String fundaId,

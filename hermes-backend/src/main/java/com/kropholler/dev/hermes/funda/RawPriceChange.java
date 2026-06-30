@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.scraping.funda;
+package com.kropholler.dev.hermes.funda;
 
 import java.time.Instant;
 import java.time.LocalDate;

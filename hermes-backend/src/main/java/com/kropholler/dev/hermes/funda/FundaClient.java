@@ -1,7 +1,7 @@
-package com.kropholler.dev.hermes.scraping.funda;
+package com.kropholler.dev.hermes.funda;
 
-import com.kropholler.dev.hermes.scraping.funda.json.FundaProxyListing;
-import com.kropholler.dev.hermes.scraping.funda.json.FundaProxyPriceChange;
+import com.kropholler.dev.hermes.funda.json.FundaProxyListing;
+import com.kropholler.dev.hermes.funda.json.FundaProxyPriceChange;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class FundaProxyClient {
+public class FundaClient {
 
     private static final Pattern ID_PATTERN = Pattern.compile("/(\\d{7,9})(?:/|$)");
     private static final ParameterizedTypeReference<List<FundaProxyListing>> LISTING_LIST =
@@ -27,11 +27,11 @@ public class FundaProxyClient {
         new ParameterizedTypeReference<>() {};
 
     private final RestClient restClient;
-    private final FundaProxyListingMapper mapper;
+    private final FundaListingMapper mapper;
 
-    FundaProxyClient(RestClient.Builder builder,
-                     @Value("${funda.proxy.url:http://funda-proxy:8001}") String baseUrl,
-                     FundaProxyListingMapper mapper) {
+    FundaClient(RestClient.Builder builder,
+                @Value("${funda.proxy.url:http://funda-proxy:8001}") String baseUrl,
+                FundaListingMapper mapper) {
         this.restClient = builder.baseUrl(baseUrl).build();
         this.mapper = mapper;
     }

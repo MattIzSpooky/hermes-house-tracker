@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.scraping.schedule.session;
 
-import com.kropholler.dev.hermes.scraping.funda.RawListing;
+import com.kropholler.dev.hermes.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionFailed;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;

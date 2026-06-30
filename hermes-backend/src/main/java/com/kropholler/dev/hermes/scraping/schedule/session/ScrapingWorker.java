@@ -1,9 +1,9 @@
 package com.kropholler.dev.hermes.scraping.schedule.session;
 
-import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.funda.RawListing;
+import com.kropholler.dev.hermes.funda.ListingNotFound;
+import com.kropholler.dev.hermes.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyClient;
+import com.kropholler.dev.hermes.funda.FundaClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,7 +20,7 @@ import java.util.Optional;
 class ScrapingWorker {
 
     private final ScrapingSessionStore sessionStore;
-    private final FundaProxyClient proxyClient;
+    private final FundaClient proxyClient;
     private final ApplicationEventPublisher eventPublisher;
 
     @Async

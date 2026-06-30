@@ -1,10 +1,10 @@
 package com.kropholler.dev.hermes.listing.async.consumer;
 
 import com.google.common.util.concurrent.RateLimiter;
+import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
 import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -20,7 +20,7 @@ class ListingDetailsConsumer {
     private static final RateLimiter RATE_LIMITER = RateLimiter.create(50.0 / 60.0);
 
     private final ListingRepository listingRepository;
-    private final FundaProxyFacade proxyFacade;
+    private final FundaClient fundaClient;
 
     @JmsListener(destination = JmsQueues.LISTING_DETAILS_FETCH)
     @Transactional
@@ -28,7 +28,7 @@ class ListingDetailsConsumer {
         RATE_LIMITER.acquire();
         log.info("Fetching listing details for {}", command.listingId());
 
-        var externalListingOptional = proxyFacade.getListing(command.fundaId());
+        var externalListingOptional = fundaClient.getListing(command.fundaId());
 
         if (externalListingOptional.isEmpty()) {
             log.error("Proxy could not find listing {}", command.listingId());
