@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.listing.summary;
 
-import com.kropholler.dev.hermes.listing.summary.ListingSummary;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryEntity;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryRepository;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryDto;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
@@ -28,7 +28,7 @@ class ListingSummaryServiceTest {
     @Test
     void findByListingId_returnsDtoWhenSummaryExists() {
         UUID listingId = UUID.randomUUID();
-        ListingSummary summary = new ListingSummary();
+        ListingSummaryEntity summary = new ListingSummaryEntity();
         summary.setListingId(listingId);
         summary.setSummary("A lovely apartment in Amsterdam.");
         summary.setGeneratedAt(Instant.now());

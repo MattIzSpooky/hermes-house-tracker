@@ -500,7 +500,27 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.13</version>
+                <version>0.8.15</version>
+                <configuration>
+                    <includes>
+                        <include>com/kropholler/dev/hermes/**</include>
+                    </includes>
+                    <excludes>
+                        <!-- OpenAPI generated interfaces and models -->
+                        <exclude>**/openapi/**</exclude>
+                        <!-- MapStruct generated implementations -->
+                        <exclude>**/*MapperImpl*</exclude>
+                        <!-- Spring CGLIB proxies and AoT-generated classes -->
+                        <exclude>**/*$$*</exclude>
+                        <exclude>**/*__BeanDefinitions*</exclude>
+                        <exclude>**/*__AotRepository*</exclude>
+                        <!-- Hibernate reflection optimizer classes (generated per entity) -->
+                        <exclude>**/*__Accessor_*</exclude>
+                        <exclude>**/*__Instantiator_*</exclude>
+                        <!-- JPA entity classes (excluded to avoid Hibernate bytecode-enhanced method noise) -->
+                        <exclude>**/*Entity*</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <id>prepare-agent</id>
@@ -512,14 +532,6 @@
                         <goals><goal>report</goal></goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <excludes>
-                        <!-- OpenAPI generated classes (models, interfaces, ApiUtil) -->
-                        <exclude>**/openapi/**</exclude>
-                        <!-- MapStruct generated implementations -->
-                        <exclude>**/*MapperImpl.class</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
     </build>

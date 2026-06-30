@@ -3,7 +3,7 @@ package com.kropholler.dev.hermes.ai.agent.task.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.WatchTaskHandler;
@@ -36,7 +36,7 @@ class WatchTaskHandlerTest {
 
     @Test
     void returnsEmptyWhenNoNewListings() throws Exception {
-        AgentTask task = watchTask(Instant.now().minusSeconds(3600));
+        AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto old = listing(Instant.now().minusSeconds(7200)); // seen before lastRunAt
         when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
             any(Boolean.class), any(), any(), any())).thenReturn(List.of(old));
@@ -48,7 +48,7 @@ class WatchTaskHandlerTest {
 
     @Test
     void returnsNotificationWhenNewListingFound() throws Exception {
-        AgentTask task = watchTask(Instant.now().minusSeconds(3600));
+        AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto newListing = listing(Instant.now().minusSeconds(60)); // seen after lastRunAt
         when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
             any(Boolean.class), any(), any(), any())).thenReturn(List.of(newListing));
@@ -60,9 +60,9 @@ class WatchTaskHandlerTest {
         assertThat(result.get().listingIds()).hasSize(1);
     }
 
-    private AgentTask watchTask(Instant lastRunAt) throws Exception {
+    private AgentTaskEntity watchTask(Instant lastRunAt) throws Exception {
         WatchPayload payload = new WatchPayload("Utrecht", null, null, 400000, 3, null, null, null, null, null);
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.WATCH);
         task.setStatus(AgentTaskStatus.ACTIVE);

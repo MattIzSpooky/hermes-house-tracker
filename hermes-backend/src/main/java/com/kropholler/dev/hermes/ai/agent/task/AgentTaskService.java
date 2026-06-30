@@ -27,7 +27,7 @@ public class AgentTaskService {
 
     @Transactional
     public AgentTaskDto createWatch(UUID clientId, String name, WatchPayload payload) {
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.WATCH);
         task.setClientId(clientId);
         task.setName(name);
@@ -39,7 +39,7 @@ public class AgentTaskService {
 
     @Transactional
     public AgentTaskDto createResearch(UUID clientId, String prompt) {
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.RESEARCH);
         task.setClientId(clientId);
         task.setName("Research: " + prompt.substring(0, Math.min(60, prompt.length())));
@@ -50,7 +50,7 @@ public class AgentTaskService {
 
     @Transactional
     public AgentTaskDto createDigest(UUID clientId, String name, List<String> cities) {
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.DIGEST);
         task.setClientId(clientId);
         task.setName(name);
@@ -73,7 +73,7 @@ public class AgentTaskService {
     }
 
     @Transactional
-    public void markRan(AgentTask task) {
+    public void markRan(AgentTaskEntity task) {
         task.setLastRunAt(Instant.now());
         if (task.getSchedule() != null) {
             task.setNextRunAt(computeNext(task.getSchedule()));
@@ -84,7 +84,7 @@ public class AgentTaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgentTask> findDueTasks() {
+    public List<AgentTaskEntity> findDueTasks() {
         return agentTaskRepository.findAllByStatusAndNextRunAtLessThanEqual(
             AgentTaskStatus.ACTIVE, Instant.now());
     }
@@ -103,7 +103,7 @@ public class AgentTaskService {
         }
     }
 
-    public AgentTaskDto toDto(AgentTask t) {
+    public AgentTaskDto toDto(AgentTaskEntity t) {
         return new AgentTaskDto(t.getId(), t.getType(), t.getStatus(), t.getClientId(),
             t.getName(), t.getSchedule(), t.getLastRunAt(), t.getNextRunAt(), t.getCreatedAt());
     }

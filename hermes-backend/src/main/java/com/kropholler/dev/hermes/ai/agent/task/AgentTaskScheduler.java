@@ -17,7 +17,7 @@ class AgentTaskScheduler {
 
     @Scheduled(fixedDelay = 60_000)
     void tick() {
-        List<AgentTask> due = agentTaskService.findDueTasks();
+        List<AgentTaskEntity> due = agentTaskService.findDueTasks();
         if (!due.isEmpty()) {
             log.info("AgentTaskScheduler: executing {} due task(s)", due.size());
             due.forEach(executor::execute);

@@ -15,7 +15,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ScrapingSession {
+public class ScrapingSessionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

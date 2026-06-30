@@ -2,7 +2,7 @@ package com.kropholler.dev.hermes.listing.async.consumer;
 
 import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.funda.RawListing;
 import org.junit.jupiter.api.Test;
@@ -44,16 +44,16 @@ class ListingDetailsConsumerTest {
         RawListing raw = richListing("12345678");
         when(fundaClient.getListing("12345678")).thenReturn(Optional.of(raw));
 
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setId(listingId);
         when(listingRepository.findById(listingId)).thenReturn(Optional.of(listing));
         when(listingRepository.save(any())).thenReturn(listing);
 
         consumer.onMessage(command);
 
-        ArgumentCaptor<Listing> captor = ArgumentCaptor.forClass(Listing.class);
+        ArgumentCaptor<ListingEntity> captor = ArgumentCaptor.forClass(ListingEntity.class);
         verify(listingRepository).save(captor.capture());
-        Listing saved = captor.getValue();
+        ListingEntity saved = captor.getValue();
         assertThat(saved.getDescription()).isEqualTo("Mooie woning");
         assertThat(saved.getLivingAreaM2()).isEqualTo(95);
         assertThat(saved.getRooms()).isEqualTo(4);

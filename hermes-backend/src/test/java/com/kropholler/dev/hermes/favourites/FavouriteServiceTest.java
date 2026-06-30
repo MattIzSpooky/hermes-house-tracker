@@ -27,7 +27,7 @@ class FavouriteServiceTest {
         UUID listingId = UUID.randomUUID();
         Instant now = Instant.now();
 
-        Favourite favourite = new Favourite();
+        FavouriteEntity favourite = new FavouriteEntity();
         favourite.setClientId(clientId);
         favourite.setListingId(listingId);
         favourite.setSavedAt(now);
@@ -49,7 +49,7 @@ class FavouriteServiceTest {
 
         service.addFavourite(clientId, listingId);
 
-        ArgumentCaptor<Favourite> cap = ArgumentCaptor.forClass(Favourite.class);
+        ArgumentCaptor<FavouriteEntity> cap = ArgumentCaptor.forClass(FavouriteEntity.class);
         verify(repository).save(cap.capture());
         assertThat(cap.getValue().getClientId()).isEqualTo(clientId);
         assertThat(cap.getValue().getListingId()).isEqualTo(listingId);

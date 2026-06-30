@@ -24,10 +24,10 @@ class ScrapingTimeoutWatchdog {
     @Transactional
     public void markTimedOutSessions() {
         Instant cutoff = Instant.now().minus(TIMEOUT_MINUTES, ChronoUnit.MINUTES);
-        List<ScrapingSession> stale = sessionRepository
+        List<ScrapingSessionEntity> stale = sessionRepository
             .findByStatusAndStartedAtBefore(ScrapingSessionStatus.IN_PROGRESS, cutoff);
 
-        for (ScrapingSession session : stale) {
+        for (ScrapingSessionEntity session : stale) {
             log.warn("Session {} timed out after {} minutes", session.getId(), TIMEOUT_MINUTES);
             session.setStatus(ScrapingSessionStatus.TIMED_OUT);
             session.setCompletedAt(Instant.now());

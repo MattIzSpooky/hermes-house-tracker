@@ -2,7 +2,7 @@ package com.kropholler.dev.hermes.ai.agent.task;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ class AgentTaskRepositoryTest {
 
     @Test
     void findsDueActiveTasks() {
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.WATCH);
         task.setClientId(UUID.randomUUID());
         task.setName("test watch");
@@ -32,7 +32,7 @@ class AgentTaskRepositoryTest {
         task.setNextRunAt(Instant.now().minusSeconds(60));
         repo.save(task);
 
-        List<AgentTask> due = repo.findAllByStatusAndNextRunAtLessThanEqual(
+        List<AgentTaskEntity> due = repo.findAllByStatusAndNextRunAtLessThanEqual(
             AgentTaskStatus.ACTIVE, Instant.now());
 
         assertThat(due).hasSize(1);
@@ -41,7 +41,7 @@ class AgentTaskRepositoryTest {
 
     @Test
     void doesNotReturnFutureTasks() {
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.RESEARCH);
         task.setClientId(UUID.randomUUID());
         task.setName("future task");
@@ -49,7 +49,7 @@ class AgentTaskRepositoryTest {
         task.setNextRunAt(Instant.now().plusSeconds(3600));
         repo.save(task);
 
-        List<AgentTask> due = repo.findAllByStatusAndNextRunAtLessThanEqual(
+        List<AgentTaskEntity> due = repo.findAllByStatusAndNextRunAtLessThanEqual(
             AgentTaskStatus.ACTIVE, Instant.now());
 
         assertThat(due).isEmpty();

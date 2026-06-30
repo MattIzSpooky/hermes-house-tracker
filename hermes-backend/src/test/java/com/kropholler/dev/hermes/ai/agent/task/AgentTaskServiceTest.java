@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import org.junit.jupiter.api.Test;
@@ -38,9 +38,9 @@ class AgentTaskServiceTest {
         WatchPayload payload = new WatchPayload("Utrecht", null, null, 400000, 3, null, null, null, null, null);
         service.createWatch(UUID.randomUUID(), "Utrecht 3-bed", payload);
 
-        ArgumentCaptor<AgentTask> captor = ArgumentCaptor.forClass(AgentTask.class);
+        ArgumentCaptor<AgentTaskEntity> captor = ArgumentCaptor.forClass(AgentTaskEntity.class);
         verify(repo).save(captor.capture());
-        AgentTask saved = captor.getValue();
+        AgentTaskEntity saved = captor.getValue();
 
         assertThat(saved.getType()).isEqualTo(AgentTaskType.WATCH);
         assertThat(saved.getSchedule()).isEqualTo("0 0 8 * * *");
@@ -54,9 +54,9 @@ class AgentTaskServiceTest {
 
         service.createResearch(UUID.randomUUID(), "analyse my favourites and recommend one");
 
-        ArgumentCaptor<AgentTask> captor = ArgumentCaptor.forClass(AgentTask.class);
+        ArgumentCaptor<AgentTaskEntity> captor = ArgumentCaptor.forClass(AgentTaskEntity.class);
         verify(repo).save(captor.capture());
-        AgentTask saved = captor.getValue();
+        AgentTaskEntity saved = captor.getValue();
 
         assertThat(saved.getType()).isEqualTo(AgentTaskType.RESEARCH);
         assertThat(saved.getSchedule()).isNull();
@@ -66,7 +66,7 @@ class AgentTaskServiceTest {
     @Test
     void markRanSetsCompletedForOneShot() {
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setSchedule(null);
         task.setStatus(AgentTaskStatus.ACTIVE);
         task.setType(AgentTaskType.RESEARCH);
@@ -83,7 +83,7 @@ class AgentTaskServiceTest {
     @Test
     void markRanUpdatesNextRunAtForRepeating() {
         when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
-        AgentTask task = new AgentTask();
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setSchedule("0 0 8 * * *");
         task.setStatus(AgentTaskStatus.ACTIVE);
         task.setType(AgentTaskType.WATCH);

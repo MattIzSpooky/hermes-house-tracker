@@ -24,7 +24,7 @@ class ScrapingWorker {
     private final ApplicationEventPublisher eventPublisher;
 
     @Async
-    public void process(ScrapingSession session) {
+    public void process(ScrapingSessionEntity session) {
         sessionStore.markInProgress(session.getId());
 
         try {
@@ -36,7 +36,7 @@ class ScrapingWorker {
         }
     }
 
-    private List<RawListing> scrapeAllPages(ScrapingSession session) {
+    private List<RawListing> scrapeAllPages(ScrapingSessionEntity session) {
         if (session.getType() == ScrapingSessionType.RESCRAPE) {
             String fundaId = proxyClient.extractFundaId(session.getTargetListingUrl());
             Optional<RawListing> listing = proxyClient.getListing(fundaId);

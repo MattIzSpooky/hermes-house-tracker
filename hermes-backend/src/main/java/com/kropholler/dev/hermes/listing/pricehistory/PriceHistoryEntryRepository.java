@@ -7,11 +7,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface PriceHistoryEntryRepository extends JpaRepository<PriceHistoryEntry, UUID> {
+public interface PriceHistoryEntryRepository extends JpaRepository<PriceHistoryEntryEntity, UUID> {
 
-    List<PriceHistoryEntry> findByListingIdOrderByTimestampAsc(UUID listingId);
+    List<PriceHistoryEntryEntity> findByListingIdOrderByTimestampAsc(UUID listingId);
 
-    Optional<PriceHistoryEntry> findFirstByListingIdAndStatusOrderByTimestampDesc(
+    Optional<PriceHistoryEntryEntity> findFirstByListingIdAndStatusOrderByTimestampDesc(
             UUID listingId, String status);
 
     boolean existsByListingIdAndTimestamp(UUID listingId, Instant timestamp);

@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.listing.geocoding;
 
-import com.kropholler.dev.hermes.listing.city.City;
+import com.kropholler.dev.hermes.listing.city.CityEntity;
 import com.kropholler.dev.hermes.listing.city.CityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +19,12 @@ public class GeocodingService {
     private final NominatimClient nominatimClient;
 
     @Transactional
-    public Optional<City> findOrFetchCity(String cityName) {
-        Optional<City> cached = cityRepository.findByNameIgnoreCase(cityName);
+    public Optional<CityEntity> findOrFetchCity(String cityName) {
+        Optional<CityEntity> cached = cityRepository.findByNameIgnoreCase(cityName);
         if (cached.isPresent()) return cached;
 
         return nominatimClient.geocodeCity(cityName).map(response -> {
-            City city = new City();
+            CityEntity city = new CityEntity();
             city.setName(cityName);
             city.setLongitude(Double.parseDouble(response.lon()));
             city.setLatitude(Double.parseDouble(response.lat()));

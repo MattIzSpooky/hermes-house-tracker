@@ -12,5 +12,5 @@ public interface ScrapingSessionMapper {
         "city", "minPrice", "maxPrice", "minArea", "maxArea",
         "pageLimit", "fundaUrl", "targetListingUrl", "startedAt"
     })
-    ScrapingSessionDto toDto(ScrapingSession session);
+    ScrapingSessionDto toDto(ScrapingSessionEntity session);
 }

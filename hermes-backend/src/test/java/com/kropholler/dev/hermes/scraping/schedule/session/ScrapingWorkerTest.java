@@ -28,7 +28,7 @@ class ScrapingWorkerTest {
 
     @Test
     void rescrape_publishesListingNotFound_when404() {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.RESCRAPE);
         session.setCity("amsterdam");
         session.setPageLimit(1);

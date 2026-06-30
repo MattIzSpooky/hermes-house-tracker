@@ -6,7 +6,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-interface AgentTaskRepository extends JpaRepository<AgentTask, UUID> {
-    List<AgentTask> findAllByStatusAndNextRunAtLessThanEqual(AgentTaskStatus status, Instant cutoff);
-    List<AgentTask> findAllByClientIdAndStatusOrderByCreatedAtDesc(UUID clientId, AgentTaskStatus status);
+interface AgentTaskRepository extends JpaRepository<AgentTaskEntity, UUID> {
+    List<AgentTaskEntity> findAllByStatusAndNextRunAtLessThanEqual(AgentTaskStatus status, Instant cutoff);
+    List<AgentTaskEntity> findAllByClientIdAndStatusOrderByCreatedAtDesc(UUID clientId, AgentTaskStatus status);
 }

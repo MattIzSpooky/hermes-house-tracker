@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpecificationExecutor<Listing> {
-    Optional<Listing> findByFundaId(String fundaId);
-    List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(
+public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, JpaSpecificationExecutor<ListingEntity> {
+    Optional<ListingEntity> findByFundaId(String fundaId);
+    List<ListingEntity> findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(
             String street, String houseNumber, String city);
-    List<Listing> findByStreetIgnoreCaseAndHouseNumberIgnoreCase(String street, String houseNumber);
-    Page<Listing> findAllByDeletedAtIsNull(Pageable pageable);
-    List<Listing> findByIdIn(List<UUID> ids);
+    List<ListingEntity> findByStreetIgnoreCaseAndHouseNumberIgnoreCase(String street, String houseNumber);
+    Page<ListingEntity> findAllByDeletedAtIsNull(Pageable pageable);
+    List<ListingEntity> findByIdIn(List<UUID> ids);
 
     @Query(value = """
             SELECT l.id::text FROM listings l
@@ -93,7 +93,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             LIMIT 5
             """,
             nativeQuery = true)
-    List<Listing> searchForChatNearLocation(
+    List<ListingEntity> searchForChatNearLocation(
             @Param("minBedrooms") Integer minBedrooms,
             @Param("minRooms") Integer minRooms,
             @Param("minLivingAreaM2") Integer minLivingAreaM2,
@@ -129,7 +129,7 @@ public interface ListingRepository extends JpaRepository<Listing, UUID>, JpaSpec
             ORDER BY CASE WHEN :sortDesc = true THEN -latest_price.price ELSE latest_price.price END ASC NULLS LAST
             LIMIT 5
             """, nativeQuery = true)
-    List<Listing> searchForChat(
+    List<ListingEntity> searchForChat(
             @Param("minBedrooms") Integer minBedrooms,
             @Param("minRooms") Integer minRooms,
             @Param("minLivingAreaM2") Integer minLivingAreaM2,

@@ -1,9 +1,9 @@
 package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +36,13 @@ class ListingServiceFindForChatTest {
      * stubs so that {@code ListingService.toDto} will produce a {@code ListingDto} whose
      * {@code currentPrice} equals {@code price} (or {@code null} when {@code price} is null).
      */
-    private Listing listingWithPrice(Integer price) {
+    private ListingEntity listingWithPrice(Integer price) {
         UUID id = UUID.randomUUID();
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setId(id);
 
         if (price != null) {
-            PriceHistoryEntry entry = mock(PriceHistoryEntry.class);
+            PriceHistoryEntryEntity entry = mock(PriceHistoryEntryEntity.class);
             when(entry.getPrice()).thenReturn(price);
             when(priceHistoryRepository.findFirstByListingIdAndStatusOrderByTimestampDesc(id, "asking_price"))
                     .thenReturn(Optional.of(entry));
@@ -55,10 +55,11 @@ class ListingServiceFindForChatTest {
                 null, null, price, null, null, null, null, null, null, null);
         when(mapper.toDto(listing, price)).thenReturn(dto);
 
+
         return listing;
     }
 
-    private void stubSearchForChat(List<Listing> results) {
+    private void stubSearchForChat(List<ListingEntity> results) {
         when(listingRepository.searchForChat(any(), any(), any(), any(), any(), any(), any(), any(), any(Boolean.class)))
                 .thenReturn(results);
     }
@@ -66,8 +67,8 @@ class ListingServiceFindForChatTest {
     @Test
     void findForChat_minPrice_excludesListingsBelowMinPrice() {
         // Price filtering is now in SQL; mock returns what the DB would return after filtering.
-        Listing exact     = listingWithPrice(200_000);
-        Listing expensive = listingWithPrice(300_000);
+        ListingEntity exact     = listingWithPrice(200_000);
+        ListingEntity expensive = listingWithPrice(300_000);
         stubSearchForChat(List.of(exact, expensive));
 
         List<ListingDto> result = service.findForChat(200_000, null, null, null, null, null, null, null, false, null, null, null);
@@ -79,8 +80,8 @@ class ListingServiceFindForChatTest {
     @Test
     void findForChat_maxPrice_excludesListingsAboveMaxPrice() {
         // Price filtering is now in SQL; mock returns what the DB would return after filtering.
-        Listing cheap = listingWithPrice(100_000);
-        Listing exact = listingWithPrice(200_000);
+        ListingEntity cheap = listingWithPrice(100_000);
+        ListingEntity exact = listingWithPrice(200_000);
         stubSearchForChat(List.of(cheap, exact));
 
         List<ListingDto> result = service.findForChat(null, 200_000, null, null, null, null, null, null, false, null, null, null);
@@ -92,7 +93,7 @@ class ListingServiceFindForChatTest {
     @Test
     void findForChat_nullCurrentPrice_excludedWhenMinPriceSet() {
         // SQL excludes listings with no price history when a minPrice is applied (NULL >= x is false).
-        Listing withPrice = listingWithPrice(200_000);
+        ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
         List<ListingDto> result = service.findForChat(100_000, null, null, null, null, null, null, null, false, null, null, null);
@@ -104,7 +105,7 @@ class ListingServiceFindForChatTest {
     @Test
     void findForChat_nullCurrentPrice_excludedWhenMaxPriceSet() {
         // SQL excludes listings with no price history when a maxPrice is applied (NULL <= x is false).
-        Listing withPrice = listingWithPrice(200_000);
+        ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
         List<ListingDto> result = service.findForChat(null, 300_000, null, null, null, null, null, null, false, null, null, null);
@@ -115,8 +116,8 @@ class ListingServiceFindForChatTest {
 
     @Test
     void findForChat_noPriceBounds_allListingsPassThrough() {
-        Listing a = listingWithPrice(100_000);
-        Listing b = listingWithPrice(200_000);
+        ListingEntity a = listingWithPrice(100_000);
+        ListingEntity b = listingWithPrice(200_000);
         stubSearchForChat(List.of(a, b));
 
         List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null);
@@ -127,8 +128,8 @@ class ListingServiceFindForChatTest {
     @Test
     void findForChat_noPriceBounds_nullPriceListingsPassThrough() {
         // With no price bounds, SQL does not filter on price, so listings without price history are included.
-        Listing noPrice   = listingWithPrice(null);
-        Listing withPrice = listingWithPrice(200_000);
+        ListingEntity noPrice   = listingWithPrice(null);
+        ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(noPrice, withPrice));
 
         List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null);

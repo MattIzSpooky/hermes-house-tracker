@@ -24,13 +24,13 @@ public class NotificationService {
 
     @Transactional
     public NotificationDto save(UUID taskId, UUID clientId, NotificationContent content) {
-        Notification notification = new Notification();
+        NotificationEntity notification = new NotificationEntity();
         notification.setTaskId(taskId);
         notification.setClientId(clientId);
         notification.setTitle(content.title());
         notification.setBody(content.body());
         notification.setListingIds(serializeIds(content.listingIds()));
-        Notification saved = notificationRepository.save(notification);
+        NotificationEntity saved = notificationRepository.save(notification);
 
         NotificationDto dto = toDto(saved, content.listingIds());
         messaging.convertAndSend("/topic/notifications/" + clientId, dto);
@@ -74,7 +74,7 @@ public class NotificationService {
         }
     }
 
-    private NotificationDto toDto(Notification n, List<UUID> listingIds) {
+    private NotificationDto toDto(NotificationEntity n, List<UUID> listingIds) {
         return new NotificationDto(n.getId(), n.getTaskId(), n.getClientId(),
             n.getTitle(), n.getBody(), listingIds, n.isRead(),
             n.getCreatedAt(), n.getEmailSentAt());

@@ -3,7 +3,7 @@ package com.kropholler.dev.hermes.listing.pricehistory;
 import com.kropholler.dev.hermes.funda.FundaClient;
 import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.funda.RawPriceChange;
 import lombok.RequiredArgsConstructor;
@@ -29,10 +29,10 @@ public class PriceHistoryService {
 
     public void refreshAll() {
         int page = 0;
-        Page<Listing> batch;
+        Page<ListingEntity> batch;
         do {
             batch = listingRepository.findAllByDeletedAtIsNull(PageRequest.of(page, 100));
-            for (Listing listing : batch.getContent()) {
+            for (ListingEntity listing : batch.getContent()) {
                 try {
                     jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                         new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
@@ -56,7 +56,7 @@ public class PriceHistoryService {
             if (priceHistoryRepository.existsByListingIdAndTimestamp(listingId, change.timestamp())) {
                 continue;
             }
-            PriceHistoryEntry entry = new PriceHistoryEntry();
+            PriceHistoryEntryEntity entry = new PriceHistoryEntryEntity();
             entry.setListingId(listingId);
             entry.setPrice(change.price());
             entry.setStatus(change.status());

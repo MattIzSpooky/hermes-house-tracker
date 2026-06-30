@@ -3,7 +3,7 @@ package com.kropholler.dev.hermes.ai.agent.task.handler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
@@ -55,7 +55,7 @@ class ResearchTaskHandler implements AgentTaskHandler {
     public AgentTaskType getType() { return AgentTaskType.RESEARCH; }
 
     @Override
-    public Optional<NotificationContent> handle(AgentTask task) {
+    public Optional<NotificationContent> handle(AgentTaskEntity task) {
         ResearchPayload payload;
         try {
             payload = objectMapper.readValue(task.getPayload(), ResearchPayload.class);

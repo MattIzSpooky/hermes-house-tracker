@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.listing.async.consumer;
 
 import com.kropholler.dev.hermes.listing.async.command.FetchGeocodingCommand;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
@@ -29,7 +29,7 @@ class GeocodingConsumerTest {
     @Test
     void onMessage_geocodesListingAndUpdatesGeometry() {
         UUID listingId = UUID.randomUUID();
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setHouseNumber("9");
         listing.setStreet("Rentmeesterlaan");
         listing.setCity("Weert");
@@ -53,7 +53,7 @@ class GeocodingConsumerTest {
     @Test
     void onMessage_nominatimReturnsEmpty_doesNotUpdateGeometry() {
         UUID listingId = UUID.randomUUID();
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setHouseNumber("1");
         listing.setStreet("Onbekend");
         listing.setCity("Nergens");

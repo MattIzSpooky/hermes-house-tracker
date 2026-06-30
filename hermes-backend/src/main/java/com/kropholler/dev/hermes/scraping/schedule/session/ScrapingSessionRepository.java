@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface ScrapingSessionRepository extends JpaRepository<ScrapingSession, UUID> {
+public interface ScrapingSessionRepository extends JpaRepository<ScrapingSessionEntity, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("SELECT s FROM ScrapingSession s WHERE s.status = :status ORDER BY s.createdAt ASC LIMIT 1")
-    Optional<ScrapingSession> findFirstPendingWithLock(ScrapingSessionStatus status);
+    @Query("SELECT s FROM ScrapingSessionEntity s WHERE s.status = :status ORDER BY s.createdAt ASC LIMIT 1")
+    Optional<ScrapingSessionEntity> findFirstPendingWithLock(ScrapingSessionStatus status);
 
-    List<ScrapingSession> findByStatusAndStartedAtBefore(ScrapingSessionStatus status, Instant cutoff);
+    List<ScrapingSessionEntity> findByStatusAndStartedAtBefore(ScrapingSessionStatus status, Instant cutoff);
 }

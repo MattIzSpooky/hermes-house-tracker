@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionEntity;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,8 +28,8 @@ class ScrapingQueueServiceTest {
 
     @BeforeEach
     void stubMapper() {
-        when(mapper.toDto(any(ScrapingSession.class))).thenAnswer(inv -> {
-            ScrapingSession s = inv.getArgument(0);
+        when(mapper.toDto(any(ScrapingSessionEntity.class))).thenAnswer(inv -> {
+            ScrapingSessionEntity s = inv.getArgument(0);
             return new ScrapingSessionDto(s.getId(), s.getStatus(), s.getType(),
                 s.getCreatedAt(), s.getCompletedAt());
         });
@@ -37,7 +37,7 @@ class ScrapingQueueServiceTest {
 
     @Test
     void enqueueSearch_clampsPageLimitToFive() {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
         session.setCity("amsterdam");
         session.setPageLimit(5);
@@ -51,7 +51,7 @@ class ScrapingQueueServiceTest {
 
     @Test
     void enqueueSearch_setsCorrectType() {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
         session.setCity("rotterdam");
         session.setPageLimit(3);
@@ -64,7 +64,7 @@ class ScrapingQueueServiceTest {
 
     @Test
     void enqueueRescrape_setsRescrapeType() {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.RESCRAPE);
         session.setCity("amsterdam");
         session.setPageLimit(1);

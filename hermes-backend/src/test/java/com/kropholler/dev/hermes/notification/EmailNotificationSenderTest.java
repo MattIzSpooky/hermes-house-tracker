@@ -38,7 +38,7 @@ class EmailNotificationSenderTest {
     @Test
     void sendAsync_sendsMailWithCorrectFields() {
         UUID id = UUID.randomUUID();
-        Notification entity = new Notification();
+        NotificationEntity entity = new NotificationEntity();
         setEmails("from@hermes.nl", "to@user.nl");
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
@@ -56,13 +56,13 @@ class EmailNotificationSenderTest {
     @Test
     void sendAsync_updatesEmailSentAt() {
         UUID id = UUID.randomUUID();
-        Notification entity = new Notification();
+        NotificationEntity entity = new NotificationEntity();
         setEmails("from@hermes.nl", "to@user.nl");
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
         sender.sendAsync(dto(id));
 
-        ArgumentCaptor<Notification> saved = ArgumentCaptor.forClass(Notification.class);
+        ArgumentCaptor<NotificationEntity> saved = ArgumentCaptor.forClass(NotificationEntity.class);
         verify(notificationRepository).save(saved.capture());
         assertThat(saved.getValue().getEmailSentAt()).isNotNull();
     }

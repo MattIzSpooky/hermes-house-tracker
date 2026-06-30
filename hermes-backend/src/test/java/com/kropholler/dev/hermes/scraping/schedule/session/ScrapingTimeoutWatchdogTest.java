@@ -27,7 +27,7 @@ class ScrapingTimeoutWatchdogTest {
 
     @Test
     void markTimedOutSessions_setsStatusAndCompletedAtOnStaleSessions() {
-        ScrapingSession stale = new ScrapingSession();
+        ScrapingSessionEntity stale = new ScrapingSessionEntity();
         stale.setId(UUID.randomUUID());
         stale.setStatus(ScrapingSessionStatus.IN_PROGRESS);
         stale.setType(ScrapingSessionType.SEARCH);

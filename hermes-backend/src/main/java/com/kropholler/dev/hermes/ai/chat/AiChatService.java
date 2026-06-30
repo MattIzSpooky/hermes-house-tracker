@@ -74,7 +74,7 @@ public class AiChatService {
     public void saveUserMessage(UUID sessionId, String content) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(content, "content must not be null");
-        ChatMessage msg = new ChatMessage();
+        ChatMessageEntity msg = new ChatMessageEntity();
         msg.setSessionId(sessionId);
         msg.setRole("USER");
         msg.setContent(content);
@@ -85,7 +85,7 @@ public class AiChatService {
     public void saveAssistantMessage(UUID sessionId, String content) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(content, "content must not be null");
-        ChatMessage msg = new ChatMessage();
+        ChatMessageEntity msg = new ChatMessageEntity();
         msg.setSessionId(sessionId);
         msg.setRole("ASSISTANT");
         msg.setContent(content);
@@ -100,7 +100,7 @@ public class AiChatService {
     public StreamHandle startStream(UUID sessionId, UUID clientId, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
-        List<ChatMessage> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        List<ChatMessageEntity> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
         int fromIndex = Math.max(0, allMessages.size() - 20);
         List<Message> history = allMessages.subList(fromIndex, allMessages.size())
                 .stream()

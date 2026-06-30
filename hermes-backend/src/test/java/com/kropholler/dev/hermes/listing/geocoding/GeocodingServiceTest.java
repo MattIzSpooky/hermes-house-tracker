@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.listing.geocoding;
 
-import com.kropholler.dev.hermes.listing.city.City;
+import com.kropholler.dev.hermes.listing.city.CityEntity;
 import com.kropholler.dev.hermes.listing.city.CityRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +25,10 @@ class GeocodingServiceTest {
 
     @Test
     void findOrFetchCity_cachedCity_returnsWithoutCallingNominatim() {
-        City city = new City();
+        CityEntity city = new CityEntity();
         when(cityRepository.findByNameIgnoreCase("Weert")).thenReturn(Optional.of(city));
 
-        Optional<City> result = service.findOrFetchCity("Weert");
+        Optional<CityEntity> result = service.findOrFetchCity("Weert");
 
         assertThat(result).isPresent();
         verifyNoInteractions(nominatimClient);
@@ -46,12 +46,12 @@ class GeocodingServiceTest {
         when(nominatimClient.geocodeCity("Weert")).thenReturn(Optional.of(response));
         when(cityRepository.save(any())).thenAnswer(i -> i.getArgument(0));
 
-        Optional<City> result = service.findOrFetchCity("Weert");
+        Optional<CityEntity> result = service.findOrFetchCity("Weert");
 
         assertThat(result).isPresent();
         assertThat(result.get().getLatitude()).isEqualTo(51.2355829, within(0.0001));
         assertThat(result.get().getLongitude()).isEqualTo(5.7050797, within(0.0001));
-        verify(cityRepository).save(any(City.class));
+        verify(cityRepository).save(any(CityEntity.class));
     }
 
     @Test
@@ -59,7 +59,7 @@ class GeocodingServiceTest {
         when(cityRepository.findByNameIgnoreCase("Unknown")).thenReturn(Optional.empty());
         when(nominatimClient.geocodeCity("Unknown")).thenReturn(Optional.empty());
 
-        Optional<City> result = service.findOrFetchCity("Unknown");
+        Optional<CityEntity> result = service.findOrFetchCity("Unknown");
 
         assertThat(result).isEmpty();
         verify(cityRepository, never()).save(any());

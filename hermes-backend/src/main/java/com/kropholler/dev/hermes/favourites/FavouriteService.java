@@ -23,7 +23,7 @@ public class FavouriteService {
     @Transactional
     public void addFavourite(UUID clientId, UUID listingId) {
         if (!repository.existsByClientIdAndListingId(clientId, listingId)) {
-            Favourite f = new Favourite();
+            FavouriteEntity f = new FavouriteEntity();
             f.setClientId(clientId);
             f.setListingId(listingId);
             repository.save(f);

@@ -4,7 +4,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.notification.NotificationService;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskExecutor;
 import com.kropholler.dev.hermes.ai.agent.task.handler.AgentTaskHandler;
 import com.kropholler.dev.hermes.notification.NotificationContent;
@@ -39,7 +39,7 @@ class AgentTaskExecutorTest {
 
     @Test
     void callsHandlerAndSavesNotificationWhenContentPresent() {
-        AgentTask task = task(AgentTaskType.WATCH);
+        AgentTaskEntity task = task(AgentTaskType.WATCH);
         NotificationContent content = new NotificationContent("title", "body", List.of());
         when(watchHandler.handle(task)).thenReturn(Optional.of(content));
 
@@ -51,7 +51,7 @@ class AgentTaskExecutorTest {
 
     @Test
     void doesNotSaveNotificationWhenHandlerReturnsEmpty() {
-        AgentTask task = task(AgentTaskType.WATCH);
+        AgentTaskEntity task = task(AgentTaskType.WATCH);
         when(watchHandler.handle(task)).thenReturn(Optional.empty());
 
         executor.execute(task);
@@ -62,15 +62,15 @@ class AgentTaskExecutorTest {
 
     @Test
     void logsWarningForUnknownTaskType() {
-        AgentTask task = task(AgentTaskType.DIGEST); // no handler registered
+        AgentTaskEntity task = task(AgentTaskType.DIGEST); // no handler registered
 
         executor.execute(task); // must not throw
 
         verify(agentTaskService, never()).markRan(any());
     }
 
-    private AgentTask task(AgentTaskType type) {
-        AgentTask t = new AgentTask();
+    private AgentTaskEntity task(AgentTaskType type) {
+        AgentTaskEntity t = new AgentTaskEntity();
         t.setId(UUID.randomUUID());
         t.setType(type);
         t.setStatus(AgentTaskStatus.ACTIVE);

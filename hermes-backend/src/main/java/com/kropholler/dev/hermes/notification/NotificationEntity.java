@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "notifications")
 @Getter @Setter @NoArgsConstructor
-class Notification {
+class NotificationEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

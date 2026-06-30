@@ -2,9 +2,9 @@ package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class ListingService {
         if (params.isEmpty()) {
             return listingRepository.findAll(pageable).map(this::toDto);
         }
-        Specification<Listing> spec = params.hasRadiusSearch()
+        Specification<ListingEntity> spec = params.hasRadiusSearch()
                 ? ListingSpecifications.withParamsForRadius(params)
                 : ListingSpecifications.withParams(params);
         if (params.hasRadiusSearch()) {
@@ -141,7 +141,7 @@ public class ListingService {
         String n = houseNumber != null ? houseNumber.strip() : null;
         String c = city != null && !city.isBlank() ? city.strip() : null;
         if (c != null) {
-            List<Listing> withCity = listingRepository
+            List<ListingEntity> withCity = listingRepository
                     .findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(s, n, c);
             if (!withCity.isEmpty()) return Optional.of(toDto(withCity.get(0)));
         }
@@ -164,10 +164,10 @@ public class ListingService {
                 .stream().map(mapper::toDto).toList();
     }
 
-    private ListingDto toDto(Listing l) {
+    private ListingDto toDto(ListingEntity l) {
         Integer currentPrice = priceHistoryRepository
                 .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
-                .map(PriceHistoryEntry::getPrice)
+                .map(PriceHistoryEntryEntity::getPrice)
                 .orElse(null);
         return mapper.toDto(l, currentPrice);
     }

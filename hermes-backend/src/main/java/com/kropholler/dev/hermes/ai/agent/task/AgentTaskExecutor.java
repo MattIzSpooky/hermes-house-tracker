@@ -26,7 +26,7 @@ class AgentTaskExecutor {
         this.notificationService = notificationService;
     }
 
-    void execute(AgentTask task) {
+    void execute(AgentTaskEntity task) {
         AgentTaskHandler handler = handlers.get(task.getType());
         if (handler == null) {
             log.warn("No handler registered for task type {}, skipping task {}", task.getType(), task.getId());

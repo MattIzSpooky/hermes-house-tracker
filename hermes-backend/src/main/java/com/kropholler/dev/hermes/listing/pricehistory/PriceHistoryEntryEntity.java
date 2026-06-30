@@ -14,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PriceHistoryEntry {
+public class PriceHistoryEntryEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

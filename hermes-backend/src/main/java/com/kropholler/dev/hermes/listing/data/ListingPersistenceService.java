@@ -38,13 +38,13 @@ public class ListingPersistenceService {
         for (RawListing raw : event.listings()) {
             var existing = listingRepository.findByFundaId(raw.fundaId());
             boolean isNew = existing.isEmpty();
-            Listing listing = existing.orElseGet(() -> createListing(raw));
+            ListingEntity listing = existing.orElseGet(() -> createListing(raw));
 
             Instant now = Instant.now();
             listing.setLastSeenAt(now);
             listing.setLastUpdatedAt(now);
             listing.setStatus(parseStatus(raw.status()));
-            Listing saved = listingRepository.saveAndFlush(listing);
+            ListingEntity saved = listingRepository.saveAndFlush(listing);
 
             UUID savedId = saved.getId();
             String savedFundaId = saved.getFundaId();
@@ -82,8 +82,8 @@ public class ListingPersistenceService {
         });
     }
 
-    private Listing createListing(RawListing raw) {
-        Listing l = new Listing();
+    private ListingEntity createListing(RawListing raw) {
+        ListingEntity l = new ListingEntity();
         l.setFundaId(raw.fundaId());
         l.setUrl(raw.url());
         l.setStreet(raw.street());

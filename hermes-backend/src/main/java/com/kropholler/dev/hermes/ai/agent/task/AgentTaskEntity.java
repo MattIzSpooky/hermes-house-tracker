@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "agent_tasks")
 @Getter @Setter @NoArgsConstructor
-public class AgentTask {
+public class AgentTaskEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

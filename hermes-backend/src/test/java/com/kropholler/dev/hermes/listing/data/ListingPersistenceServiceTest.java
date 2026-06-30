@@ -4,7 +4,7 @@ import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
 import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
-import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingPersistenceService;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.funda.ListingNotFound;
@@ -71,7 +71,7 @@ class ListingPersistenceServiceTest {
         RawListing raw = rawListing("12345678", "FOR_SALE");
         ScrapingSessionCompleted event = new ScrapingSessionCompleted(UUID.randomUUID(), ScrapingSessionType.SEARCH, List.of(raw));
 
-        Listing saved = new Listing();
+        ListingEntity saved = new ListingEntity();
         saved.setId(UUID.randomUUID());
         saved.setFundaId("12345678");
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.empty());
@@ -80,7 +80,7 @@ class ListingPersistenceServiceTest {
         service.onScrapingSessionCompleted(event);
         fireAfterCommit();
 
-        ArgumentCaptor<Listing> listingCaptor = ArgumentCaptor.forClass(Listing.class);
+        ArgumentCaptor<ListingEntity> listingCaptor = ArgumentCaptor.forClass(ListingEntity.class);
         verify(listingRepository).saveAndFlush(listingCaptor.capture());
         assertThat(listingCaptor.getValue().getStatus()).isEqualTo(ListingStatus.FOR_SALE);
         assertThat(listingCaptor.getValue().getLastUpdatedAt()).isNotNull();
@@ -101,7 +101,7 @@ class ListingPersistenceServiceTest {
 
     @Test
     void existingListing_onRescrape_sendsBothFetchCommands() {
-        Listing existing = new Listing();
+        ListingEntity existing = new ListingEntity();
         existing.setId(UUID.randomUUID());
         existing.setFundaId("12345678");
 
@@ -121,7 +121,7 @@ class ListingPersistenceServiceTest {
 
     @Test
     void existingListing_onSearch_sendsDetailsCommandOnly() {
-        Listing existing = new Listing();
+        ListingEntity existing = new ListingEntity();
         existing.setId(UUID.randomUUID());
         existing.setFundaId("12345678");
 
@@ -140,7 +140,7 @@ class ListingPersistenceServiceTest {
 
     @Test
     void onListingNotFound_setsStatusDeletedAndDeletedAt() {
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setFundaId("12345678");
 
         when(listingRepository.findByFundaId("12345678")).thenReturn(Optional.of(listing));

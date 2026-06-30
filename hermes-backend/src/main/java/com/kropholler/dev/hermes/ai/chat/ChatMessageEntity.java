@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.ai.chat;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,22 +9,25 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "favourites")
+@Table(name = "chat_messages")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Favourite {
+public class ChatMessageEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
-    private UUID clientId;
+    private UUID sessionId;
+
+    @Column(nullable = false, length = 16)
+    private String role;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
 
     @Column(nullable = false)
-    private UUID listingId;
-
-    @Column(nullable = false)
-    private Instant savedAt = Instant.now();
+    private Instant createdAt = Instant.now();
 }

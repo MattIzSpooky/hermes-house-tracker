@@ -3,7 +3,7 @@ package com.kropholler.dev.hermes.ai.agent.task.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.ResearchTaskHandler;
@@ -58,7 +58,7 @@ class ResearchTaskHandlerTest {
         when(promptSpec.call()).thenReturn(callSpec);
         when(callSpec.content()).thenReturn("Analysis complete: property A is the best deal.");
 
-        AgentTask task = researchTask("analyse my favourites");
+        AgentTaskEntity task = researchTask("analyse my favourites");
 
         Optional<NotificationContent> result = handler.handle(task);
 
@@ -80,8 +80,8 @@ class ResearchTaskHandlerTest {
         assertThat(result).isEmpty();
     }
 
-    private AgentTask researchTask(String prompt) throws Exception {
-        AgentTask task = new AgentTask();
+    private AgentTaskEntity researchTask(String prompt) throws Exception {
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.RESEARCH);
         task.setStatus(AgentTaskStatus.ACTIVE);

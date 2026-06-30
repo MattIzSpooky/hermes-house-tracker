@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
+import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionEntity;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +26,7 @@ public class ScrapingQueueService {
         int clampedLimit = Math.min(pageLimit, MAX_PAGE_LIMIT);
         String url = buildSearchUrl(city, minPrice, maxPrice, minArea, maxArea, 1);
 
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
         session.setCity(city);
         session.setMinPrice(minPrice);
@@ -41,7 +41,7 @@ public class ScrapingQueueService {
 
     @Transactional
     public ScrapingSessionDto enqueueRescrape(String listingUrl, String city) {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.RESCRAPE);
         session.setCity(city);
         session.setPageLimit(1);

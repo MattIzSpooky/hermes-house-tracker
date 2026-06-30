@@ -20,14 +20,14 @@ class ScrapingSessionRepositoryTest {
 
     @Test
     void findFirstPendingWithLock_returnsPendingSession() {
-        ScrapingSession session = new ScrapingSession();
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
         session.setCity("Amsterdam");
         session.setPageLimit(3);
         session.setFundaUrl("https://www.funda.nl/zoeken/koop?selected_area=%5B%22amsterdam%22%5D");
         repository.save(session);
 
-        Optional<ScrapingSession> result = repository.findFirstPendingWithLock(ScrapingSessionStatus.PENDING);
+        Optional<ScrapingSessionEntity> result = repository.findFirstPendingWithLock(ScrapingSessionStatus.PENDING);
 
         assertThat(result).isPresent();
         assertThat(result.get().getStatus()).isEqualTo(ScrapingSessionStatus.PENDING);

@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.data.Listing;
-import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 
@@ -17,7 +17,7 @@ class ListingMapperTest {
 
     @Test
     void toDto_injectsCurrentPrice() {
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setStreet("Kerkstraat");
         listing.setHouseNumber("5");
         listing.setCity("Amsterdam");
@@ -34,7 +34,7 @@ class ListingMapperTest {
 
     @Test
     void toDto_nullCurrentPrice_producesNullPrice() {
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setFirstSeenAt(Instant.now());
         listing.setLastSeenAt(Instant.now());
 
@@ -45,7 +45,7 @@ class ListingMapperTest {
 
     @Test
     void toDto_priceHistoryEntry_mapsFields() {
-        PriceHistoryEntry entry = new PriceHistoryEntry();
+        PriceHistoryEntryEntity entry = new PriceHistoryEntryEntity();
         entry.setId(UUID.randomUUID());
         entry.setListingId(UUID.randomUUID());
         entry.setPrice(300000);

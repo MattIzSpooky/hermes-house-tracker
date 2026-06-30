@@ -34,7 +34,7 @@ class NotificationServiceTest {
         UUID clientId = UUID.randomUUID();
         UUID taskId = UUID.randomUUID();
         when(repo.save(any())).thenAnswer(inv -> {
-            Notification n = inv.getArgument(0);
+            NotificationEntity n = inv.getArgument(0);
             n.setId(UUID.randomUUID());
             return n;
         });
@@ -42,7 +42,7 @@ class NotificationServiceTest {
 
         service.save(taskId, clientId, content);
 
-        ArgumentCaptor<Notification> cap = ArgumentCaptor.forClass(Notification.class);
+        ArgumentCaptor<NotificationEntity> cap = ArgumentCaptor.forClass(NotificationEntity.class);
         verify(repo).save(cap.capture());
         assertThat(cap.getValue().getTitle()).isEqualTo("title");
 

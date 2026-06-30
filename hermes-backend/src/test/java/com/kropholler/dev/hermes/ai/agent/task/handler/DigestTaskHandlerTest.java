@@ -3,7 +3,7 @@ package com.kropholler.dev.hermes.ai.agent.task.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.DigestTaskHandler;
 import com.kropholler.dev.hermes.notification.NotificationContent;
@@ -57,7 +57,7 @@ class DigestTaskHandlerTest {
         when(promptSpec.call()).thenReturn(callSpec);
         when(callSpec.content()).thenReturn("This week in Amsterdam: 3 new listings appeared...");
 
-        AgentTask task = digestTask(List.of("Amsterdam", "Utrecht"));
+        AgentTaskEntity task = digestTask(List.of("Amsterdam", "Utrecht"));
 
         Optional<NotificationContent> result = handler.handle(task);
 
@@ -66,8 +66,8 @@ class DigestTaskHandlerTest {
         assertThat(result.get().body()).contains("Amsterdam");
     }
 
-    private AgentTask digestTask(List<String> cities) throws Exception {
-        AgentTask task = new AgentTask();
+    private AgentTaskEntity digestTask(List<String> cities) throws Exception {
+        AgentTaskEntity task = new AgentTaskEntity();
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.DIGEST);
         task.setStatus(AgentTaskStatus.ACTIVE);

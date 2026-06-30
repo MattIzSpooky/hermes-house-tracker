@@ -87,9 +87,9 @@ public class ListingSummaryGenerationService {
     }
 
     private void upsertSummary(UUID listingId, String summaryText) {
-        ListingSummary summary = summaryRepository.findByListingId(listingId)
+        ListingSummaryEntity summary = summaryRepository.findByListingId(listingId)
             .orElseGet(() -> {
-                ListingSummary s = new ListingSummary();
+                ListingSummaryEntity s = new ListingSummaryEntity();
                 s.setListingId(listingId);
                 return s;
             });

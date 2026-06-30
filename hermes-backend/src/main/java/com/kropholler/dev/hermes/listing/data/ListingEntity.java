@@ -14,7 +14,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Listing {
+public class ListingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
