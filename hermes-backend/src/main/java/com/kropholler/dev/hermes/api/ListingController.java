@@ -8,7 +8,7 @@ import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ReportService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
+import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

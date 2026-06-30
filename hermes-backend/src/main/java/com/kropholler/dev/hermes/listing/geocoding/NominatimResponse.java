@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public record NominatimResponse(
+record NominatimResponse(
     String lat,
     String lon,
     List<String> boundingbox,

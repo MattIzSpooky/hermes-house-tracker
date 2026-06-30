@@ -1,7 +1,4 @@
-package com.kropholler.dev.hermes.scraping.schedule.session;
-
-import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
-import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
+package com.kropholler.dev.hermes.scraping;
 
 import java.time.Instant;
 import java.util.UUID;

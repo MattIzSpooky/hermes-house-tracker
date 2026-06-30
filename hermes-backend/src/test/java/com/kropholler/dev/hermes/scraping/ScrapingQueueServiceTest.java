@@ -1,7 +1,6 @@
 package com.kropholler.dev.hermes.scraping;
 
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSession;
-import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionDto;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import org.junit.jupiter.api.BeforeEach;

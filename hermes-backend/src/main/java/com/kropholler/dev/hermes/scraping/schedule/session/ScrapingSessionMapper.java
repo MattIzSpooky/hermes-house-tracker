@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.scraping.schedule.session;
 
 import com.kropholler.dev.hermes.config.MapStructConfig;
+import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 

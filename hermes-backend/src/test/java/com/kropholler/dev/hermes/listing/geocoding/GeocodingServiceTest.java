@@ -75,10 +75,10 @@ class GeocodingServiceTest {
         when(nominatimClient.geocodeAddress("9", "Rentmeesterlaan", "Weert"))
             .thenReturn(Optional.of(response));
 
-        Optional<double[]> result = service.geocodeAddress("9", "Rentmeesterlaan", "Weert");
+        Optional<GeocodeResult> result = service.geocodeAddress("9", "Rentmeesterlaan", "Weert");
 
         assertThat(result).isPresent();
-        assertThat(result.get()[0]).isEqualTo(51.2574224, within(0.0001));
-        assertThat(result.get()[1]).isEqualTo(5.6972390, within(0.0001));
+        assertThat(result.get().lat()).isEqualTo(51.2574224, within(0.0001));
+        assertThat(result.get().lon()).isEqualTo(5.6972390, within(0.0001));
     }
 }

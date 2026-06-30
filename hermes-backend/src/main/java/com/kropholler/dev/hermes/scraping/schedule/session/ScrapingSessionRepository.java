@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ScrapingSessionRepository extends JpaRepository<ScrapingSession, UUID> {
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM ScrapingSession s WHERE s.status = :status ORDER BY s.createdAt ASC LIMIT 1")
     Optional<ScrapingSession> findFirstPendingWithLock(ScrapingSessionStatus status);

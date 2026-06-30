@@ -26,16 +26,16 @@ public class GeocodingService {
         return nominatimClient.geocodeCity(cityName).map(response -> {
             City city = new City();
             city.setName(cityName);
-            city.setLatitude(Double.parseDouble(response.lat()));
             city.setLongitude(Double.parseDouble(response.lon()));
+            city.setLatitude(Double.parseDouble(response.lat()));
             city.setFetchedAt(Instant.now());
             return cityRepository.save(city);
         });
     }
 
-    public Optional<double[]> geocodeAddress(String houseNumber, String street, String city) {
+    public Optional<GeocodeResult> geocodeAddress(String houseNumber, String street, String city) {
         return nominatimClient.geocodeAddress(houseNumber, street, city)
-            .map(r -> new double[]{Double.parseDouble(r.lat()), Double.parseDouble(r.lon())});
+            .map(r -> new GeocodeResult(Double.parseDouble(r.lon()), Double.parseDouble(r.lat()), r.boundingbox()));
     }
 
 }

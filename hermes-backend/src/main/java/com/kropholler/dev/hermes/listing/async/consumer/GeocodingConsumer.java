@@ -4,14 +4,12 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
 import com.kropholler.dev.hermes.listing.async.command.FetchGeocodingCommand;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.listing.geocoding.NominatimClient;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Component
@@ -22,7 +20,7 @@ class GeocodingConsumer {
     private static final RateLimiter RATE_LIMITER = RateLimiter.create(1.0);
 
     private final ListingRepository listingRepository;
-    private final NominatimClient nominatimClient;
+    private final GeocodingService geocodingService;
 
     @JmsListener(destination = JmsQueues.GEOCODING_FETCH)
     @Transactional
@@ -44,7 +42,11 @@ class GeocodingConsumer {
             return;
         }
 
-        final var geocodingResultOptional = nominatimClient.geocodeAddress( listing.getHouseNumber(), listing.getStreet(), listing.getCity());
+        final var geocodingResultOptional = geocodingService.geocodeAddress(
+                listing.getHouseNumber(),
+                listing.getStreet(),
+                listing.getCity()
+        );
 
         if (geocodingResultOptional.isEmpty()) {
             log.error("Could not find geo location for {}", command.listingId());
@@ -53,19 +55,16 @@ class GeocodingConsumer {
 
         final var response = geocodingResultOptional.get();
 
-        double lon = Double.parseDouble(response.lon());
-        double lat = Double.parseDouble(response.lat());
-        listingRepository.updateLocation(command.listingId(), lon, lat);
-        updateBoundingBox(command.listingId(), response.boundingbox());
-        log.info("Successfully geocoded listing {} to {},{}", command.listingId(), lat, lon);
-    }
+        double lon = response.lon();
+        double lat = response.lat();
 
-    private void updateBoundingBox(java.util.UUID listingId, List<String> bbox) {
-        if (bbox == null || bbox.size() < 4) return;
-        double latMin = Double.parseDouble(bbox.get(0));
-        double latMax = Double.parseDouble(bbox.get(1));
-        double lonMin = Double.parseDouble(bbox.get(2));
-        double lonMax = Double.parseDouble(bbox.get(3));
-        listingRepository.updateBoundingBox(listingId, lonMin, latMin, lonMax, latMax);
+        listingRepository.updateLocation(command.listingId(), lon, lat);
+        listingRepository.updateBoundingBox(command.listingId(),
+                response.boundingBoxLonMin(),
+                response.boundingBoxLatMin(),
+                response.boundingBoxLonMax(),
+                response.boundingBoxLatMax()
+        );
+        log.info("Successfully geocoded listing {} to {},{}", command.listingId(), lat, lon);
     }
 }

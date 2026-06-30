@@ -3,8 +3,8 @@ package com.kropholler.dev.hermes.listing.async.consumer;
 import com.kropholler.dev.hermes.listing.async.command.FetchGeocodingCommand;
 import com.kropholler.dev.hermes.listing.data.Listing;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
-import com.kropholler.dev.hermes.listing.geocoding.NominatimClient;
-import com.kropholler.dev.hermes.listing.geocoding.NominatimResponse;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 class GeocodingConsumerTest {
 
     @Mock private ListingRepository listingRepository;
-    @Mock private NominatimClient nominatimClient;
+    @Mock private GeocodingService geocodingService;
     @InjectMocks private GeocodingConsumer consumer;
 
     @Test
@@ -34,14 +34,13 @@ class GeocodingConsumerTest {
         listing.setStreet("Rentmeesterlaan");
         listing.setCity("Weert");
 
-        NominatimResponse response = new NominatimResponse(
-            "51.2574224", "5.6972390",
-            List.of("51.2573724", "51.2574724", "5.6971890", "5.6972890"),
-            30, "place", "9, Rentmeesterlaan, Weert"
+        GeocodeResult response = new GeocodeResult(
+            Double.parseDouble("5.6972390"), Double.parseDouble("51.2574224"),
+            List.of("51.2573724", "51.2574724", "5.6971890", "5.6972890")
         );
 
         when(listingRepository.findById(listingId)).thenReturn(Optional.of(listing));
-        when(nominatimClient.geocodeAddress("9", "Rentmeesterlaan", "Weert"))
+        when(geocodingService.geocodeAddress("9", "Rentmeesterlaan", "Weert"))
             .thenReturn(Optional.of(response));
 
         consumer.onMessage(new FetchGeocodingCommand(listingId));
@@ -60,7 +59,7 @@ class GeocodingConsumerTest {
         listing.setCity("Nergens");
 
         when(listingRepository.findById(listingId)).thenReturn(Optional.of(listing));
-        when(nominatimClient.geocodeAddress(any(), any(), any())).thenReturn(Optional.empty());
+        when(geocodingService.geocodeAddress(any(), any(), any())).thenReturn(Optional.empty());
 
         consumer.onMessage(new FetchGeocodingCommand(listingId));
 

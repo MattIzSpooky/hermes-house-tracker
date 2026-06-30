@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class NominatimClient {
+class NominatimClient {
 
     private static final String BASE_URL = "https://nominatim.openstreetmap.org";
     private static final String USER_AGENT = "HermesHouseTracker/1.0 (https://github.com/MattIzSpooky/hermes-house-tracker)";
@@ -24,7 +24,7 @@ public class NominatimClient {
             .build();
     }
 
-    public Optional<NominatimResponse> geocodeAddress(String houseNumber, String street, String city) {
+    Optional<NominatimResponse> geocodeAddress(String houseNumber, String street, String city) {
         String query = houseNumber + " " + street + " " + city;
         log.debug("Geocoding address: {}", query);
         try {
@@ -32,14 +32,14 @@ public class NominatimClient {
                 .uri("/search?q={q}&format=jsonv2&countrycodes=nl&limit=1", query)
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {});
-            return results == null || results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+            return results == null || results.isEmpty() ? Optional.empty() : Optional.of(results.getFirst());
         } catch (Exception e) {
             log.warn("Nominatim address geocoding failed for '{}': {}", query, e.getMessage());
             return Optional.empty();
         }
     }
 
-    public Optional<NominatimResponse> geocodeCity(String cityName) {
+    Optional<NominatimResponse> geocodeCity(String cityName) {
         log.debug("Geocoding city: {}", cityName);
         try {
             List<NominatimResponse> results = restClient.get()
