@@ -1,7 +1,6 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.kropholler.dev.hermes.ai.agent.notification.NotificationService;
-import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.notification.NotificationService;
 import com.kropholler.dev.hermes.ai.agent.task.handler.AgentTaskHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

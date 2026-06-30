@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

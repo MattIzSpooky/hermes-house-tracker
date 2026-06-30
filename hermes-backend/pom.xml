@@ -422,8 +422,8 @@
                         <configuration>
                             <inputSpec>${project.basedir}/src/main/resources/openapi/notifications.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.ai.agent.notification</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.ai.agent.notification</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.notification</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.notification</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>

@@ -1,7 +1,5 @@
-package com.kropholler.dev.hermes.ai.agent.task.data;
+package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
-import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

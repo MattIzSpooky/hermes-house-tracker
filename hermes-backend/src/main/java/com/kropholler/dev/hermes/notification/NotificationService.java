@@ -1,11 +1,8 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.ai.agent.task.data.Notification;
-import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
-import com.kropholler.dev.hermes.ai.agent.task.data.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

@@ -1,6 +1,5 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

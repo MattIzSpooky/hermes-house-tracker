@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.Mapper;
@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(config = MapStructConfig.class)
-public interface NotificationApiMapper {
+interface NotificationApiMapper {
 
     @Mapping(target = "listingIds", defaultExpression = "java(java.util.List.of())")
     NotificationResponse toResponse(NotificationDto dto);

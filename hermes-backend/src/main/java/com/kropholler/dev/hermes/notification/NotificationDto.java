@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
 import java.time.Instant;
 import java.util.List;

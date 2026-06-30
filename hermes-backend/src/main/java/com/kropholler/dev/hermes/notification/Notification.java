@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.agent.task.data;
+package com.kropholler.dev.hermes.notification;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "notifications")
 @Getter @Setter @NoArgsConstructor
-public class Notification {
+class Notification {
 
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;

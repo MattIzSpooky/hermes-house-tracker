@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.ai.agent.task.handler;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
-import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
-import com.kropholler.dev.hermes.ai.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTask;
+import com.kropholler.dev.hermes.notification.NotificationContent;
 
 import java.util.Optional;
 

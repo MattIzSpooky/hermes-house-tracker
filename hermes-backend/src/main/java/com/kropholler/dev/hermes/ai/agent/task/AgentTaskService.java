@@ -2,8 +2,6 @@ package com.kropholler.dev.hermes.ai.agent.task;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.ai.agent.task.data.AgentTask;
-import com.kropholler.dev.hermes.ai.agent.task.data.AgentTaskRepository;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;

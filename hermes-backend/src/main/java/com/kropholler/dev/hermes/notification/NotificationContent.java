@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.ai.agent.task.handler.json;
+package com.kropholler.dev.hermes.notification;
 
 import java.util.List;
 import java.util.UUID;

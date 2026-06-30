@@ -1,6 +1,5 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
-import com.kropholler.dev.hermes.ai.agent.task.data.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +13,7 @@ import java.time.Instant;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmailNotificationSender {
+class EmailNotificationSender {
 
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;

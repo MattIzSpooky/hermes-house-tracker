@@ -1,5 +1,9 @@
-package com.kropholler.dev.hermes.ai.agent.notification;
+package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.notification.NotificationApiMapper;
+import com.kropholler.dev.hermes.notification.NotificationController;
+import com.kropholler.dev.hermes.notification.NotificationDto;
+import com.kropholler.dev.hermes.notification.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -22,8 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class NotificationControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @MockitoBean NotificationService notificationService;
-    @MockitoBean NotificationApiMapper notificationApiMapper;
+    @MockitoBean
+    NotificationService notificationService;
+    @MockitoBean
+    NotificationApiMapper notificationApiMapper;
 
     @Test
     void getNotifications_returnsMappedList() throws Exception {
