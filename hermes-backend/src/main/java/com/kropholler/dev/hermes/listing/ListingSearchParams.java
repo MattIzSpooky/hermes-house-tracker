@@ -17,7 +17,7 @@ public record ListingSearchParams(
         return isBlank(street) && isBlank(houseNumber) && isBlank(houseNumberAddition)
             && isBlank(zipCode) && isBlank(city) && isBlank(province)
             && minBedrooms == null && minRooms == null && minLivingAreaM2 == null
-            && isBlank(energyLabel) && !hasRadiusSearch();
+            && isBlank(energyLabel) && radiusKm == null;
     }
 
     public boolean hasRadiusSearch() {

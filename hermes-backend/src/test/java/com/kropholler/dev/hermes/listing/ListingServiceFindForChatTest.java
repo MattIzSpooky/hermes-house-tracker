@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.city.CityEntity;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
@@ -17,7 +19,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -135,5 +144,129 @@ class ListingServiceFindForChatTest {
         List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null);
 
         assertThat(result).hasSize(2);
+    }
+
+    // ── findForChat: radius path (resolveLatLon) ──────────────────────────────
+
+    @Test
+    void findForChat_withNearAddressAndRadius_geocodesAndCallsNearLocationSearch() {
+        GeocodeResult geocoded = new GeocodeResult(4.9041, 52.3676, null);
+        when(geocodingService.geocodeAddress("Kerkstraat 13", "", "")).thenReturn(Optional.of(geocoded));
+        when(listingRepository.searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(),
+                eq(4.9041), eq(52.3676), eq(5_000))).thenReturn(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "Kerkstraat 13", null, 5);
+
+        verify(geocodingService).geocodeAddress("Kerkstraat 13", "", "");
+        verify(listingRepository).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(),
+                eq(4.9041), eq(52.3676), eq(5_000));
+        verify(listingRepository, never()).searchForChat(
+                any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void findForChat_withNearCityAndRadius_geocodesCityAndCallsNearLocationSearch() {
+        CityEntity city = new CityEntity();
+        city.setLatitude(52.3676);
+        city.setLongitude(4.9041);
+        when(geocodingService.findOrFetchCity("Amsterdam")).thenReturn(Optional.of(city));
+        when(listingRepository.searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(),
+                eq(4.9041), eq(52.3676), eq(10_000))).thenReturn(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, null, "Amsterdam", 10);
+
+        verify(geocodingService).findOrFetchCity("Amsterdam");
+        verify(geocodingService, never()).geocodeAddress(any(), any(), any());
+        verify(listingRepository).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(),
+                eq(4.9041), eq(52.3676), eq(10_000));
+    }
+
+    @Test
+    void findForChat_withNearAddressAndRadius_geocodingFails_fallsBackToRegularSearch() {
+        when(geocodingService.geocodeAddress("Unknown Street", "", "")).thenReturn(Optional.empty());
+        stubSearchForChat(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "Unknown Street", null, 5);
+
+        verify(listingRepository, never()).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt());
+        verify(listingRepository).searchForChat(
+                any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean());
+    }
+
+    @Test
+    void findForChat_nearAddressBlank_resolvesFromNearCity() {
+        CityEntity city = new CityEntity();
+        city.setLatitude(52.3676);
+        city.setLongitude(4.9041);
+        when(geocodingService.findOrFetchCity("Amsterdam")).thenReturn(Optional.of(city));
+        when(listingRepository.searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(),
+                anyDouble(), anyDouble(), anyInt())).thenReturn(List.of());
+
+        // blank nearAddress → first branch of resolveLatLon is skipped → resolves via nearCity
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "  ", "Amsterdam", 5);
+
+        verify(geocodingService, never()).geocodeAddress(any(), any(), any());
+        verify(geocodingService).findOrFetchCity("Amsterdam");
+    }
+
+    @Test
+    void findForChat_radiusKmNull_nearAddressIgnored_usesRegularSearch() {
+        stubSearchForChat(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "Kerkstraat 13", null, null); // radiusKm=null → radius path skipped
+
+        verifyNoInteractions(geocodingService);
+        verify(listingRepository, never()).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt());
+    }
+
+    @Test
+    void findForChat_radiusKmSetButBothNearAddressAndNearCityNull_usesRegularSearch() {
+        // radiusKm != null but (null != null || null != null) is false → outer condition fails
+        stubSearchForChat(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, null, null, 5);
+
+        verifyNoInteractions(geocodingService);
+        verify(listingRepository, never()).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt());
+    }
+
+    @Test
+    void findForChat_blankNearAddressAndNullNearCity_resolveLatLonReturnsNull_usesRegularSearch() {
+        // Reaches resolveLatLon(" ", null): nearAddress blank → skip; nearCity null → skip; return null
+        stubSearchForChat(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "  ", null, 5);
+
+        verifyNoInteractions(geocodingService);
+        verify(listingRepository, never()).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt());
+    }
+
+    @Test
+    void findForChat_blankNearAddressAndBlankNearCity_resolveLatLonReturnsNull_usesRegularSearch() {
+        // Reaches resolveLatLon(" ", "  "): both blank → both branches skipped → return null
+        stubSearchForChat(List.of());
+
+        service.findForChat(null, null, null, null, null, null, null, null,
+                false, "  ", "  ", 5);
+
+        verifyNoInteractions(geocodingService);
+        verify(listingRepository, never()).searchForChatNearLocation(
+                any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt());
     }
 }
