@@ -100,4 +100,27 @@ class CompareListingsToolTest {
         assertThat(result).contains("Missing 99");
         assertThat(holder.get()).hasSize(1);
     }
+
+    @Test
+    void compareListings_dtoWithNullableNumericFieldsAndNonNullAddition_formatsCorrectly() {
+        UUID id = UUID.randomUUID();
+        // houseNumberAddition="A" covers L61 true; plotAreaM2=50 covers L67 true;
+        // null price/bedrooms/rooms/livingAreaM2/energyLabel/status cover the "unknown" branches on L63-69
+        ListingDto sparse = new ListingDto(id, "f", "u", "Sparsestraat", "3", "A",
+            "5678CD", "Utrecht", "Utrecht", Instant.now(), Instant.now(),
+            null, null, null, null, null, null, null, 50);
+        ChatListingCard card = new ChatListingCard(id, "Sparsestraat", "3", "A", "Utrecht", "Utrecht", null, null, null, null, null);
+
+        when(listingService.findByAddress("Sparsestraat", "3", "Utrecht")).thenReturn(Optional.of(sparse));
+        when(mapper.toChatListingCard(sparse)).thenReturn(card);
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        AddressList params = new AddressList(List.of(new AddressEntry("Sparsestraat", "3", "Utrecht")));
+
+        String result = tool(holder).compareListings(params);
+
+        assertThat(result).contains("Sparsestraat 3A");
+        assertThat(result).contains("50 m²");
+        assertThat(result).contains("unknown");
+    }
 }

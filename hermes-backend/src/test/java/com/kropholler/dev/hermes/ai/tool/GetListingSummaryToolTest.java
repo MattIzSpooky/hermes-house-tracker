@@ -79,4 +79,17 @@ class GetListingSummaryToolTest {
 
         assertThat(result).contains("Property not found");
     }
+
+    @Test
+    void getListingSummary_noSummaryAndBlankDescription_returnsNotAvailableMessage() {
+        // Covers L41 branch: description != null but isBlank() → false → "No description available"
+        UUID id = UUID.randomUUID();
+        when(listingService.findByAddress("Hoofdstraat", "7", "Tilburg"))
+            .thenReturn(Optional.of(dto(id, "   ")));
+        when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
+
+        String result = tool().getListingSummary(new AddressParams("Hoofdstraat", "7", "Tilburg"));
+
+        assertThat(result).contains("No description is available");
+    }
 }

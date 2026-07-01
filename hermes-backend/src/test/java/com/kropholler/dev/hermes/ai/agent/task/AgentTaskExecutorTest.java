@@ -69,6 +69,17 @@ class AgentTaskExecutorTest {
         verify(agentTaskService, never()).markRan(any());
     }
 
+    @Test
+    void execute_handlerThrows_stillCallsMarkRan() {
+        AgentTaskEntity task = task(AgentTaskType.WATCH);
+        when(watchHandler.handle(task)).thenThrow(new RuntimeException("handler error"));
+
+        executor.execute(task);
+
+        verify(agentTaskService).markRan(task);
+        verify(notificationService, never()).save(any(), any(), any());
+    }
+
     private AgentTaskEntity task(AgentTaskType type) {
         AgentTaskEntity t = new AgentTaskEntity();
         t.setId(UUID.randomUUID());

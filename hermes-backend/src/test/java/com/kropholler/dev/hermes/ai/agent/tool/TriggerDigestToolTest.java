@@ -38,4 +38,17 @@ class TriggerDigestToolTest {
         assertThat(result).contains("Weekly digest scheduled");
         assertThat(result).contains("Amsterdam,Utrecht");
     }
+
+    @Test
+    void triggerDigest_blankEntryInCitiesString_filteredOut() {
+        // Covers L27 filter false branch: blank entry after split+strip is removed
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+        when(agentTaskService.createDigest(any(), anyString(), anyList())).thenReturn(null);
+
+        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService);
+        tool.triggerDigest("Amsterdam, ,Utrecht", "Digest");
+
+        verify(agentTaskService).createDigest(clientId, "Digest", List.of("Amsterdam", "Utrecht"));
+    }
 }

@@ -105,4 +105,104 @@ class ChatControllerTest {
                 eq("/topic/chat/" + sessionId),
                 (Object) argThat(obj -> obj instanceof ResultFrame));
     }
+
+    @Test
+    void handleMessage_nullRequest_returnsEarlyWithoutStreaming() {
+        controller.handleMessage(null);
+
+        verify(aiChatService, never()).startStream(any(), any(), any());
+        verify(messaging, never()).convertAndSend(anyString(), (Object) any());
+    }
+
+    @Test
+    void handleMessage_nullSessionId_returnsEarlyWithoutStreaming() {
+        controller.handleMessage(new ChatMessageRequest(null, "hello", null));
+
+        verify(aiChatService, never()).startStream(any(), any(), any());
+    }
+
+    @Test
+    void handleMessage_nullMessage_returnsEarlyWithoutStreaming() {
+        controller.handleMessage(new ChatMessageRequest(UUID.randomUUID(), null, null));
+
+        verify(aiChatService, never()).startStream(any(), any(), any());
+    }
+
+    @Test
+    void handleMessage_blankMessage_returnsEarlyWithoutStreaming() {
+        controller.handleMessage(new ChatMessageRequest(UUID.randomUUID(), "   ", null));
+
+        verify(aiChatService, never()).startStream(any(), any(), any());
+    }
+
+    @Test
+    void handleMessage_whitespaceOnlyToken_doesNotSaveAssistantMessage() {
+        UUID sessionId = UUID.randomUUID();
+        ChatMessageRequest request = new ChatMessageRequest(sessionId, "hello", null);
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        AiChatService.StreamHandle handle = new AiChatService.StreamHandle(
+                Flux.just("   "), holder);
+        when(aiChatService.startStream(sessionId, null, request.message())).thenReturn(handle);
+
+        controller.handleMessage(request);
+
+        verify(aiChatService).saveUserMessage(sessionId, request.message());
+        verify(aiChatService, never()).saveAssistantMessage(any(), any());
+        verify(messaging, never()).convertAndSend(
+                eq("/topic/chat/" + sessionId),
+                (Object) argThat(obj -> obj instanceof TokenFrame tf && tf.type().equals("TOKEN")));
+    }
+
+    @Test
+    void handleMessage_jsonToolCallFollowedByText_discardJsonAndSendText() {
+        UUID sessionId = UUID.randomUUID();
+        ChatMessageRequest request = new ChatMessageRequest(sessionId, "find a house", null);
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        AiChatService.StreamHandle handle = new AiChatService.StreamHandle(
+                Flux.just("{\"name\":\"searchListings\"}", " Here are results."), holder);
+        when(aiChatService.startStream(sessionId, null, request.message())).thenReturn(handle);
+
+        controller.handleMessage(request);
+
+        verify(messaging, times(1)).convertAndSend(
+                eq("/topic/chat/" + sessionId),
+                (Object) argThat(obj -> obj instanceof TokenFrame tf && tf.type().equals("TOKEN")));
+        verify(aiChatService).saveAssistantMessage(sessionId, "Here are results.");
+    }
+
+    @Test
+    void handleMessage_jsonWithInlineTrailingText_sendsTrailingText() {
+        UUID sessionId = UUID.randomUUID();
+        ChatMessageRequest request = new ChatMessageRequest(sessionId, "search", null);
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        AiChatService.StreamHandle handle = new AiChatService.StreamHandle(
+                Flux.just("{\"name\":\"tool\"} answer here"), holder);
+        when(aiChatService.startStream(sessionId, null, request.message())).thenReturn(handle);
+
+        controller.handleMessage(request);
+
+        verify(messaging, times(1)).convertAndSend(
+                eq("/topic/chat/" + sessionId),
+                (Object) argThat(obj -> obj instanceof TokenFrame tf
+                        && tf.type().equals("TOKEN") && tf.content().equals("answer here")));
+        verify(aiChatService).saveAssistantMessage(sessionId, "answer here");
+    }
+
+    @Test
+    void handleMessage_unclosedJsonBuffer_flushedAsText() {
+        UUID sessionId = UUID.randomUUID();
+        ChatMessageRequest request = new ChatMessageRequest(sessionId, "query", null);
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        AiChatService.StreamHandle handle = new AiChatService.StreamHandle(
+                Flux.just("{unclosed"), holder);
+        when(aiChatService.startStream(sessionId, null, request.message())).thenReturn(handle);
+
+        controller.handleMessage(request);
+
+        verify(messaging, times(1)).convertAndSend(
+                eq("/topic/chat/" + sessionId),
+                (Object) argThat(obj -> obj instanceof TokenFrame tf
+                        && tf.type().equals("TOKEN") && tf.content().equals("{unclosed")));
+        verify(aiChatService).saveAssistantMessage(sessionId, "{unclosed");
+    }
 }

@@ -124,4 +124,18 @@ class ListingSearchToolTest {
                 .hasMessage("DB error");
         assertThat(holder.get()).isEmpty();
     }
+
+    @Test
+    void searchListings_blankStringParams_treatedAsNull() {
+        // Covers the blankToNull branch: s != null && s.isBlank() → return null
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
+                .thenReturn(List.of());
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
+
+        List<ChatListingCard> result = tool.searchListings("  ", "  ", null, null, null, null, null, "  ", null, "  ", "  ", null);
+
+        assertThat(result).isEmpty();
+    }
 }

@@ -14,6 +14,10 @@ import org.springframework.context.ApplicationEventPublisher;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,5 +41,19 @@ class PriceHistoryConsumerTest {
         ArgumentCaptor<PriceHistoryUpdated> captor = ArgumentCaptor.forClass(PriceHistoryUpdated.class);
         verify(eventPublisher).publishEvent(captor.capture());
         assertThat(captor.getValue().listingIds()).containsExactly(listingId);
+    }
+
+    @Test
+    void onMessage_fetchThrows_rethrowsAndDoesNotPublish() {
+        UUID listingId = UUID.randomUUID();
+        FetchPriceHistoryCommand command = new FetchPriceHistoryCommand(listingId, "12345678");
+        doThrow(new RuntimeException("proxy error"))
+            .when(priceHistoryService).fetchAndStore(listingId, "12345678");
+
+        assertThatThrownBy(() -> consumer.onMessage(command))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessage("proxy error");
+
+        verify(eventPublisher, never()).publishEvent(any());
     }
 }

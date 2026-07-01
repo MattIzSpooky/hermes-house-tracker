@@ -61,4 +61,22 @@ class ListWatchesToolTest {
         assertThat(result).contains("cancelled");
         assertThat(result).contains(cancelId.toString());
     }
+
+    @Test
+    void returnsFormattedWatchWithNullScheduleAndNonNullLastRunAt() {
+        // Covers L36 false (schedule==null → "once") and L37 true (lastRunAt!=null → "last ran ...")
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+        UUID watchId = UUID.randomUUID();
+        Instant lastRun = Instant.parse("2026-06-01T08:00:00Z");
+        AgentTaskDto dto = new AgentTaskDto(watchId, AgentTaskType.WATCH,
+            AgentTaskStatus.ACTIVE, clientId, "One-off watch", null, lastRun, Instant.now(), Instant.now());
+        when(agentTaskService.findByClientId(clientId)).thenReturn(List.of(dto));
+
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        String result = tool.listWatches(null);
+
+        assertThat(result).contains("once");
+        assertThat(result).contains("last ran 2026-06-01");
+    }
 }

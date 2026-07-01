@@ -66,4 +66,40 @@ class GeocodingConsumerTest {
         verify(listingRepository, never()).updateLocation(any(), anyDouble(), anyDouble());
         verify(listingRepository, never()).save(any());
     }
+
+    @Test
+    void onMessage_listingNotFound_skipsGeocoding() {
+        UUID listingId = UUID.randomUUID();
+        when(listingRepository.findById(listingId)).thenReturn(Optional.empty());
+
+        consumer.onMessage(new FetchGeocodingCommand(listingId));
+
+        verify(geocodingService, never()).geocodeAddress(any(), any(), any());
+    }
+
+    @Test
+    void onMessage_streetNull_skipsGeocoding() {
+        UUID listingId = UUID.randomUUID();
+        ListingEntity listing = new ListingEntity();
+        listing.setStreet(null);
+        listing.setCity("Amsterdam");
+        when(listingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+
+        consumer.onMessage(new FetchGeocodingCommand(listingId));
+
+        verify(geocodingService, never()).geocodeAddress(any(), any(), any());
+    }
+
+    @Test
+    void onMessage_cityNull_skipsGeocoding() {
+        UUID listingId = UUID.randomUUID();
+        ListingEntity listing = new ListingEntity();
+        listing.setStreet("Dorpstraat");
+        listing.setCity(null);
+        when(listingRepository.findById(listingId)).thenReturn(Optional.of(listing));
+
+        consumer.onMessage(new FetchGeocodingCommand(listingId));
+
+        verify(geocodingService, never()).geocodeAddress(any(), any(), any());
+    }
 }

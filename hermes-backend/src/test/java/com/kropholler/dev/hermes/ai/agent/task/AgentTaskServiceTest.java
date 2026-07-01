@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
@@ -16,10 +17,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -95,5 +100,62 @@ class AgentTaskServiceTest {
 
         assertThat(task.getStatus()).isEqualTo(AgentTaskStatus.ACTIVE);
         assertThat(task.getNextRunAt()).isAfter(Instant.now());
+    }
+
+    @Test
+    void createDigest_persistsTaskWithWeeklySchedule() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.createDigest(UUID.randomUUID(), "Weekly digest", List.of("Amsterdam", "Utrecht"));
+
+        ArgumentCaptor<AgentTaskEntity> captor = ArgumentCaptor.forClass(AgentTaskEntity.class);
+        verify(repo).save(captor.capture());
+        AgentTaskEntity saved = captor.getValue();
+
+        assertThat(saved.getType()).isEqualTo(AgentTaskType.DIGEST);
+        assertThat(saved.getSchedule()).isEqualTo("0 0 8 * * MON");
+        assertThat(saved.getNextRunAt()).isNotNull();
+    }
+
+    @Test
+    void findByClientId_delegatesToRepository() {
+        UUID clientId = UUID.randomUUID();
+        when(repo.findAllByClientIdAndStatusOrderByCreatedAtDesc(clientId, AgentTaskStatus.ACTIVE))
+            .thenReturn(List.of());
+
+        List<AgentTaskDto> result = service.findByClientId(clientId);
+
+        assertThat(result).isEmpty();
+        verify(repo).findAllByClientIdAndStatusOrderByCreatedAtDesc(clientId, AgentTaskStatus.ACTIVE);
+    }
+
+    @Test
+    void delete_invokesRepositoryDeleteById() {
+        UUID taskId = UUID.randomUUID();
+
+        service.delete(taskId);
+
+        verify(repo).deleteById(taskId);
+    }
+
+    @Test
+    void findDueTasks_delegatesToRepository() {
+        when(repo.findAllByStatusAndNextRunAtLessThanEqual(eq(AgentTaskStatus.ACTIVE), any(Instant.class)))
+            .thenReturn(List.of());
+
+        List<AgentTaskEntity> result = service.findDueTasks();
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void serialize_throwsIllegalStateOnJsonException() throws Exception {
+        doThrow(new com.fasterxml.jackson.core.JsonProcessingException("forced") {})
+            .when(objectMapper).writeValueAsString(any());
+
+        assertThatThrownBy(() -> service.createWatch(UUID.randomUUID(), "name",
+                new WatchPayload(null, null, null, null, null, null, null, null, null, null)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Failed to serialize agent task payload");
     }
 }

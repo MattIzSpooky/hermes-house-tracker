@@ -83,4 +83,23 @@ class GetFavouriteListingsToolTest {
 
         assertThat(result).contains("could not be found");
     }
+
+    @Test
+    void getFavouriteListings_cardWithAdditionAndNullPrice_formatsCorrectly() {
+        // Covers L66 true (houseNumberAddition != null → appended) and L68 false (price null → not appended)
+        UUID listingId = UUID.randomUUID();
+        FavouriteDto fav = new FavouriteDto(listingId, Instant.now());
+        ListingDto listingDto = dto(listingId);
+        ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", "C", "Rotterdam", "Zuid-Holland", null, 3, 100, "A", "FOR_SALE");
+
+        when(favouriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
+        when(mapper.toChatListingCard(listingDto)).thenReturn(card);
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        String result = tool(holder).getFavouriteListings();
+
+        assertThat(result).contains("Straat 5C");
+        assertThat(result).doesNotContain("€");
+    }
 }

@@ -66,6 +66,42 @@ class DigestTaskHandlerTest {
         assertThat(result.get().body()).contains("Amsterdam");
     }
 
+    @Test
+    void handle_aiReturnsNull_returnsEmpty() throws Exception {
+        when(chatClient.prompt()).thenReturn(promptSpec);
+        when(promptSpec.user(anyString())).thenReturn(promptSpec);
+        when(promptSpec.tools(any(Object[].class))).thenReturn(promptSpec);
+        when(promptSpec.call()).thenReturn(callSpec);
+        when(callSpec.content()).thenReturn(null);
+
+        Optional<NotificationContent> result = handler.handle(digestTask(List.of("Amsterdam")));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void handle_aiReturnsBlank_returnsEmpty() throws Exception {
+        when(chatClient.prompt()).thenReturn(promptSpec);
+        when(promptSpec.user(anyString())).thenReturn(promptSpec);
+        when(promptSpec.tools(any(Object[].class))).thenReturn(promptSpec);
+        when(promptSpec.call()).thenReturn(callSpec);
+        when(callSpec.content()).thenReturn("   ");
+
+        Optional<NotificationContent> result = handler.handle(digestTask(List.of("Amsterdam")));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void handle_invalidPayload_returnsEmpty() throws Exception {
+        AgentTaskEntity task = digestTask(List.of("Amsterdam"));
+        task.setPayload("{not valid json");
+
+        Optional<NotificationContent> result = handler.handle(task);
+
+        assertThat(result).isEmpty();
+    }
+
     private AgentTaskEntity digestTask(List<String> cities) throws Exception {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setId(UUID.randomUUID());

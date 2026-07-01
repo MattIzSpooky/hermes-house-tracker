@@ -80,6 +80,29 @@ class ResearchTaskHandlerTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    void handle_aiReturnsNull_returnsEmpty() throws Exception {
+        when(chatClient.prompt()).thenReturn(promptSpec);
+        when(promptSpec.user(anyString())).thenReturn(promptSpec);
+        when(promptSpec.tools(any(Object[].class))).thenReturn(promptSpec);
+        when(promptSpec.call()).thenReturn(callSpec);
+        when(callSpec.content()).thenReturn(null);
+
+        Optional<NotificationContent> result = handler.handle(researchTask("analyse my favourites"));
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void handle_invalidPayload_returnsEmpty() throws Exception {
+        AgentTaskEntity task = researchTask("analyse");
+        task.setPayload("{not valid json");
+
+        Optional<NotificationContent> result = handler.handle(task);
+
+        assertThat(result).isEmpty();
+    }
+
     private AgentTaskEntity researchTask(String prompt) throws Exception {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setId(UUID.randomUUID());

@@ -7,11 +7,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -127,6 +129,15 @@ class FundaClientTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    void getListing_nonNotFoundClientError_rethrowsException() {
+        server.expect(requestTo(containsString("/listings/12345678")))
+            .andRespond(withStatus(HttpStatus.FORBIDDEN));
+
+        assertThatThrownBy(() -> client.getListing("12345678"))
+            .isInstanceOf(HttpClientErrorException.class);
+    }
+
     // --- getPriceHistory ---
 
     @Test
@@ -149,6 +160,25 @@ class FundaClientTest {
         List<RawPriceChange> history = client.getPriceHistory("00000000");
 
         assertThat(history).isEmpty();
+    }
+
+    @Test
+    void getPriceHistory_nullBody_returnsEmptyList() {
+        server.expect(requestTo(containsString("/listings/12345678/price-history")))
+            .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+        List<RawPriceChange> history = client.getPriceHistory("12345678");
+
+        assertThat(history).isEmpty();
+    }
+
+    @Test
+    void getPriceHistory_nonNotFoundClientError_rethrowsException() {
+        server.expect(requestTo(containsString("/listings/12345678/price-history")))
+            .andRespond(withStatus(HttpStatus.FORBIDDEN));
+
+        assertThatThrownBy(() -> client.getPriceHistory("12345678"))
+            .isInstanceOf(HttpClientErrorException.class);
     }
 
     // --- extractFundaId ---

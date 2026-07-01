@@ -81,4 +81,35 @@ class FindPriceDropToolTest {
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         tool(holder).execute(new PriceDropParams("  ", null));
     }
+
+    @Test
+    void execute_noResults_withNonNullCity_includesCityInMessage() {
+        // Covers L48 true branch: city != null → " in " + city appended
+        when(listingService.findPriceDropListings("Amsterdam", 1.0)).thenReturn(List.of());
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        String result = tool(holder).execute(new PriceDropParams("Amsterdam", null));
+
+        assertThat(result).contains("No listings found");
+        assertThat(result).contains("in Amsterdam");
+    }
+
+    @Test
+    void execute_withHouseNumberAddition_appendsAdditionToAddress() {
+        // Covers L55 true branch: houseNumberAddition != null → appended
+        UUID id = UUID.randomUUID();
+        ListingDto withAddition = new ListingDto(id, "f", "u", "Straat", "1", "B", "1234AB",
+            "Utrecht", "Utrecht", Instant.now(), Instant.now(),
+            280000, ListingStatus.FOR_SALE, null, 90, 4, 2, "B", null);
+        PriceDropResult drop = new PriceDropResult(withAddition, 300000, 280000, 6.67);
+        ChatListingCard card = new ChatListingCard(id, "Straat", "1", "B", "Utrecht", "Utrecht", 280000, 2, 90, "B", "FOR_SALE");
+
+        when(listingService.findPriceDropListings(null, 1.0)).thenReturn(List.of(drop));
+        when(mapper.toChatListingCard(withAddition)).thenReturn(card);
+
+        AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
+        String result = tool(holder).execute(new PriceDropParams(null, null));
+
+        assertThat(result).contains("Straat 1B");
+    }
 }

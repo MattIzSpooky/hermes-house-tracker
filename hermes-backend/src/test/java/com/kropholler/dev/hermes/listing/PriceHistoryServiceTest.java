@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jms.core.JmsTemplate;
 
@@ -106,5 +107,43 @@ class PriceHistoryServiceTest {
         FetchPriceHistoryCommand cmd = (FetchPriceHistoryCommand) cmdCaptor.getValue();
         assertThat(cmd.listingId()).isEqualTo(listingId);
         assertThat(cmd.fundaId()).isEqualTo("12345678");
+    }
+
+    @Test
+    void refreshAll_multiplePages_processesAllPages() {
+        ListingEntity listing1 = new ListingEntity();
+        listing1.setId(UUID.randomUUID());
+        listing1.setFundaId("11111111");
+        ListingEntity listing2 = new ListingEntity();
+        listing2.setId(UUID.randomUUID());
+        listing2.setFundaId("22222222");
+
+        // total=200, size=100 → 2 pages; page 0 has hasNext()=true
+        PageImpl<ListingEntity> page0 = new PageImpl<>(List.of(listing1), PageRequest.of(0, 100), 200);
+        // page 1 has hasNext()=false
+        PageImpl<ListingEntity> page1 = new PageImpl<>(List.of(listing2), PageRequest.of(1, 100), 200);
+
+        when(listingRepository.findAllByDeletedAtIsNull(any(Pageable.class)))
+            .thenReturn(page0, page1);
+
+        service.refreshAll();
+
+        verify(jmsTemplate, times(2)).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
+    }
+
+    @Test
+    void refreshAll_jmsThrows_logsAndContinues() {
+        ListingEntity listing = new ListingEntity();
+        listing.setId(UUID.randomUUID());
+        listing.setFundaId("12345678");
+
+        when(listingRepository.findAllByDeletedAtIsNull(any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(listing)));
+        doThrow(new RuntimeException("JMS unavailable"))
+            .when(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
+
+        service.refreshAll(); // must not throw
+
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
     }
 }
