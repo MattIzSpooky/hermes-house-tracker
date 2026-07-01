@@ -26,13 +26,13 @@
         </h1>
         <p class="text-slate-500 mt-1">{{ listing.zipCode }} {{ listing.city }}, {{ listing.province }}</p>
       </div>
-      <button (click)="favourites.toggle(listing.id)"
-        title="{{ favourites.isFavourite(listing.id) ? 'Remove from favourites' : 'Save to favourites' }}"
+      <button (click)="favorites.toggle(listing.id)"
+        title="{{ favorites.isFavorite(listing.id) ? 'Remove from favorites' : 'Save to favorites' }}"
         class="mt-1 flex-shrink-0 rounded-full p-2 transition-colors"
-        [class]="favourites.isFavourite(listing.id)
+        [class]="favorites.isFavorite(listing.id)
           ? 'text-rose-500 hover:text-rose-400 bg-rose-50 hover:bg-rose-100'
           : 'text-slate-300 hover:text-rose-400 bg-slate-50 hover:bg-rose-50'">
-        @if (favourites.isFavourite(listing.id)) {
+        @if (favorites.isFavorite(listing.id)) {
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
             <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
           </svg>

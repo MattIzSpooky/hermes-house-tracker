@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.favorites;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -9,21 +9,21 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class FavouriteService {
+public class FavoriteService {
 
-    private final FavouriteRepository repository;
+    private final FavoriteRepository repository;
 
     @Transactional(readOnly = true)
-    public List<FavouriteDto> findByClientId(UUID clientId) {
+    public List<FavoriteDto> findByClientId(UUID clientId) {
         return repository.findByClientId(clientId).stream()
-                .map(f -> new FavouriteDto(f.getListingId(), f.getSavedAt()))
+                .map(f -> new FavoriteDto(f.getListingId(), f.getSavedAt()))
                 .toList();
     }
 
     @Transactional
-    public void addFavourite(UUID clientId, UUID listingId) {
+    public void addFavorite(UUID clientId, UUID listingId) {
         if (!repository.existsByClientIdAndListingId(clientId, listingId)) {
-            FavouriteEntity f = new FavouriteEntity();
+            FavoriteEntity f = new FavoriteEntity();
             f.setClientId(clientId);
             f.setListingId(listingId);
             repository.save(f);
@@ -31,12 +31,12 @@ public class FavouriteService {
     }
 
     @Transactional
-    public void removeFavourite(UUID clientId, UUID listingId) {
+    public void removeFavorite(UUID clientId, UUID listingId) {
         repository.deleteByClientIdAndListingId(clientId, listingId);
     }
 
     @Transactional(readOnly = true)
-    public boolean isFavourite(UUID clientId, UUID listingId) {
+    public boolean isFavorite(UUID clientId, UUID listingId) {
         return repository.existsByClientIdAndListingId(clientId, listingId);
     }
 }

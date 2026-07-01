@@ -1003,6 +1003,7 @@ git commit -m "feat(agent): add AgentTaskHandler interface and WatchTaskHandler"
 - [ ] **Step 1: Write the test**
 
 `hermes-backend/src/test/java/com/kropholler/dev/hermes/agent/internal/ResearchTaskHandlerTest.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
@@ -1011,7 +1012,7 @@ import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -1034,13 +1035,20 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ResearchTaskHandlerTest {
 
-    @Mock ChatClient chatClient;
-    @Mock ChatClient.PromptSpec promptSpec;
-    @Mock ChatClient.CallResponseSpec callSpec;
-    @Mock ListingService listingService;
-    @Mock ChatListingCardMapper chatListingCardMapper;
-    @Mock ListingSummaryService listingSummaryService;
-    @Mock FavouriteService favouriteService;
+    @Mock
+    ChatClient chatClient;
+    @Mock
+    ChatClient.PromptSpec promptSpec;
+    @Mock
+    ChatClient.CallResponseSpec callSpec;
+    @Mock
+    ListingService listingService;
+    @Mock
+    ChatListingCardMapper chatListingCardMapper;
+    @Mock
+    ListingSummaryService listingSummaryService;
+    @Mock
+    FavouriteService favoriteService;
 
     MeterRegistry meterRegistry = new SimpleMeterRegistry();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -1049,7 +1057,7 @@ class ResearchTaskHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new ResearchTaskHandler(chatClient, listingService, chatListingCardMapper,
-            listingSummaryService, favouriteService, meterRegistry, objectMapper);
+                listingSummaryService, favoriteService, meterRegistry, objectMapper);
     }
 
     @Test
@@ -1105,6 +1113,7 @@ mvnw.cmd test -Dtest=ResearchTaskHandlerTest -DfailIfNoTests=false
 - [ ] **Step 3: Create ResearchTaskHandler**
 
 `hermes-backend/src/main/java/com/kropholler/dev/hermes/agent/internal/ResearchTaskHandler.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
@@ -1112,7 +1121,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.*;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -1133,28 +1142,30 @@ public class ResearchTaskHandler implements AgentTaskHandler {
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
-    private final FavouriteService favouriteService;
+    private final FavouriteService favoriteService;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
 
     public ResearchTaskHandler(@Qualifier("chatClient") ChatClient chatClient,
-                                ListingService listingService,
-                                ChatListingCardMapper chatListingCardMapper,
-                                ListingSummaryService listingSummaryService,
-                                FavouriteService favouriteService,
-                                MeterRegistry meterRegistry,
-                                ObjectMapper objectMapper) {
+                               ListingService listingService,
+                               ChatListingCardMapper chatListingCardMapper,
+                               ListingSummaryService listingSummaryService,
+                               FavouriteService favoriteService,
+                               MeterRegistry meterRegistry,
+                               ObjectMapper objectMapper) {
         this.chatClient = chatClient;
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
-        this.favouriteService = favouriteService;
+        this.favoriteService = favoriteService;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public AgentTaskType getType() { return AgentTaskType.RESEARCH; }
+    public AgentTaskType getType() {
+        return AgentTaskType.RESEARCH;
+    }
 
     @Override
     public Optional<NotificationContent> handle(AgentTask task) {
@@ -1169,23 +1180,23 @@ public class ResearchTaskHandler implements AgentTaskHandler {
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
         UUID clientId = task.getClientId();
 
-        var searchTool    = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var summaryTool   = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
-        var historyTool   = new GetPriceHistoryTool(listingService, meterRegistry);
-        var compareTool   = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var searchTool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
+        var historyTool = new GetPriceHistoryTool(listingService, meterRegistry);
+        var compareTool = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         var priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var favTool       = new GetFavouriteListingsTool(clientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var favTool = new GetFavouriteListingsTool(clientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         String result = chatClient.prompt()
-            .user(payload.prompt())
-            .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favTool)
-            .call()
-            .content();
+                .user(payload.prompt())
+                .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favTool)
+                .call()
+                .content();
 
         if (result == null || result.isBlank()) return Optional.empty();
 
         return Optional.of(new NotificationContent(
-            "Research complete: " + task.getName(), result, List.of()));
+                "Research complete: " + task.getName(), result, List.of()));
     }
 }
 ```
@@ -1218,6 +1229,7 @@ git commit -m "feat(agent): add ResearchTaskHandler for background AI research t
 - [ ] **Step 1: Write the test**
 
 `hermes-backend/src/test/java/com/kropholler/dev/hermes/agent/internal/DigestTaskHandlerTest.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
@@ -1226,7 +1238,7 @@ import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -1249,13 +1261,20 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DigestTaskHandlerTest {
 
-    @Mock ChatClient chatClient;
-    @Mock ChatClient.PromptSpec promptSpec;
-    @Mock ChatClient.CallResponseSpec callSpec;
-    @Mock ListingService listingService;
-    @Mock ChatListingCardMapper chatListingCardMapper;
-    @Mock ListingSummaryService listingSummaryService;
-    @Mock FavouriteService favouriteService;
+    @Mock
+    ChatClient chatClient;
+    @Mock
+    ChatClient.PromptSpec promptSpec;
+    @Mock
+    ChatClient.CallResponseSpec callSpec;
+    @Mock
+    ListingService listingService;
+    @Mock
+    ChatListingCardMapper chatListingCardMapper;
+    @Mock
+    ListingSummaryService listingSummaryService;
+    @Mock
+    FavouriteService favoriteService;
 
     ObjectMapper objectMapper = new ObjectMapper();
     DigestTaskHandler handler;
@@ -1263,7 +1282,7 @@ class DigestTaskHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new DigestTaskHandler(chatClient, listingService, chatListingCardMapper,
-            listingSummaryService, favouriteService, new SimpleMeterRegistry(), objectMapper);
+                listingSummaryService, favoriteService, new SimpleMeterRegistry(), objectMapper);
     }
 
     @Test
@@ -1307,6 +1326,7 @@ mvnw.cmd test -Dtest=DigestTaskHandlerTest -DfailIfNoTests=false
 - [ ] **Step 3: Create DigestTaskHandler**
 
 `hermes-backend/src/main/java/com/kropholler/dev/hermes/agent/internal/DigestTaskHandler.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
@@ -1314,7 +1334,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.*;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -1336,28 +1356,30 @@ public class DigestTaskHandler implements AgentTaskHandler {
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
-    private final FavouriteService favouriteService;
+    private final FavouriteService favoriteService;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
 
     public DigestTaskHandler(@Qualifier("chatClient") ChatClient chatClient,
-                              ListingService listingService,
-                              ChatListingCardMapper chatListingCardMapper,
-                              ListingSummaryService listingSummaryService,
-                              FavouriteService favouriteService,
-                              MeterRegistry meterRegistry,
-                              ObjectMapper objectMapper) {
+                             ListingService listingService,
+                             ChatListingCardMapper chatListingCardMapper,
+                             ListingSummaryService listingSummaryService,
+                             FavouriteService favoriteService,
+                             MeterRegistry meterRegistry,
+                             ObjectMapper objectMapper) {
         this.chatClient = chatClient;
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
-        this.favouriteService = favouriteService;
+        this.favoriteService = favoriteService;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public AgentTaskType getType() { return AgentTaskType.DIGEST; }
+    public AgentTaskType getType() {
+        return AgentTaskType.DIGEST;
+    }
 
     @Override
     public Optional<NotificationContent> handle(AgentTask task) {
@@ -1371,33 +1393,33 @@ public class DigestTaskHandler implements AgentTaskHandler {
 
         String citiesList = payload.cities().stream().collect(Collectors.joining(", "));
         String prompt = """
-            Generate a friendly weekly market digest for these cities: %s.
-            For each city:
-            1. Call searchListings to find current listings and summarise how many are available and typical price range.
-            2. Call findPriceDrop to identify any notable price reductions.
-            Write a brief, friendly summary paragraph per city. Keep it concise.
-            """.formatted(citiesList);
+                Generate a friendly weekly market digest for these cities: %s.
+                For each city:
+                1. Call searchListings to find current listings and summarise how many are available and typical price range.
+                2. Call findPriceDrop to identify any notable price reductions.
+                Write a brief, friendly summary paragraph per city. Keep it concise.
+                """.formatted(citiesList);
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
         UUID clientId = task.getClientId();
 
-        var searchTool    = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var summaryTool   = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
-        var historyTool   = new GetPriceHistoryTool(listingService, meterRegistry);
-        var compareTool   = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var searchTool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
+        var historyTool = new GetPriceHistoryTool(listingService, meterRegistry);
+        var compareTool = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         var priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var favTool       = new GetFavouriteListingsTool(clientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var favTool = new GetFavouriteListingsTool(clientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         String result = chatClient.prompt()
-            .user(prompt)
-            .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favTool)
-            .call()
-            .content();
+                .user(prompt)
+                .tools(searchTool, summaryTool, historyTool, compareTool, priceDropTool, favTool)
+                .call()
+                .content();
 
         if (result == null || result.isBlank()) return Optional.empty();
 
         return Optional.of(new NotificationContent(
-            "Weekly digest: " + task.getName(), result, List.of()));
+                "Weekly digest: " + task.getName(), result, List.of()));
     }
 }
 ```

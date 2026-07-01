@@ -1,6 +1,6 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.favorites;
 
-import com.kropholler.dev.hermes.favourites.openapi.FavouriteResponse;
+import com.kropholler.dev.hermes.favorites.openapi.FavoriteResponse;
 import com.kropholler.dev.hermes.config.MapStructConfig;
 import org.mapstruct.Mapper;
 
@@ -9,9 +9,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 @Mapper(config = MapStructConfig.class)
-public interface FavouriteApiMapper {
+public interface FavoriteApiMapper {
 
-    FavouriteResponse toResponse(FavouriteDto dto);
+    FavoriteResponse toResponse(FavoriteDto dto);
 
     default OffsetDateTime toOffsetDateTime(Instant instant) {
         return instant != null ? instant.atOffset(ZoneOffset.UTC) : null;

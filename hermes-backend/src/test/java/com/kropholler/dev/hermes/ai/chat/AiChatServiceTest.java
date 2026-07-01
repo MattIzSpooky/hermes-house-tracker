@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.ai.chat;
 
 import com.kropholler.dev.hermes.ai.ChatToolProvider;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -32,7 +32,8 @@ class AiChatServiceTest {
     @Mock ListingService listingService;
     @Mock ChatListingCardMapper chatListingCardMapper;
     @Mock ListingSummaryService listingSummaryService;
-    @Mock FavouriteService favouriteService;
+    @Mock
+    FavoriteService favoriteService;
     @Mock ChatToolProvider chatToolProvider;
 
     AiChatService service;
@@ -40,7 +41,7 @@ class AiChatServiceTest {
     @BeforeEach
     void setUp() {
         service = new AiChatService(chatClient, chatMessageRepository, listingService,
-                chatListingCardMapper, listingSummaryService, favouriteService,
+                chatListingCardMapper, listingSummaryService, favoriteService,
                 List.of(), new SimpleMeterRegistry());
     }
 
@@ -128,7 +129,7 @@ class AiChatServiceTest {
         UUID sessionId = UUID.randomUUID();
         UUID clientId = UUID.randomUUID();
         service = new AiChatService(chatClient, chatMessageRepository, listingService,
-                chatListingCardMapper, listingSummaryService, favouriteService,
+                chatListingCardMapper, listingSummaryService, favoriteService,
                 List.of(chatToolProvider), new SimpleMeterRegistry());
         when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
         when(chatToolProvider.provideTools(clientId)).thenReturn(List.of(new Object()));

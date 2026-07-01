@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ListingsService } from '../../core/listings.service';
-import { FavouritesService } from '../../core/favourites.service';
+import { FavoritesService } from '../../core/favorites.service';
 import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
@@ -23,7 +23,7 @@ import { SectionCardComponent } from '../../shared/section-card.component';
 })
 export class ListingDetailPageComponent implements OnInit, OnDestroy {
   protected readonly svc = inject(ListingsService);
-  protected readonly favourites = inject(FavouritesService);
+  protected readonly favorites = inject(FavoritesService);
   private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);

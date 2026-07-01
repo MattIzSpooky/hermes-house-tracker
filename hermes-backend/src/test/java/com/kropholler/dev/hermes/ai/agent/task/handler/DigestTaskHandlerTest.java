@@ -5,11 +5,10 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
-import com.kropholler.dev.hermes.ai.agent.task.handler.DigestTaskHandler;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +37,8 @@ class DigestTaskHandlerTest {
     @Mock ListingService listingService;
     @Mock ChatListingCardMapper chatListingCardMapper;
     @Mock ListingSummaryService listingSummaryService;
-    @Mock FavouriteService favouriteService;
+    @Mock
+    FavoriteService favoriteService;
 
     ObjectMapper objectMapper = new ObjectMapper();
     DigestTaskHandler handler;
@@ -46,7 +46,7 @@ class DigestTaskHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new DigestTaskHandler(chatClient, listingService, chatListingCardMapper,
-            listingSummaryService, favouriteService, new SimpleMeterRegistry(), objectMapper);
+            listingSummaryService, favoriteService, new SimpleMeterRegistry(), objectMapper);
     }
 
     @Test

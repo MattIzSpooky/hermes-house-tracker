@@ -2,8 +2,8 @@ package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
-import com.kropholler.dev.hermes.favourites.FavouriteDto;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteDto;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -18,20 +18,20 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GetFavouriteListingsTool {
 
     private final UUID clientId;
-    private final FavouriteService favouriteService;
+    private final FavoriteService favoriteService;
     private final ListingService listingService;
     private final ChatListingCardMapper mapper;
     private final AtomicReference<List<ChatListingCard>> resultHolder;
     private final Counter callCounter;
 
     public GetFavouriteListingsTool(UUID clientId,
-                                     FavouriteService favouriteService,
+                                     FavoriteService favoriteService,
                                      ListingService listingService,
                                      ChatListingCardMapper mapper,
                                      AtomicReference<List<ChatListingCard>> resultHolder,
                                      MeterRegistry meterRegistry) {
         this.clientId = clientId;
-        this.favouriteService = favouriteService;
+        this.favoriteService = favoriteService;
         this.listingService = listingService;
         this.mapper = mapper;
         this.resultHolder = resultHolder;
@@ -44,7 +44,7 @@ public class GetFavouriteListingsTool {
         log.info("getFavouriteListings called: clientId={}", clientId);
         callCounter.increment();
 
-        List<FavouriteDto> favourites = favouriteService.findByClientId(clientId);
+        List<FavoriteDto> favourites = favoriteService.findByClientId(clientId);
         if (favourites.isEmpty()) {
             return "You have no saved listings yet. You can save a listing by clicking the heart icon on its detail page.";
         }

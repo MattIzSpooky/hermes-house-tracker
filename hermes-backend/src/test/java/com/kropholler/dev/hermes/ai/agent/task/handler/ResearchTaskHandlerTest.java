@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
-import com.kropholler.dev.hermes.ai.agent.task.handler.ResearchTaskHandler;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -38,7 +37,8 @@ class ResearchTaskHandlerTest {
     @Mock ListingService listingService;
     @Mock ChatListingCardMapper chatListingCardMapper;
     @Mock ListingSummaryService listingSummaryService;
-    @Mock FavouriteService favouriteService;
+    @Mock
+    FavoriteService favoriteService;
 
     MeterRegistry meterRegistry = new SimpleMeterRegistry();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -47,7 +47,7 @@ class ResearchTaskHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new ResearchTaskHandler(chatClient, listingService, chatListingCardMapper,
-            listingSummaryService, favouriteService, meterRegistry, objectMapper);
+            listingSummaryService, favoriteService, meterRegistry, objectMapper);
     }
 
     @Test

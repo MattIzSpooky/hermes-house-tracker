@@ -1,6 +1,6 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.favorites;
 
-import com.kropholler.dev.hermes.favourites.openapi.FavouriteResponse;
+import com.kropholler.dev.hermes.favorites.openapi.FavoriteResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -19,52 +19,54 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(FavouriteController.class)
-class FavouriteControllerTest {
+@WebMvcTest(FavoriteController.class)
+class FavoriteControllerTest {
 
     @Autowired MockMvc mockMvc;
-    @MockitoBean FavouriteService favouriteService;
-    @MockitoBean FavouriteApiMapper favouriteApiMapper;
+    @MockitoBean
+    FavoriteService favoriteService;
+    @MockitoBean
+    FavoriteApiMapper favoriteApiMapper;
 
     @Test
-    void getFavourites_returnsMappedList() throws Exception {
+    void getFavorites_returnsMappedList() throws Exception {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         Instant savedAt = Instant.parse("2026-01-15T10:00:00Z");
 
-        FavouriteDto dto = new FavouriteDto(listingId, savedAt);
-        FavouriteResponse response = new FavouriteResponse();
+        FavoriteDto dto = new FavoriteDto(listingId, savedAt);
+        FavoriteResponse response = new FavoriteResponse();
         response.setListingId(listingId);
         response.setSavedAt(OffsetDateTime.ofInstant(savedAt, ZoneOffset.UTC));
 
-        when(favouriteService.findByClientId(clientId)).thenReturn(List.of(dto));
-        when(favouriteApiMapper.toResponse(any())).thenReturn(response);
+        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(dto));
+        when(favoriteApiMapper.toResponse(any())).thenReturn(response);
 
-        mockMvc.perform(get("/api/favourites/{clientId}", clientId))
+        mockMvc.perform(get("/api/favorites/{clientId}", clientId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].listingId").value(listingId.toString()))
             .andExpect(jsonPath("$[0].savedAt").value("2026-01-15T10:00:00Z"));
     }
 
     @Test
-    void addFavourite_returns204() throws Exception {
+    void addFavorite_returns204() throws Exception {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
 
-        mockMvc.perform(put("/api/favourites/{clientId}/{listingId}", clientId, listingId))
+        mockMvc.perform(put("/api/favorites/{clientId}/{listingId}", clientId, listingId))
             .andExpect(status().isNoContent());
 
-        verify(favouriteService).addFavourite(clientId, listingId);
+        verify(favoriteService).addFavorite(clientId, listingId);
     }
 
     @Test
-    void removeFavourite_returns204() throws Exception {
+    void removeFavorite_returns204() throws Exception {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/favourites/{clientId}/{listingId}", clientId, listingId))
+        mockMvc.perform(delete("/api/favorites/{clientId}/{listingId}", clientId, listingId))
             .andExpect(status().isNoContent());
 
-        verify(favouriteService).removeFavourite(clientId, listingId);
+        verify(favoriteService).removeFavorite(clientId, listingId);
     }
 }

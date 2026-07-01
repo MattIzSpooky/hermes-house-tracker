@@ -121,7 +121,7 @@ export interface ChatListingCard {
   status?: string;
 }
 
-export interface FavouriteDto {
+export interface FavoriteDto {
   listingId: string;
   savedAt: string;
 }

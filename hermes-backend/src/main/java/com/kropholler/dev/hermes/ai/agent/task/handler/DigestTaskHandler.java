@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.ai.tool.*;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ class DigestTaskHandler implements AgentTaskHandler {
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
-    private final FavouriteService favouriteService;
+    private final FavoriteService favoriteService;
     private final MeterRegistry meterRegistry;
     private final ObjectMapper objectMapper;
 
@@ -40,14 +40,14 @@ class DigestTaskHandler implements AgentTaskHandler {
                               ListingService listingService,
                               ChatListingCardMapper chatListingCardMapper,
                               ListingSummaryService listingSummaryService,
-                              FavouriteService favouriteService,
+                              FavoriteService favoriteService,
                               MeterRegistry meterRegistry,
                               ObjectMapper objectMapper) {
         this.chatClient = chatClient;
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
-        this.favouriteService = favouriteService;
+        this.favoriteService = favoriteService;
         this.meterRegistry = meterRegistry;
         this.objectMapper = objectMapper;
     }
@@ -82,7 +82,7 @@ class DigestTaskHandler implements AgentTaskHandler {
         var historyTool   = new GetPriceHistoryTool(listingService, meterRegistry);
         var compareTool   = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         var priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var favTool       = new GetFavouriteListingsTool(clientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var favTool       = new GetFavouriteListingsTool(clientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         String result = chatClient.prompt()
             .user(prompt)

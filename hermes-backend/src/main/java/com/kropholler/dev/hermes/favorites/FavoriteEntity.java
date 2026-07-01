@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.favorites;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,11 +9,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "favourites")
+@Table(name = "favorites")
 @Getter
 @Setter
 @NoArgsConstructor
-public class FavouriteEntity {
+public class FavoriteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

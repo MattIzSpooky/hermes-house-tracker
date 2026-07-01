@@ -379,13 +379,13 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>generate-favourites</id>
+                        <id>generate-favorites</id>
                         <goals><goal>generate</goal></goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi/favourites.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/favorites.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.favourites.openapi</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.favourites.openapi</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.favorites.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.favorites.openapi</modelPackage>
                             <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>

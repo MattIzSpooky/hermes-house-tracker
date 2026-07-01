@@ -1,4 +1,4 @@
-package com.kropholler.dev.hermes.favourites;
+package com.kropholler.dev.hermes.favorites;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +16,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class FavouriteServiceTest {
+class FavoriteServiceTest {
 
-    @Mock FavouriteRepository repository;
-    @InjectMocks FavouriteService service;
+    @Mock
+    FavoriteRepository repository;
+    @InjectMocks
+    FavoriteService service;
 
     @Test
     void findByClientId_returnsMappedDtos() {
@@ -27,14 +29,14 @@ class FavouriteServiceTest {
         UUID listingId = UUID.randomUUID();
         Instant now = Instant.now();
 
-        FavouriteEntity favourite = new FavouriteEntity();
+        FavoriteEntity favourite = new FavoriteEntity();
         favourite.setClientId(clientId);
         favourite.setListingId(listingId);
         favourite.setSavedAt(now);
 
         when(repository.findByClientId(clientId)).thenReturn(List.of(favourite));
 
-        List<FavouriteDto> result = service.findByClientId(clientId);
+        List<FavoriteDto> result = service.findByClientId(clientId);
 
         assertThat(result).hasSize(1);
         assertThat(result.getFirst().listingId()).isEqualTo(listingId);
@@ -42,55 +44,55 @@ class FavouriteServiceTest {
     }
 
     @Test
-    void addFavourite_savesWhenNotAlreadyPresent() {
+    void addFavorite_savesWhenNotAlreadyPresent() {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         when(repository.existsByClientIdAndListingId(clientId, listingId)).thenReturn(false);
 
-        service.addFavourite(clientId, listingId);
+        service.addFavorite(clientId, listingId);
 
-        ArgumentCaptor<FavouriteEntity> cap = ArgumentCaptor.forClass(FavouriteEntity.class);
+        ArgumentCaptor<FavoriteEntity> cap = ArgumentCaptor.forClass(FavoriteEntity.class);
         verify(repository).save(cap.capture());
         assertThat(cap.getValue().getClientId()).isEqualTo(clientId);
         assertThat(cap.getValue().getListingId()).isEqualTo(listingId);
     }
 
     @Test
-    void addFavourite_doesNotSaveWhenAlreadyPresent() {
+    void addFavorite_doesNotSaveWhenAlreadyPresent() {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         when(repository.existsByClientIdAndListingId(clientId, listingId)).thenReturn(true);
 
-        service.addFavourite(clientId, listingId);
+        service.addFavorite(clientId, listingId);
 
         verify(repository, never()).save(any());
     }
 
     @Test
-    void removeFavourite_delegatesToRepository() {
+    void removeFavorite_delegatesToRepository() {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
 
-        service.removeFavourite(clientId, listingId);
+        service.removeFavorite(clientId, listingId);
 
         verify(repository).deleteByClientIdAndListingId(clientId, listingId);
     }
 
     @Test
-    void isFavourite_returnsTrueWhenPresent() {
+    void isFavorite_returnsTrueWhenPresent() {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         when(repository.existsByClientIdAndListingId(clientId, listingId)).thenReturn(true);
 
-        assertThat(service.isFavourite(clientId, listingId)).isTrue();
+        assertThat(service.isFavorite(clientId, listingId)).isTrue();
     }
 
     @Test
-    void isFavourite_returnsFalseWhenAbsent() {
+    void isFavorite_returnsFalseWhenAbsent() {
         UUID clientId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         when(repository.existsByClientIdAndListingId(clientId, listingId)).thenReturn(false);
 
-        assertThat(service.isFavourite(clientId, listingId)).isFalse();
+        assertThat(service.isFavorite(clientId, listingId)).isFalse();
     }
 }

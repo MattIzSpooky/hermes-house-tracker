@@ -2,8 +2,8 @@ package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
-import com.kropholler.dev.hermes.favourites.FavouriteDto;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
+import com.kropholler.dev.hermes.favorites.FavoriteDto;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -25,7 +25,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class GetFavouriteListingsToolTest {
 
-    @Mock FavouriteService favouriteService;
+    @Mock
+    FavoriteService favoriteService;
     @Mock ListingService listingService;
     @Mock ChatListingCardMapper mapper;
 
@@ -38,12 +39,12 @@ class GetFavouriteListingsToolTest {
     }
 
     private GetFavouriteListingsTool tool(AtomicReference<List<ChatListingCard>> holder) {
-        return new GetFavouriteListingsTool(clientId, favouriteService, listingService, mapper, holder, new SimpleMeterRegistry());
+        return new GetFavouriteListingsTool(clientId, favoriteService, listingService, mapper, holder, new SimpleMeterRegistry());
     }
 
     @Test
     void getFavouriteListings_noFavourites_returnsNoneSavedMessage() {
-        when(favouriteService.findByClientId(clientId)).thenReturn(List.of());
+        when(favoriteService.findByClientId(clientId)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         String result = tool(holder).getFavouriteListings();
@@ -54,11 +55,11 @@ class GetFavouriteListingsToolTest {
     @Test
     void getFavouriteListings_withFavourites_populatesHolder() {
         UUID listingId = UUID.randomUUID();
-        FavouriteDto fav = new FavouriteDto(listingId, Instant.now());
+        FavoriteDto fav = new FavoriteDto(listingId, Instant.now());
         ListingDto listingDto = dto(listingId);
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", null, "Rotterdam", "Zuid-Holland", 400000, 3, 100, "A", "FOR_SALE");
 
-        when(favouriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 
@@ -73,9 +74,9 @@ class GetFavouriteListingsToolTest {
     @Test
     void getFavouriteListings_listingDeleted_returnsCouldNotBeFoundMessage() {
         UUID listingId = UUID.randomUUID();
-        FavouriteDto fav = new FavouriteDto(listingId, Instant.now());
+        FavoriteDto fav = new FavoriteDto(listingId, Instant.now());
 
-        when(favouriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.empty());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -88,11 +89,11 @@ class GetFavouriteListingsToolTest {
     void getFavouriteListings_cardWithAdditionAndNullPrice_formatsCorrectly() {
         // Covers L66 true (houseNumberAddition != null → appended) and L68 false (price null → not appended)
         UUID listingId = UUID.randomUUID();
-        FavouriteDto fav = new FavouriteDto(listingId, Instant.now());
+        FavoriteDto fav = new FavoriteDto(listingId, Instant.now());
         ListingDto listingDto = dto(listingId);
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", "C", "Rotterdam", "Zuid-Holland", null, 3, 100, "A", "FOR_SALE");
 
-        when(favouriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 

@@ -1,9 +1,9 @@
 package com.kropholler.dev.hermes.ai.chat;
 
 import com.kropholler.dev.hermes.ai.ChatToolProvider;
+import com.kropholler.dev.hermes.favorites.FavoriteService;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.ai.tool.*;
-import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class AiChatService {
     private final ListingService listingService;
     private final ChatListingCardMapper chatListingCardMapper;
     private final ListingSummaryService listingSummaryService;
-    private final FavouriteService favouriteService;
+    private final FavoriteService favoriteService;
     private final List<ChatToolProvider> chatToolProviders;
     private final MeterRegistry meterRegistry;
 
@@ -47,7 +47,7 @@ public class AiChatService {
                           ListingService listingService,
                           ChatListingCardMapper chatListingCardMapper,
                           ListingSummaryService listingSummaryService,
-                          FavouriteService favouriteService,
+                          FavoriteService favoriteService,
                           List<ChatToolProvider> chatToolProviders,
                           MeterRegistry meterRegistry) {
         this.chatClient = chatClient;
@@ -55,7 +55,7 @@ public class AiChatService {
         this.listingService = listingService;
         this.chatListingCardMapper = chatListingCardMapper;
         this.listingSummaryService = listingSummaryService;
-        this.favouriteService = favouriteService;
+        this.favoriteService = favoriteService;
         this.chatToolProviders = chatToolProviders;
         this.meterRegistry = meterRegistry;
     }
@@ -123,7 +123,7 @@ public class AiChatService {
         CompareListingsTool compareTool = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         FindPriceDropTool priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         GetFavouriteListingsTool favouritesTool = new GetFavouriteListingsTool(
-                effectiveClientId, favouriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+                effectiveClientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         List<Object> allTools = new ArrayList<>(List.of(
                 searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool));
