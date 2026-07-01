@@ -59,7 +59,7 @@ Only `org.locationtech.jts:jts-core:1.20.0` is required. **No `hibernate-spatial
 
 ### Listing entity changes
 
-Two new fields are added to `com.kropholler.dev.hermes.listing.internal.Listing`:
+Two new fields are added to `com.kropholler.dev.hermes.listing.data.Listing`:
 
 ```java
 @Column(columnDefinition = "geometry(Point,4326)")
@@ -73,7 +73,7 @@ Both fields are added to `@BeanMapping(ignoreUnmappedSourceProperties = {...})` 
 
 ### City entity
 
-`com.kropholler.dev.hermes.listing.internal.City` — JPA entity on the `cities` table. Fields: `id` (UUID), `name` (String, unique), `location` (Point), `boundingBox` (Polygon), `fetchedAt` (Instant).
+`com.kropholler.dev.hermes.listing.city.City` — JPA entity on the `cities` table. Fields: `id` (UUID), `name` (String, unique), `location` (Point), `boundingBox` (Polygon), `fetchedAt` (Instant).
 
 `CityRepository` extends `JpaRepository<City, UUID>` and adds `Optional<City> findByNameIgnoreCase(String name)`.
 
@@ -135,7 +135,7 @@ poly.setSRID(4326);
 
 ### GeocodingService (public)
 
-`com.kropholler.dev.hermes.listing.GeocodingService` — `@Service`, accessible by other modules.
+`com.kropholler.dev.hermes.listing.geocoding.GeocodingService` — `@Service`, accessible by other modules.
 
 | Method | Behaviour |
 |---|---|

@@ -1,0 +1,135 @@
+package com.kropholler.dev.hermes.listing.geocoding;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+@RestClientTest(NominatimClient.class)
+class NominatimClientTest {
+
+    @Autowired
+    private NominatimClient client;
+
+    @Autowired
+    private MockRestServiceServer server;
+
+    @Test
+    void geocodeAddress_returnsParsedLatLon() {
+        server.expect(requestTo(containsString("Rentmeesterlaan")))
+            .andRespond(withSuccess("""
+                [{"lat":"51.2574224","lon":"5.6972390",
+                  "boundingbox":["51.2573724","51.2574724","5.6971890","5.6972890"],
+                  "place_rank":30,"addresstype":"place","display_name":"9, Rentmeesterlaan, Weert"}]
+                """, MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeAddress("9", "Rentmeesterlaan", "Weert");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().lat()).isEqualTo("51.2574224");
+        assertThat(result.get().lon()).isEqualTo("5.6972390");
+        assertThat(result.get().boundingbox()).hasSize(4);
+    }
+
+    @Test
+    void geocodeCity_filtersToNetherlandsAndReturnsFirst() {
+        server.expect(requestTo(containsString("countrycodes=nl")))
+            .andRespond(withSuccess("""
+                [{"lat":"51.2355829","lon":"5.7050797",
+                  "boundingbox":["51.1804207","51.2905755","5.5660454","5.7917701"],
+                  "place_rank":14,"addresstype":"municipality","display_name":"Weert, Limburg, Netherlands"}]
+                """, MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeCity("Weert");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().addressType()).isEqualTo("municipality");
+    }
+
+    @Test
+    void geocodeAddress_emptyResponse_returnsEmpty() {
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeAddress("1", "Onbekend", "Nergens");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeAddress_nullBody_returnsEmpty() {
+        // RestClient returns null when the JSON body is the literal "null"
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeAddress("1", "Kerkstraat", "Amsterdam");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeAddress_serverError_returnsEmpty() {
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withServerError());
+
+        Optional<NominatimResponse> result = client.geocodeAddress("1", "Kerkstraat", "Amsterdam");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeCity_emptyResponse_returnsEmpty() {
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withSuccess("[]", MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeCity("Nergens");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeCity_nullBody_returnsEmpty() {
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withSuccess("null", MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeCity("Nergens");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeCity_serverError_returnsEmpty() {
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withServerError());
+
+        Optional<NominatimResponse> result = client.geocodeCity("Amsterdam");
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void geocodeCity_noMatchingAddressType_fallsBackToFirstResult() {
+        // When no result has a municipality/city/town/administrative addressType,
+        // the .or() lambda fires and returns the first result regardless
+        server.expect(requestTo(containsString("search")))
+            .andRespond(withSuccess("""
+                [{"lat":"52.0","lon":"4.9",
+                  "boundingbox":["51.9","52.1","4.8","5.0"],
+                  "place_rank":20,"addresstype":"village","display_name":"Some Village, Netherlands"}]
+                """, MediaType.APPLICATION_JSON));
+
+        Optional<NominatimResponse> result = client.geocodeCity("SomeVillage");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().addressType()).isEqualTo("village");
+    }
+}

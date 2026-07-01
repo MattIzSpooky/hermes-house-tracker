@@ -1,7 +1,8 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

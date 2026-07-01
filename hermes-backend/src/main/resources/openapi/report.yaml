@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Hermes Reports API
+  version: 1.0.0
+
+paths:
+  /api/listings/{id}/report:
+    get:
+      operationId: getListingReport
+      tags: [Reports]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListingReportResponse'
+        '404':
+          description: Listing not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    ListingReportResponse:
+      type: object
+      properties:
+        listingId:
+          type: string
+          format: uuid
+        daysInHermes:
+          type: integer
+          format: int64
+        currentPrice:
+          type: integer
+          nullable: true
+        initialPrice:
+          type: integer
+          nullable: true
+        priceChangePct:
+          type: number
+          format: double
+          nullable: true
+        priceHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/PricePointResponse'
+        currentStatus:
+          type: string
+          nullable: true
+
+    PricePointResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        price:
+          type: integer
+          nullable: true
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri

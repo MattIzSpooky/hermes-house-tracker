@@ -390,7 +390,7 @@ public record FetchListingDetailsCommand(UUID listingId, String fundaId) impleme
 ```java
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.internal.FundaProxyClient;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -449,8 +449,8 @@ In `ListingPersistenceServiceTest.java`, replace the full file:
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -602,7 +602,7 @@ public void onScrapingSessionCompleted(ScrapingSessionCompleted event) {
 
 Add import at the top of the file:
 ```java
-import com.kropholler.dev.hermes.listing.internal.FetchListingDetailsCommand;
+import com.kropholler.dev.hermes.listing.async.command.FetchListingDetailsCommand;
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
@@ -637,8 +637,8 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/internal/
 ```java
 package com.kropholler.dev.hermes.listing.internal;
 
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -741,7 +741,7 @@ Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/listing/internal/
 package com.kropholler.dev.hermes.listing.internal;
 
 import com.google.common.util.concurrent.RateLimiter;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -903,7 +903,7 @@ public record ListingSearchParams(
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
+import com.kropholler.dev.hermes.listing.data.Listing;
 import org.springframework.data.jpa.domain.Specification;
 
 class ListingSpecifications {
@@ -944,8 +944,8 @@ Replace the full file:
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -1171,7 +1171,7 @@ private ListingDetailResponse toDetailResponse(ListingDto dto) {
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.listing.ListingSearchParams;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.report.ReportService;

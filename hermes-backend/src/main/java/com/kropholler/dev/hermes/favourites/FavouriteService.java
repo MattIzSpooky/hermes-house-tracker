@@ -1,7 +1,5 @@
 package com.kropholler.dev.hermes.favourites;
 
-import com.kropholler.dev.hermes.favourites.internal.Favourite;
-import com.kropholler.dev.hermes.favourites.internal.FavouriteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +23,7 @@ public class FavouriteService {
     @Transactional
     public void addFavourite(UUID clientId, UUID listingId) {
         if (!repository.existsByClientIdAndListingId(clientId, listingId)) {
-            Favourite f = new Favourite();
+            FavouriteEntity f = new FavouriteEntity();
             f.setClientId(clientId);
             f.setListingId(listingId);
             repository.save(f);

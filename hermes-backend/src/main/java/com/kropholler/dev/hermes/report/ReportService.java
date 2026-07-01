@@ -30,8 +30,8 @@ public class ReportService {
 
             if (askingPrices.isEmpty()) return null;
 
-            Integer initialPrice = askingPrices.get(0).price();
-            Integer currentPrice = askingPrices.get(askingPrices.size() - 1).price();
+            Integer initialPrice = askingPrices.getFirst().price();
+            Integer currentPrice = askingPrices.getLast().price();
 
             Double priceChangePct = null;
             if (initialPrice != null && currentPrice != null && initialPrice != 0) {

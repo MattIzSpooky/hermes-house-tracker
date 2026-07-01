@@ -658,7 +658,7 @@ record FundaProxyPriceChange(
 Add the following import and constant at the top of `FundaProxyClient.java`:
 
 ```java
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 ```
 
 Add the new constant after the existing ones:
@@ -697,7 +697,7 @@ private RawPriceChange toRawPriceChange(FundaProxyPriceChange p) {
 ```java
 package com.kropholler.dev.hermes.scraping;
 
-import com.kropholler.dev.hermes.scraping.internal.FundaProxyClient;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -744,7 +744,7 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/internal
 ```java
 package com.kropholler.dev.hermes.scraping.internal;
 
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
@@ -820,7 +820,7 @@ if (session.getType() == ScrapingSessionType.RESCRAPE) {
 
 Add the import at the top:
 ```java
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
 ```
 
 - [ ] **Step 4: Run test to confirm it passes**
@@ -855,8 +855,8 @@ package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingCreated;
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -965,8 +965,8 @@ package com.kropholler.dev.hermes.listing.internal;
 
 import com.kropholler.dev.hermes.listing.ListingCreated;
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.scraping.ListingNotFound;
-import com.kropholler.dev.hermes.scraping.RawListing;
+import com.kropholler.dev.hermes.scraping.funda.ListingNotFound;
+import com.kropholler.dev.hermes.scraping.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -1065,12 +1065,12 @@ git commit -m "feat(hermes-backend): rewrite ListingPersistenceService for price
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -1197,12 +1197,12 @@ Expected: compilation error — `PriceHistoryService` not found.
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.scraping.funda.FundaProxyFacade;
+import com.kropholler.dev.hermes.scraping.funda.RawPriceChange;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -1376,10 +1376,10 @@ Full replacement:
 ```java
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.data.Listing;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntry;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -1564,7 +1564,7 @@ Full replacement:
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.api.generated.ListingsApi;
 import com.kropholler.dev.hermes.api.generated.model.*;
 import com.kropholler.dev.hermes.listing.ListingDto;
@@ -1768,7 +1768,7 @@ package com.kropholler.dev.hermes.report;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
-import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -1889,7 +1889,7 @@ Full replacement:
 package com.kropholler.dev.hermes.report;
 
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1975,7 +1975,7 @@ package com.kropholler.dev.hermes.ai.internal;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.PriceHistoryUpdated;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryUpdated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -2082,7 +2082,7 @@ package com.kropholler.dev.hermes;
 
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
-import com.kropholler.dev.hermes.listing.PriceHistoryService;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import io.micrometer.observation.Observation;
 import io.micrometer.observation.ObservationRegistry;
@@ -2147,7 +2147,7 @@ public Page<ListingDto> findAllActive(Pageable pageable) {
 ```java
 package com.kropholler.dev.hermes;
 
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

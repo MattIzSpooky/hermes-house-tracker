@@ -1,13 +1,14 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.FetchPriceHistoryCommand;
-import com.kropholler.dev.hermes.listing.internal.JmsQueues;
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
-import com.kropholler.dev.hermes.scraping.FundaProxyFacade;
-import com.kropholler.dev.hermes.scraping.RawPriceChange;
+import com.kropholler.dev.hermes.funda.FundaClient;
+import com.kropholler.dev.hermes.listing.async.command.FetchPriceHistoryCommand;
+import com.kropholler.dev.hermes.listing.async.JmsQueues;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
+import com.kropholler.dev.hermes.funda.RawPriceChange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -15,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jms.core.JmsTemplate;
 
@@ -33,7 +35,7 @@ class PriceHistoryServiceTest {
 
     @Mock private ListingRepository listingRepository;
     @Mock private PriceHistoryEntryRepository priceHistoryRepository;
-    @Mock private FundaProxyFacade proxyFacade;
+    @Mock private FundaClient fundaClient;
     @Mock private JmsTemplate jmsTemplate;
 
     @InjectMocks
@@ -46,12 +48,12 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), ts);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
         when(priceHistoryRepository.existsByListingIdAndTimestamp(listingId, ts)).thenReturn(false);
 
         service.fetchAndStore(listingId, "12345678");
 
-        ArgumentCaptor<PriceHistoryEntry> captor = ArgumentCaptor.forClass(PriceHistoryEntry.class);
+        ArgumentCaptor<PriceHistoryEntryEntity> captor = ArgumentCaptor.forClass(PriceHistoryEntryEntity.class);
         verify(priceHistoryRepository).save(captor.capture());
         assertThat(captor.getValue().getPrice()).isEqualTo(350000);
         assertThat(captor.getValue().getStatus()).isEqualTo("asking_price");
@@ -65,7 +67,7 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), ts);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
         when(priceHistoryRepository.existsByListingIdAndTimestamp(listingId, ts)).thenReturn(true);
 
         service.fetchAndStore(listingId, "12345678");
@@ -79,7 +81,7 @@ class PriceHistoryServiceTest {
         RawPriceChange change = new RawPriceChange(350000, "asking_price", "walter",
             LocalDate.of(2024, 5, 15), null);
 
-        when(proxyFacade.getPriceHistory("12345678")).thenReturn(List.of(change));
+        when(fundaClient.getPriceHistory("12345678")).thenReturn(List.of(change));
 
         service.fetchAndStore(listingId, "12345678");
 
@@ -89,7 +91,7 @@ class PriceHistoryServiceTest {
 
     @Test
     void refreshAll_sendsJmsMessagePerListing() {
-        Listing listing = new Listing();
+        ListingEntity listing = new ListingEntity();
         listing.setFundaId("12345678");
         UUID listingId = UUID.randomUUID();
         listing.setId(listingId);
@@ -105,5 +107,43 @@ class PriceHistoryServiceTest {
         FetchPriceHistoryCommand cmd = (FetchPriceHistoryCommand) cmdCaptor.getValue();
         assertThat(cmd.listingId()).isEqualTo(listingId);
         assertThat(cmd.fundaId()).isEqualTo("12345678");
+    }
+
+    @Test
+    void refreshAll_multiplePages_processesAllPages() {
+        ListingEntity listing1 = new ListingEntity();
+        listing1.setId(UUID.randomUUID());
+        listing1.setFundaId("11111111");
+        ListingEntity listing2 = new ListingEntity();
+        listing2.setId(UUID.randomUUID());
+        listing2.setFundaId("22222222");
+
+        // total=200, size=100 → 2 pages; page 0 has hasNext()=true
+        PageImpl<ListingEntity> page0 = new PageImpl<>(List.of(listing1), PageRequest.of(0, 100), 200);
+        // page 1 has hasNext()=false
+        PageImpl<ListingEntity> page1 = new PageImpl<>(List.of(listing2), PageRequest.of(1, 100), 200);
+
+        when(listingRepository.findAllByDeletedAtIsNull(any(Pageable.class)))
+            .thenReturn(page0, page1);
+
+        service.refreshAll();
+
+        verify(jmsTemplate, times(2)).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
+    }
+
+    @Test
+    void refreshAll_jmsThrows_logsAndContinues() {
+        ListingEntity listing = new ListingEntity();
+        listing.setId(UUID.randomUUID());
+        listing.setFundaId("12345678");
+
+        when(listingRepository.findAllByDeletedAtIsNull(any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(listing)));
+        doThrow(new RuntimeException("JMS unavailable"))
+            .when(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
+
+        service.refreshAll(); // must not throw
+
+        verify(jmsTemplate).convertAndSend(eq(JmsQueues.PRICE_HISTORY_FETCH), any(FetchPriceHistoryCommand.class));
     }
 }

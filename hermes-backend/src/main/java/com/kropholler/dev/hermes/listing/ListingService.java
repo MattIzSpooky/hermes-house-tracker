@@ -1,9 +1,12 @@
 package com.kropholler.dev.hermes.listing;
 
-import com.kropholler.dev.hermes.listing.internal.Listing;
-import com.kropholler.dev.hermes.listing.internal.ListingRepository;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntry;
-import com.kropholler.dev.hermes.listing.internal.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
+import com.kropholler.dev.hermes.listing.data.ListingEntity;
+import com.kropholler.dev.hermes.listing.data.ListingRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
+import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,6 +25,7 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
     private final PriceHistoryEntryRepository priceHistoryRepository;
+    private final PriceHistoryService priceHistoryService;
     private final ListingMapper mapper;
     private final GeocodingService geocodingService;
 
@@ -29,39 +34,41 @@ public class ListingService {
         if (params.isEmpty()) {
             return listingRepository.findAll(pageable).map(this::toDto);
         }
-        Specification<Listing> spec = params.hasRadiusSearch()
-            ? ListingSpecifications.withParamsForRadius(params)
-            : ListingSpecifications.withParams(params);
+        Specification<ListingEntity> spec = params.hasRadiusSearch()
+                ? ListingSpecifications.withParamsForRadius(params)
+                : ListingSpecifications.withParams(params);
         if (params.hasRadiusSearch()) {
-            double[] latLon = resolveRadiusCenter(params);
+            GeocodeResult latLon = resolveRadiusCenter(params);
             if (latLon != null) {
-                spec = spec.and(ListingSpecifications.withinRadius(latLon[1], latLon[0], params.radiusKm() * 1000));
+                spec = spec.and(ListingSpecifications.withinRadius(latLon.lon(), latLon.lat(), params.radiusKm() * 1000));
             }
         }
-        return listingRepository.findAll(spec, pageable).map(this::toDto);
+        return listingRepository
+                .findAll(spec, pageable)
+                .map(this::toDto);
     }
 
-    private double[] resolveRadiusCenter(ListingSearchParams params) {
+    private GeocodeResult resolveRadiusCenter(ListingSearchParams params) {
         if (params.street() != null && !params.street().isBlank()) {
             return geocodingService.geocodeAddress(
-                params.houseNumber() != null ? params.houseNumber() : "",
-                params.street(),
-                params.city() != null ? params.city() : ""
+                    params.houseNumber() != null ? params.houseNumber() : "",
+                    params.street(),
+                    params.city() != null ? params.city() : ""
             ).orElse(null);
         }
         return geocodingService.findOrFetchCity(params.city())
-            .map(c -> new double[]{c.getLatitude(), c.getLongitude()})
-            .orElse(null);
+                .map(c -> new GeocodeResult(c.getLongitude(), c.getLatitude(), null))
+                .orElse(null);
     }
 
-    private double[] resolveLatLon(String nearAddress, String nearCity) {
+    private GeocodeResult resolveLatLon(String nearAddress, String nearCity) {
         if (nearAddress != null && !nearAddress.isBlank()) {
             return geocodingService.geocodeAddress(nearAddress, "", "").orElse(null);
         }
         if (nearCity != null && !nearCity.isBlank()) {
             return geocodingService.findOrFetchCity(nearCity)
-                .map(c -> new double[]{c.getLatitude(), c.getLongitude()})
-                .orElse(null);
+                    .map(c -> new GeocodeResult(c.getLongitude(), c.getLatitude(), null))
+                    .orElse(null);
         }
         return null;
     }
@@ -83,19 +90,19 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public List<ListingDto> findForChat(Integer minPrice, Integer maxPrice,
-                                         Integer minBedrooms, Integer minRooms,
-                                         Integer minLivingAreaM2, String province,
-                                         String city, String keywords,
-                                         boolean sortByPriceDesc,
-                                         String nearAddress, String nearCity, Integer radiusKm) {
+                                        Integer minBedrooms, Integer minRooms,
+                                        Integer minLivingAreaM2, String province,
+                                        String city, String keywords,
+                                        boolean sortByPriceDesc,
+                                        String nearAddress, String nearCity, Integer radiusKm) {
         if (radiusKm != null && (nearAddress != null || nearCity != null)) {
-            double[] latLon = resolveLatLon(nearAddress, nearCity);
+            GeocodeResult latLon = resolveLatLon(nearAddress, nearCity);
             if (latLon != null) {
                 return listingRepository.searchForChatNearLocation(
-                        minBedrooms, minRooms, minLivingAreaM2,
-                        province, keywords, minPrice, maxPrice,
-                        latLon[1], latLon[0], radiusKm * 1000)
-                    .stream().map(this::toDto).toList();
+                                minBedrooms, minRooms, minLivingAreaM2,
+                                province, keywords, minPrice, maxPrice,
+                                latLon.lon(), latLon.lat(), radiusKm * 1000)
+                        .stream().map(this::toDto).toList();
             }
         }
         return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
@@ -118,12 +125,12 @@ public class ListingService {
                             .map(mapper::toDto)
                             .toList();
                     if (history.size() < 2) return null;
-                    int original = history.get(0).price();
-                    int current = history.get(history.size() - 1).price();
+                    int original = history.getFirst().price();
+                    int current = history.getLast().price();
                     double drop = (original - current) * 100.0 / original;
                     return new PriceDropResult(toDto(listing), original, current, drop);
                 })
-                .filter(r -> r != null)
+                .filter(Objects::nonNull)
                 .sorted((a, b) -> Double.compare(b.dropPercent(), a.dropPercent()))
                 .toList();
     }
@@ -134,12 +141,16 @@ public class ListingService {
         String n = houseNumber != null ? houseNumber.strip() : null;
         String c = city != null && !city.isBlank() ? city.strip() : null;
         if (c != null) {
-            List<Listing> withCity = listingRepository
+            List<ListingEntity> withCity = listingRepository
                     .findByStreetIgnoreCaseAndHouseNumberIgnoreCaseAndCityIgnoreCase(s, n, c);
             if (!withCity.isEmpty()) return Optional.of(toDto(withCity.get(0)));
         }
         return listingRepository.findByStreetIgnoreCaseAndHouseNumberIgnoreCase(s, n)
                 .stream().findFirst().map(this::toDto);
+    }
+
+    public void refreshAllPriceHistory() {
+        priceHistoryService.refreshAll();
     }
 
     @Transactional
@@ -150,14 +161,14 @@ public class ListingService {
     @Transactional(readOnly = true)
     public List<PriceHistoryEntryDto> findPriceHistoryByListingId(UUID listingId) {
         return priceHistoryRepository.findByListingIdOrderByTimestampAsc(listingId)
-            .stream().map(mapper::toDto).toList();
+                .stream().map(mapper::toDto).toList();
     }
 
-    private ListingDto toDto(Listing l) {
+    private ListingDto toDto(ListingEntity l) {
         Integer currentPrice = priceHistoryRepository
-            .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
-            .map(PriceHistoryEntry::getPrice)
-            .orElse(null);
+                .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
+                .map(PriceHistoryEntryEntity::getPrice)
+                .orElse(null);
         return mapper.toDto(l, currentPrice);
     }
 

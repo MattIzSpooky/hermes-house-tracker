@@ -322,14 +322,109 @@
                 <version>7.10.0</version>
                 <executions>
                     <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
+                        <id>generate-listing</id>
+                        <goals><goal>generate</goal></goals>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi/api.yaml</inputSpec>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/listing.yaml</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>com.kropholler.dev.hermes.api.generated</apiPackage>
-                            <modelPackage>com.kropholler.dev.hermes.api.generated.model</modelPackage>
+                            <apiPackage>com.kropholler.dev.hermes.listing.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.listing.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-scraping</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/scraping.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.scraping.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.scraping.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-report</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/report.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.report.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.report.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-favourites</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/favourites.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.favourites.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.favourites.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-agent-tasks</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/agent-tasks.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.ai.agent.task.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.ai.agent.task.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-notifications</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/notifications.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.notification.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.notification.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useSpringBoot3>true</useSpringBoot3>
@@ -399,6 +494,42 @@
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.15</version>
+                <configuration>
+                    <includes>
+                        <include>com/kropholler/dev/hermes/**</include>
+                    </includes>
+                    <excludes>
+                        <!-- OpenAPI generated interfaces and models -->
+                        <exclude>**/openapi/**</exclude>
+                        <!-- MapStruct generated implementations -->
+                        <exclude>**/*MapperImpl*</exclude>
+                        <!-- Spring CGLIB proxies and AoT-generated classes -->
+                        <exclude>**/*$$*</exclude>
+                        <exclude>**/*__BeanDefinitions*</exclude>
+                        <exclude>**/*__AotRepository*</exclude>
+                        <!-- Hibernate reflection optimizer classes (generated per entity) -->
+                        <exclude>**/*__Accessor_*</exclude>
+                        <exclude>**/*__Instantiator_*</exclude>
+                        <!-- JPA entity classes (excluded to avoid Hibernate bytecode-enhanced method noise) -->
+                        <exclude>**/*Entity*</exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
                     </execution>
                 </executions>
             </plugin>

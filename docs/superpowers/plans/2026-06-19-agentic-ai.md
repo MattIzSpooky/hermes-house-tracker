@@ -202,8 +202,8 @@ Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/agent/internal/Ag
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -286,8 +286,8 @@ public enum AgentTaskStatus { ACTIVE, PAUSED, COMPLETED }
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -341,7 +341,7 @@ public class AgentTask {
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
@@ -493,13 +493,14 @@ Note: `WatchPayload`, `ResearchPayload`, `DigestPayload` are defined in Task 4â€
 - [ ] **Step 1: Write the test**
 
 `hermes-backend/src/test/java/com/kropholler/dev/hermes/agent/AgentTaskServiceTest.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.internal.AgentTask;
-import com.kropholler.dev.hermes.agent.internal.AgentTaskRepository;
-import com.kropholler.dev.hermes.agent.internal.WatchPayload;
+import com.kropholler.dev.hermes.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.agent.task.data.AgentTaskRepository;
+import com.kropholler.dev.hermes.agent.task.handler.json.WatchPayload;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -509,7 +510,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -520,9 +520,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class AgentTaskServiceTest {
 
-    @Mock AgentTaskRepository repo;
-    @Spy ObjectMapper objectMapper;
-    @InjectMocks AgentTaskService service;
+    @Mock
+    AgentTaskRepository repo;
+    @Spy
+    ObjectMapper objectMapper;
+    @InjectMocks
+    AgentTaskService service;
 
     @Test
     void createWatchPersistsTaskWithDailySchedule() {
@@ -784,8 +787,8 @@ git commit -m "feat(agent): add AgentTaskService with watch/research/digest crea
 package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import org.junit.jupiter.api.Test;
@@ -885,7 +888,7 @@ public record NotificationContent(String title, String body, List<UUID> listingI
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 
 import java.util.Optional;
 
@@ -903,7 +906,7 @@ package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import lombok.RequiredArgsConstructor;
@@ -1004,10 +1007,10 @@ git commit -m "feat(agent): add AgentTaskHandler interface and WatchTaskHandler"
 package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -1107,7 +1110,7 @@ package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.*;
 import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
@@ -1219,10 +1222,10 @@ git commit -m "feat(agent): add ResearchTaskHandler for background AI research t
 package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.ai.ChatListingCardMapper;
-import com.kropholler.dev.hermes.ai.ListingSummaryService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
@@ -1309,7 +1312,7 @@ package com.kropholler.dev.hermes.agent.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.*;
 import com.kropholler.dev.hermes.favourites.FavouriteService;
 import com.kropholler.dev.hermes.listing.ListingService;
@@ -1427,13 +1430,14 @@ git commit -m "feat(agent): add DigestTaskHandler for AI-narrated weekly market 
 - [ ] **Step 1: Write the test**
 
 `hermes-backend/src/test/java/com/kropholler/dev/hermes/agent/NotificationServiceTest.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.internal.Notification;
-import com.kropholler.dev.hermes.agent.internal.NotificationContent;
-import com.kropholler.dev.hermes.agent.internal.NotificationRepository;
+import com.kropholler.dev.hermes.agent.task.data.Notification;
+import com.kropholler.dev.hermes.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.agent.task.data.NotificationRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -1457,11 +1461,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
-    @Mock NotificationRepository repo;
-    @Mock SimpMessagingTemplate messaging;
-    @Mock JavaMailSender mailSender;
-    @Spy ObjectMapper objectMapper;
-    @InjectMocks NotificationService service;
+    @Mock
+    NotificationRepository repo;
+    @Mock
+    SimpMessagingTemplate messaging;
+    @Mock
+    JavaMailSender mailSender;
+    @Spy
+    ObjectMapper objectMapper;
+    @InjectMocks
+    NotificationService service;
 
     @BeforeEach
     void setUp() {
@@ -1487,7 +1496,7 @@ class NotificationServiceTest {
         assertThat(cap.getValue().getTitle()).isEqualTo("title");
 
         verify(messaging).convertAndSend(
-            eq("/topic/notifications/" + clientId), any(NotificationDto.class));
+                eq("/topic/notifications/" + clientId), any(NotificationDto.class));
     }
 }
 ```
@@ -1501,15 +1510,16 @@ mvnw.cmd test -Dtest=NotificationServiceTest -DfailIfNoTests=false
 - [ ] **Step 3: Create NotificationService**
 
 `hermes-backend/src/main/java/com/kropholler/dev/hermes/agent/NotificationService.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kropholler.dev.hermes.agent.internal.Notification;
-import com.kropholler.dev.hermes.agent.internal.NotificationContent;
-import com.kropholler.dev.hermes.agent.internal.NotificationRepository;
+import com.kropholler.dev.hermes.agent.task.data.Notification;
+import com.kropholler.dev.hermes.agent.task.handler.json.NotificationContent;
+import com.kropholler.dev.hermes.agent.task.data.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -1577,7 +1587,7 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationDto> findByClientId(UUID clientId) {
         return notificationRepository.findTop50ByClientIdOrderByCreatedAtDesc(clientId)
-            .stream().map(n -> toDto(n, deserializeIds(n.getListingIds()))).toList();
+                .stream().map(n -> toDto(n, deserializeIds(n.getListingIds()))).toList();
     }
 
     @Transactional(readOnly = true)
@@ -1604,7 +1614,8 @@ public class NotificationService {
     private List<UUID> deserializeIds(String json) {
         if (json == null || json.isBlank()) return List.of();
         try {
-            return objectMapper.readValue(json, new TypeReference<List<UUID>>() {});
+            return objectMapper.readValue(json, new TypeReference<List<UUID>>() {
+            });
         } catch (JsonProcessingException e) {
             return List.of();
         }
@@ -1612,8 +1623,8 @@ public class NotificationService {
 
     private NotificationDto toDto(Notification n, List<UUID> listingIds) {
         return new NotificationDto(n.getId(), n.getTaskId(), n.getClientId(),
-            n.getTitle(), n.getBody(), listingIds, n.isRead(),
-            n.getCreatedAt(), n.getEmailSentAt());
+                n.getTitle(), n.getBody(), listingIds, n.isRead(),
+                n.getCreatedAt(), n.getEmailSentAt());
     }
 }
 ```
@@ -1654,10 +1665,10 @@ git commit -m "feat(agent): add NotificationService with persist, WebSocket push
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.agent.notification.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -1744,9 +1755,9 @@ mvnw.cmd test -Dtest=AgentTaskExecutorTest -DfailIfNoTests=false
 ```java
 package com.kropholler.dev.hermes.agent.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.agent.notification.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -1791,11 +1802,12 @@ public class AgentTaskExecutor {
 - [ ] **Step 4: Create AgentTaskScheduler**
 
 `hermes-backend/src/main/java/com/kropholler/dev/hermes/agent/AgentTaskScheduler.java`:
+
 ```java
 package com.kropholler.dev.hermes.agent;
 
-import com.kropholler.dev.hermes.agent.internal.AgentTask;
-import com.kropholler.dev.hermes.agent.internal.AgentTaskExecutor;
+import com.kropholler.dev.hermes.agent.task.data.AgentTask;
+import com.kropholler.dev.hermes.agent.task.AgentTaskExecutor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -2019,8 +2031,8 @@ Add to `components/schemas:`:
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.api.generated.AgentTasksApi;
 import com.kropholler.dev.hermes.api.generated.model.AgentTaskResponse;
 import lombok.RequiredArgsConstructor;
@@ -2071,8 +2083,8 @@ class AgentTaskController implements AgentTasksApi {
 ```java
 package com.kropholler.dev.hermes.api;
 
-import com.kropholler.dev.hermes.agent.NotificationDto;
-import com.kropholler.dev.hermes.agent.NotificationService;
+import com.kropholler.dev.hermes.agent.notification.NotificationDto;
+import com.kropholler.dev.hermes.agent.notification.NotificationService;
 import com.kropholler.dev.hermes.api.generated.NotificationsApi;
 import com.kropholler.dev.hermes.api.generated.model.NotificationResponse;
 import com.kropholler.dev.hermes.api.generated.model.UnreadCountResponse;
@@ -2160,14 +2172,15 @@ git commit -m "feat(agent): add OpenAPI endpoints and REST controllers for agent
 - [ ] **Step 1: Write the test**
 
 `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/internal/SaveWatchToolTest.java`:
+
 ```java
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.AgentTaskStatus;
-import com.kropholler.dev.hermes.agent.AgentTaskType;
-import com.kropholler.dev.hermes.agent.internal.WatchPayload;
+import com.kropholler.dev.hermes.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskStatus;
+import com.kropholler.dev.hermes.agent.task.AgentTaskType;
+import com.kropholler.dev.hermes.agent.task.handler.json.WatchPayload;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -2189,7 +2202,7 @@ class SaveWatchToolTest {
         AgentTaskService agentTaskService = mock(AgentTaskService.class);
         UUID clientId = UUID.randomUUID();
         AgentTaskDto dto = new AgentTaskDto(UUID.randomUUID(), AgentTaskType.WATCH,
-            AgentTaskStatus.ACTIVE, clientId, "Utrecht 3-bed", "0 0 8 * * *", null, Instant.now(), Instant.now());
+                AgentTaskStatus.ACTIVE, clientId, "Utrecht 3-bed", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(dto);
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService);
@@ -2213,11 +2226,12 @@ mvnw.cmd test -Dtest=SaveWatchToolTest -DfailIfNoTests=false
 - [ ] **Step 3: Create SaveWatchTool**
 
 `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/internal/SaveWatchTool.java`:
+
 ```java
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskService;
-import com.kropholler.dev.hermes.agent.internal.WatchPayload;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.handler.json.WatchPayload;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -2231,26 +2245,26 @@ public class SaveWatchTool {
     private final AgentTaskService agentTaskService;
 
     @Tool(description = "Save a listing watch that runs daily and sends a notification when new properties matching your criteria appear. "
-        + "Call this when the user asks to be alerted, notified, or monitored for listings. "
-        + "Use the same criteria you would pass to searchListings.")
+            + "Call this when the user asks to be alerted, notified, or monitored for listings. "
+            + "Use the same criteria you would pass to searchListings.")
     public String saveWatch(
-        @ToolParam(required = false, description = "Friendly name for this watch, e.g. 'Utrecht 3-bed under 400k'") String name,
-        @ToolParam(required = false, description = "City to filter by") String city,
-        @ToolParam(required = false, description = "Province to filter by") String province,
-        @ToolParam(required = false, description = "Minimum asking price in euros") Integer minPrice,
-        @ToolParam(required = false, description = "Maximum asking price in euros") Integer maxPrice,
-        @ToolParam(required = false, description = "Minimum number of bedrooms") Integer minBedrooms,
-        @ToolParam(required = false, description = "Minimum total rooms") Integer minRooms,
-        @ToolParam(required = false, description = "Minimum living area in square metres") Integer minLivingAreaM2,
-        @ToolParam(required = false, description = "Keywords to search in descriptions") String keywords,
-        @ToolParam(required = false, description = "City to search near") String nearCity,
-        @ToolParam(required = false, description = "Radius in km when nearCity is set") Integer radiusKm
+            @ToolParam(required = false, description = "Friendly name for this watch, e.g. 'Utrecht 3-bed under 400k'") String name,
+            @ToolParam(required = false, description = "City to filter by") String city,
+            @ToolParam(required = false, description = "Province to filter by") String province,
+            @ToolParam(required = false, description = "Minimum asking price in euros") Integer minPrice,
+            @ToolParam(required = false, description = "Maximum asking price in euros") Integer maxPrice,
+            @ToolParam(required = false, description = "Minimum number of bedrooms") Integer minBedrooms,
+            @ToolParam(required = false, description = "Minimum total rooms") Integer minRooms,
+            @ToolParam(required = false, description = "Minimum living area in square metres") Integer minLivingAreaM2,
+            @ToolParam(required = false, description = "Keywords to search in descriptions") String keywords,
+            @ToolParam(required = false, description = "City to search near") String nearCity,
+            @ToolParam(required = false, description = "Radius in km when nearCity is set") Integer radiusKm
     ) {
         String watchName = (name != null && !name.isBlank()) ? name : buildName(city, minBedrooms, maxPrice);
         WatchPayload payload = new WatchPayload(
-            blankToNull(city), blankToNull(province), minPrice, maxPrice,
-            minBedrooms, minRooms, minLivingAreaM2, blankToNull(keywords),
-            blankToNull(nearCity), radiusKm
+                blankToNull(city), blankToNull(province), minPrice, maxPrice,
+                minBedrooms, minRooms, minLivingAreaM2, blankToNull(keywords),
+                blankToNull(nearCity), radiusKm
         );
         agentTaskService.createWatch(clientId, watchName, payload);
         return "Watch '" + watchName + "' saved â€” I'll alert you daily when matching listings appear.";
@@ -2276,7 +2290,7 @@ public class SaveWatchTool {
 ```java
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
@@ -2308,8 +2322,8 @@ public class TriggerResearchTool {
 ```java
 package com.kropholler.dev.hermes.ai.internal;
 
-import com.kropholler.dev.hermes.agent.AgentTaskDto;
-import com.kropholler.dev.hermes.agent.AgentTaskService;
+import com.kropholler.dev.hermes.agent.task.AgentTaskDto;
+import com.kropholler.dev.hermes.agent.task.AgentTaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;

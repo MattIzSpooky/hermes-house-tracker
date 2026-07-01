@@ -1,0 +1,115 @@
+openapi: 3.0.3
+info:
+  title: Hermes Notifications API
+  version: 1.0.0
+
+paths:
+  /api/notifications:
+    get:
+      tags: [Notifications]
+      operationId: getNotifications
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recent notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationResponse'
+
+  /api/notifications/unread-count:
+    get:
+      tags: [Notifications]
+      operationId: getUnreadCount
+      parameters:
+        - name: clientId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Unread notification count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+
+  /api/notifications/{id}/read:
+    patch:
+      tags: [Notifications]
+      operationId: markNotificationRead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Marked read
+
+components:
+  schemas:
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        taskId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        body:
+          type: string
+        listingIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        emailSentAt:
+          type: string
+          format: date-time
+
+    UnreadCountResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: int64
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
