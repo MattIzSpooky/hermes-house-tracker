@@ -70,6 +70,29 @@
     <app-spinner label="Loading listings..." />
   </div>
 } @else if (viewMode === 'list') {
+  <div class="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <span>Rows per page:</span>
+      <select [(ngModel)]="pageSize" (ngModelChange)="onPageSizeChange()"
+        class="rounded-lg border-slate-200 text-sm py-1 focus:border-cyan-500 focus:ring-cyan-500">
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+      </select>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+      <span class="text-slate-400">Page {{ currentPage + 1 }} of {{ svc.listings().totalPages || 1 }}</span>
+      <button [disabled]="currentPage === 0" (click)="prev()"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors">
+        ←
+      </button>
+      <button [disabled]="currentPage >= svc.listings().totalPages - 1" (click)="next()"
+        class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 transition-colors">
+        →
+      </button>
+    </div>
+  </div>
+
   <app-section-card padding="" extraClass="overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-slate-200 text-sm">
