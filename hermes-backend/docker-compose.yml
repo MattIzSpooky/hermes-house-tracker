@@ -46,6 +46,7 @@ services:
     environment:
       OTEL_SERVICE_NAME: funda-proxy
       OTEL_EXPORTER_OTLP_ENDPOINT: http://grafana-lgtm:4318
+      FUNDA_MOCK_MODE: ${FUNDA_MOCK_MODE:-false}
     depends_on:
       grafana-lgtm:
         condition: service_started
