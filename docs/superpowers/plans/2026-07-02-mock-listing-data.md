@@ -15,6 +15,16 @@
 - No parallel response schema for mock data — `MockFunda` must return real `funda.listing.Listing` / `funda.listing.PriceHistory` instances so `models.py`'s `ListingResponse.from_listing()` / `PriceChangeResponse.from_change()` work unchanged.
 - No new hermes-backend (Java) endpoint — the frontend must reuse the existing `POST /api/scraping-sessions` endpoint.
 
+## Progress
+
+| Task | Status | Commit |
+|------|--------|--------|
+| Task 1: `MockFunda` client and fixture data | ⬜ Pending | — |
+| Task 2: Wire mock mode into `client.py` and `docker-compose.yml` | ⬜ Pending | — |
+| Task 3: "Seed mock listings" button on the scraping admin page | ⬜ Pending | — |
+
+**Resuming after an interruption:** re-read this table. Pick up at the first `⬜ Pending` row — every task before it is done and its commit is on the branch. Each task's own section below is self-contained (files, code, exact commands), so you don't need prior tasks' sections in context to execute it, only their *outputs* (types/signatures), which are listed under each task's "Interfaces" block.
+
 ---
 
 ### Task 1: `MockFunda` client and fixture data
