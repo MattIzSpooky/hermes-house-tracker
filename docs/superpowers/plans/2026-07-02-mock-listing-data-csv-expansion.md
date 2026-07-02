@@ -17,6 +17,7 @@
 - `MockFunda.search()` city filtering: case-insensitive substring match (either direction) between the `location` argument and each fixture's `address.city`; a falsy/empty `location` matches all cities.
 - `ScrapingQueueService`'s page-limit cap becomes `@Value("${scraping.page-limit.max:5}") private int maxPageLimit = 5;` (default unchanged at 5); `scraping.yaml`'s static `maximum: 5` on `pageLimit` is removed (keep `minimum: 1`).
 - The "Seed mock listings" button/card and `seedMockData()` method (added by the previous iteration of this feature) are removed from the frontend.
+- `ScrapingWorker.scrapeAllPages()`'s page loop becomes 0-based (`for (page = 0; page < limit; page++)`), matching the real pyfunda API exactly, and its own separate hardcoded `Math.min(pageLimit, 5)` clamp is removed in favor of trusting `session.getPageLimit()`, which is already clamped once at creation time by `ScrapingQueueService` (Task 4) — a single source of truth for the cap, not two.
 
 ## Progress
 
@@ -27,6 +28,7 @@
 | Task 3: `MockFunda` city filtering + real pagination | ⬜ Pending | — |
 | Task 4: Configurable scraping page-limit cap (hermes-backend) | ⬜ Pending | — |
 | Task 5: Remove the mock-seed button, add a city hint (hermes-frontend) | ⬜ Pending | — |
+| Task 6: Fix `ScrapingWorker`'s page numbering and redundant clamp | ⬜ Pending | — |
 
 **Resuming after an interruption:** re-read this table. Pick up at the first `⬜ Pending` row — every task before it is done and its commit is on the branch. Each task's own section below is self-contained (files, code, exact commands), so you don't need prior tasks' sections in context to execute it, only their *outputs* (types/signatures), which are listed under each task's "Interfaces" block.
 
@@ -1065,3 +1067,131 @@ git commit -m "feat(frontend): drop dedicated mock-seed button, hint mock city n
 5. Open a Weert listing's detail page and confirm it shows 1-3 price-history entries.
 6. Search an unrelated city name (e.g. "Nowhereville") and confirm the session completes with zero listings.
 7. Stop the stack, restart without `FUNDA_MOCK_MODE` set, and confirm a normal city search still attempts a real Funda search (no mock leakage).
+
+---
+
+### Task 6: Fix `ScrapingWorker`'s page numbering and redundant clamp
+
+**Context:** Discovered while planning Task 4: `ScrapingWorker.scrapeAllPages()` has its own hardcoded `Math.min(session.getPageLimit(), 5)` clamp, independent of `ScrapingQueueService`'s cap — so Task 4's configurable `scraping.page-limit.max` wouldn't actually take effect at scrape time without this fix. Separately, `pyfunda`'s real `search()` API is 0-based (`page=0` is the first 15 results), but the worker's loop starts at `page=1`, so every real (and, after Task 3, every mock) scrape has always skipped the true first page of results. This task fixes both: the worker now trusts the already-clamped `session.getPageLimit()` (set once, in `ScrapingQueueService`) instead of re-clamping, and the loop is 0-based to match the real API.
+
+**Files:**
+- Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorker.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorkerTest.java`
+
+**Interfaces:**
+- Consumes: `ScrapingSessionEntity.getPageLimit()` (existing, already clamped by `ScrapingQueueService.enqueueSearch` from Task 4 before the entity is ever persisted).
+- Produces: nothing new — `scrapeAllPages()` stays a private method; only its internal page-numbering and clamping logic changes. No other class calls it or needs to know about this change.
+
+- [ ] **Step 1: Update the failing tests**
+
+In `hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorkerTest.java`, replace the two existing `search_*` test methods and add a third:
+
+```java
+    @Test
+    void search_multiplePages_stopsWhenPageReturnsEmpty() {
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
+        session.setType(ScrapingSessionType.SEARCH);
+        session.setCity("amsterdam");
+        session.setPageLimit(3);
+        session.setFundaUrl("https://funda.nl/...");
+        RawListing listing = mock(RawListing.class);
+        when(proxyClient.search("amsterdam", null, null, null, null, 0)).thenReturn(List.of(listing));
+        when(proxyClient.search("amsterdam", null, null, null, null, 1)).thenReturn(List.of());
+
+        worker.process(session);
+
+        verify(proxyClient, times(2)).search(any(), any(), any(), any(), any(), anyInt());
+        verify(sessionStore).complete(any(), argThat(list -> list.size() == 1));
+    }
+
+    @Test
+    void search_singlePageWithResults_returnsAllListings() {
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
+        session.setType(ScrapingSessionType.SEARCH);
+        session.setCity("rotterdam");
+        session.setPageLimit(1);
+        session.setFundaUrl("https://funda.nl/...");
+        RawListing listing = mock(RawListing.class);
+        when(proxyClient.search("rotterdam", null, null, null, null, 0)).thenReturn(List.of(listing));
+
+        worker.process(session);
+
+        verify(sessionStore).complete(any(), argThat(list -> list.size() == 1));
+    }
+
+    @Test
+    void search_respectsSessionPageLimitWithoutAdditionalClamping() {
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
+        session.setType(ScrapingSessionType.SEARCH);
+        session.setCity("amsterdam");
+        session.setPageLimit(8);
+        session.setFundaUrl("https://funda.nl/...");
+        RawListing listing = mock(RawListing.class);
+        when(proxyClient.search(eq("amsterdam"), any(), any(), any(), any(), anyInt()))
+            .thenReturn(List.of(listing));
+
+        worker.process(session);
+
+        verify(proxyClient, times(8)).search(any(), any(), any(), any(), any(), anyInt());
+    }
+```
+
+(`eq` and `anyInt` are already available via the file's existing `import static org.mockito.Mockito.*;` — no new imports needed.)
+
+- [ ] **Step 2: Run the tests to verify they fail**
+
+Run (from `hermes-backend/`): `mvnw.cmd test -Dtest=ScrapingWorkerTest`
+Expected: FAIL — `search_multiplePages_stopsWhenPageReturnsEmpty` and `search_singlePageWithResults_returnsAllListings` fail because the current code calls `proxyClient.search(..., 1)` first, not `..., 0`; `search_respectsSessionPageLimitWithoutAdditionalClamping` fails because the current code clamps `pageLimit=8` down to 5 calls, not 8.
+
+- [ ] **Step 3: Fix `ScrapingWorker`**
+
+In `hermes-backend/src/main/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorker.java`, replace:
+
+```java
+        List<RawListing> all = new ArrayList<>();
+        int limit = Math.min(session.getPageLimit(), 5);
+        for (int page = 1; page <= limit; page++) {
+            List<RawListing> pageResults = proxyClient.search(
+                session.getCity(), session.getMinPrice(), session.getMaxPrice(),
+                session.getMinArea(), session.getMaxArea(), page);
+            all.addAll(pageResults);
+            if (pageResults.isEmpty()) break;
+        }
+        return all;
+```
+
+with:
+
+```java
+        List<RawListing> all = new ArrayList<>();
+        int limit = session.getPageLimit();
+        for (int page = 0; page < limit; page++) {
+            List<RawListing> pageResults = proxyClient.search(
+                session.getCity(), session.getMinPrice(), session.getMaxPrice(),
+                session.getMinArea(), session.getMaxArea(), page);
+            all.addAll(pageResults);
+            if (pageResults.isEmpty()) break;
+        }
+        return all;
+```
+
+- [ ] **Step 4: Run the tests to verify they pass**
+
+Run (from `hermes-backend/`): `mvnw.cmd test -Dtest=ScrapingWorkerTest`
+Expected: PASS — all 6 tests in `ScrapingWorkerTest` pass.
+
+- [ ] **Step 5: Run the full backend suite to confirm no regressions**
+
+Run (from `hermes-backend/`): `mvnw.cmd test`
+Expected: `BUILD SUCCESS`, 0 failures, 0 errors.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add hermes-backend/src/main/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorker.java hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/schedule/session/ScrapingWorkerTest.java
+git commit -m "fix(backend): scrape pages 0-based to match the real Funda API, trust the already-clamped page limit"
+```
+
+- [ ] **Step 7: Update the manual verification from Task 5**
+
+If Task 5's manual verification (Step 5 in that task) hasn't been performed yet, do it after this task instead of after Task 5, so the manually-observed page counts already reflect the 0-based fix. Concretely: Weert has 50 listings (indices 0-49, pages of 15: page 0 = 0-14, page 1 = 15-29, page 2 = 30-44, page 3 = 45-49). A search with `pageLimit: 4` should now return all 50 (pages 0-3, the last partial). Before this fix, the same request would have fetched pages 1-4 instead (skipping page 0 entirely) and returned only 35.
