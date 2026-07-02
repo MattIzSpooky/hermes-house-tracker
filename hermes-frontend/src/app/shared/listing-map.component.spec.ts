@@ -67,4 +67,23 @@ describe('ListingMapComponent', () => {
     fixture.detectChanges();
     expect(component.plottedCount()).toBe(1);
   });
+
+  it('escapes HTML-special characters from scraped address fields in the tooltip text', () => {
+    const maliciousListing: MapListing = {
+      id: 'c3',
+      street: '<script>alert(1)</script>',
+      houseNumber: '"5" & <b>',
+      city: "O'Brien",
+      currentPrice: 100000,
+      location: { latitude: 52.0, longitude: 5.0 },
+    };
+
+    const tooltip = (component as any).tooltipText(maliciousListing) as string;
+
+    expect(tooltip).not.toContain('<script>');
+    expect(tooltip).not.toContain('<b>');
+    expect(tooltip).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(tooltip).toContain('&quot;5&quot; &amp; &lt;b&gt;');
+    expect(tooltip).toContain('O&#39;Brien');
+  });
 });

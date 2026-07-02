@@ -112,9 +112,25 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   private tooltipText(listing: MapListing): string {
-    const address = [listing.street, listing.houseNumber].filter(Boolean).join(' ');
+    const street = listing.street != null ? this.escapeHtml(listing.street) : listing.street;
+    const houseNumber =
+      listing.houseNumber != null ? this.escapeHtml(listing.houseNumber) : listing.houseNumber;
+    const city = listing.city != null ? this.escapeHtml(listing.city) : listing.city;
+    const address = [street, houseNumber].filter(Boolean).join(' ');
     const price = listing.currentPrice != null ? `€ ${listing.currentPrice.toLocaleString('nl-NL')}` : '';
-    return [address, listing.city, price].filter(Boolean).join(' · ');
+    return [address, city, price].filter(Boolean).join(' · ');
+  }
+
+  // Leaflet's bindTooltip(string) renders via innerHTML, and street/houseNumber/city
+  // originate from scraped (untrusted) Funda listing data, so escape HTML-special
+  // characters before interpolating them into the tooltip string.
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   selectListing(id: string): void {
