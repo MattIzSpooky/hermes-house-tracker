@@ -111,3 +111,25 @@
     }
   </app-section-card>
 }
+
+<app-section-card class="mt-6" extraClass="max-w-lg space-y-3">
+  <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Geocoding backfill</h2>
+  <p class="text-xs text-slate-500">
+    Queue geocoding for listings that don't have map coordinates yet (e.g. listings scraped before the map feature existed).
+  </p>
+  <button (click)="svc.backfillGeocoding()" [disabled]="svc.backfillLoading()"
+    class="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white
+           hover:bg-slate-700 disabled:opacity-50 transition-colors">
+    @if (svc.backfillLoading()) {
+      <app-spinner color="white" label="Queuing..." />
+    } @else {
+      Backfill missing coordinates
+    }
+  </button>
+  @if (svc.backfillResult(); as result) {
+    <p class="text-sm text-emerald-600 font-medium">Queued {{ result.queuedCount }} listing(s) for geocoding.</p>
+  }
+  @if (svc.backfillError()) {
+    <app-error-alert [message]="svc.backfillError()!" />
+  }
+</app-section-card>
