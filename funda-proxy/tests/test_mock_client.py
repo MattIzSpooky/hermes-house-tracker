@@ -9,47 +9,69 @@ def mock_funda():
     return MockFunda()
 
 
-def test_search_returns_all_fixtures_by_default(mock_funda):
-    results = mock_funda.search("anything")
-    assert len(results) == 5
-    assert {l.global_id for l in results} == {
-        90000001, 90000002, 90000003, 90000004, 90000005,
-    }
+def test_search_without_location_returns_first_page_of_all_cities(mock_funda):
+    results = mock_funda.search()
+    assert len(results) == 15
 
 
-def test_search_page_one_returns_all_fixtures(mock_funda):
-    # The real Java ScrapingWorker caller is 1-based and only ever requests
-    # page=1, so this must return the same fixture set as the default page.
-    results = mock_funda.search("anything", page=1)
-    assert len(results) == 5
-    assert {l.global_id for l in results} == {
-        90000001, 90000002, 90000003, 90000004, 90000005,
-    }
+def test_search_filters_by_city_exact_match(mock_funda):
+    results = mock_funda.search("Weert")
+    assert len(results) == 15
+    assert all(l.address.city == "Weert" for l in results)
 
 
-def test_search_page_beyond_first_returns_empty(mock_funda):
-    assert mock_funda.search("anything", page=2) == []
+def test_search_filters_by_city_case_insensitive(mock_funda):
+    results = mock_funda.search("weert")
+    assert len(results) == 15
+    assert all(l.address.city == "Weert" for l in results)
+
+
+def test_search_unknown_city_returns_empty(mock_funda):
+    assert mock_funda.search("Nowhereville") == []
+
+
+def test_search_pagination_within_a_city_covers_all_50_listings(mock_funda):
+    page0 = mock_funda.search("Weert", page=0)
+    page1 = mock_funda.search("Weert", page=1)
+    page2 = mock_funda.search("Weert", page=2)
+    page3 = mock_funda.search("Weert", page=3)
+    assert len(page0) == 15
+    assert len(page1) == 15
+    assert len(page2) == 15
+    assert len(page3) == 5
+    assert mock_funda.search("Weert", page=4) == []
+    ids = {l.global_id for l in page0 + page1 + page2 + page3}
+    assert len(ids) == 50
+
+
+def test_search_page_zero_and_page_one_return_disjoint_results(mock_funda):
+    page0 = mock_funda.search("Weert", page=0)
+    page1 = mock_funda.search("Weert", page=1)
+    assert {l.global_id for l in page0}.isdisjoint({l.global_id for l in page1})
 
 
 def test_search_filters_by_price(mock_funda):
-    results = mock_funda.search("anything", min_price=600000, max_price=800000)
-    assert {l.global_id for l in results} == {90000001, 90000003}
+    wide = mock_funda.search("Weert", min_price=1, max_price=10_000_000)
+    assert len(wide) == 15
+    narrow = mock_funda.search("Weert", min_price=10_000_000)
+    assert narrow == []
 
 
 def test_search_filters_by_area(mock_funda):
-    results = mock_funda.search("anything", min_area=100)
-    assert {l.global_id for l in results} == {90000003, 90000005}
+    wide = mock_funda.search("Weert", min_area=0, max_area=1000)
+    assert len(wide) == 15
+    narrow = mock_funda.search("Weert", min_area=10_000)
+    assert narrow == []
 
 
 def test_listing_returns_matching_fixture(mock_funda):
-    listing = mock_funda.listing("90000002")
-    assert listing.global_id == 90000002
-    assert listing.address.city == "Utrecht"
+    listing = mock_funda.listing("90000001")
+    assert listing.global_id == 90000001
 
 
 def test_listing_accepts_int_id(mock_funda):
-    listing = mock_funda.listing(90000002)
-    assert listing.global_id == 90000002
+    listing = mock_funda.listing(90000001)
+    assert listing.global_id == 90000001
 
 
 def test_listing_unknown_id_raises_not_found(mock_funda):
@@ -57,15 +79,10 @@ def test_listing_unknown_id_raises_not_found(mock_funda):
         mock_funda.listing("00000000")
 
 
-def test_price_history_returns_changes_for_known_listing(mock_funda):
-    history = mock_funda.price_history("90000001")
-    assert len(history.changes) == 2
-    assert history.changes[0].price == 795000
-
-
-def test_price_history_returns_empty_for_listing_without_changes(mock_funda):
-    history = mock_funda.price_history("90000002")
-    assert history.changes == ()
+def test_price_history_returns_one_to_three_changes_for_any_listing(mock_funda):
+    for global_id in ("90000001", "90000500"):
+        history = mock_funda.price_history(global_id)
+        assert 1 <= len(history.changes) <= 3
 
 
 def test_price_history_unknown_id_raises_not_found(mock_funda):

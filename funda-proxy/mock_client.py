@@ -5,6 +5,8 @@ from funda.listing import Listing, PriceHistory
 
 from mock_fixtures import MOCK_LISTINGS, MOCK_PRICE_HISTORIES
 
+PAGE_SIZE = 15
+
 
 class MockFunda:
     """Implements the subset of Funda's interface that main.py calls."""
@@ -23,9 +25,16 @@ class MockFunda:
         page=0,
         **_ignored,
     ) -> list[Listing]:
-        if page > 1:
-            return []
         results = list(MOCK_LISTINGS)
+        if location:
+            needle = location.strip().casefold()
+            results = [
+                l for l in results
+                if l.address.city and (
+                    needle in l.address.city.casefold()
+                    or l.address.city.casefold() in needle
+                )
+            ]
         if min_price is not None:
             results = [
                 l for l in results
@@ -46,7 +55,8 @@ class MockFunda:
                 l for l in results
                 if l.areas.living is not None and l.areas.living <= max_area
             ]
-        return results
+        start = page * PAGE_SIZE
+        return results[start:start + PAGE_SIZE]
 
     def listing(self, listing_id: int | str) -> Listing:
         match = _find(str(listing_id))
