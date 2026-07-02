@@ -176,5 +176,15 @@
         </app-section-card>
       </div>
     </div>
+
+    @if (mapListings().length > 0) {
+      <app-section-card class="mt-6" padding="p-2" extraClass="h-[360px]">
+        <app-listing-map [listings]="mapListings()" />
+      </app-section-card>
+    } @else {
+      <app-section-card class="mt-6">
+        <p class="text-sm text-slate-400 italic">Location not yet available for this listing.</p>
+      </app-section-card>
+    }
   }
 }

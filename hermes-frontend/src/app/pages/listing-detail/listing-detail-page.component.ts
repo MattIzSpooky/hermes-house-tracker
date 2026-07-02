@@ -14,11 +14,12 @@ import { SpinnerComponent } from '../../shared/spinner.component';
 import { ErrorAlertComponent } from '../../shared/error-alert.component';
 import { StatCardComponent } from '../../shared/stat-card.component';
 import { SectionCardComponent } from '../../shared/section-card.component';
+import { ListingMapComponent, MapListing } from '../../shared/listing-map.component';
 
 @Component({
   selector: 'app-listing-detail-page',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, RouterLink, BaseChartDirective, EuroPricePipe, StatusBadgeComponent, SpinnerComponent, ErrorAlertComponent, StatCardComponent, SectionCardComponent],
+  imports: [DatePipe, DecimalPipe, RouterLink, BaseChartDirective, EuroPricePipe, StatusBadgeComponent, SpinnerComponent, ErrorAlertComponent, StatCardComponent, SectionCardComponent, ListingMapComponent],
   templateUrl: './listing-detail-page.component.html',
 })
 export class ListingDetailPageComponent implements OnInit, OnDestroy {
@@ -97,6 +98,19 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
         },
       ],
     };
+  });
+
+  protected readonly mapListings = computed<MapListing[]>(() => {
+    const listing = this.svc.currentListing();
+    if (!listing || !listing.location) return [];
+    return [{
+      id: listing.id,
+      street: listing.street,
+      houseNumber: listing.houseNumber,
+      city: listing.city,
+      currentPrice: listing.currentPrice,
+      location: listing.location,
+    }];
   });
 
   ngOnInit(): void {
