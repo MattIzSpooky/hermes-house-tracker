@@ -1,0 +1,501 @@
+global_id,street_name,house_number,house_number_suffix,postcode,city,province,price,living_area,plot_area,rooms,bedrooms,energy_label,status,description,offering_type,publication_date
+90000001,Prinsengracht,1,,1016GV,Amsterdam,Noord-Holland,768061,73,100,2,1,A,beschikbaar,Sfeervolle woning aan de Prinsengracht.,koop,2024-01-15
+90000002,Prinsengracht,3,,1016GV,Amsterdam,Noord-Holland,717853,51,,2,1,D,verkocht onder voorbehoud,Modern herenhuis aan de Prinsengracht.,koop,2024-01-15
+90000003,Prinsengracht,5,,1016GV,Amsterdam,Noord-Holland,758013,116,,3,2,A,beschikbaar,Modern herenhuis aan de Prinsengracht.,koop,2024-01-15
+90000004,Prinsengracht,7,,1016GV,Amsterdam,Noord-Holland,644342,68,121,2,1,E,onder bod,Sfeervolle woning aan de Prinsengracht.,koop,2024-01-15
+90000005,Prinsengracht,9,,1016GV,Amsterdam,Noord-Holland,748346,137,,4,3,D,beschikbaar,Ruim appartement met balkon aan de Prinsengracht.,koop,2024-01-15
+90000006,Prinsengracht,11,,1016GV,Amsterdam,Noord-Holland,668132,116,243,3,2,B,beschikbaar,Ruim appartement met balkon aan de Prinsengracht.,koop,2024-01-15
+90000007,Prinsengracht,13,,1016GV,Amsterdam,Noord-Holland,755397,86,99,2,1,G,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Prinsengracht.",koop,2024-01-15
+90000008,Prinsengracht,15,,1016GV,Amsterdam,Noord-Holland,645186,59,38,2,1,E,beschikbaar,Sfeervolle woning aan de Prinsengracht.,koop,2024-01-15
+90000009,Prinsengracht,17,,1016GV,Amsterdam,Noord-Holland,695285,125,157,4,3,B,verkocht onder voorbehoud,Ruim appartement met balkon aan de Prinsengracht.,koop,2024-01-15
+90000010,Prinsengracht,19,,1016GV,Amsterdam,Noord-Holland,679700,112,,3,2,B,onder bod,"Karakteristiek pand in het centrum, Prinsengracht.",koop,2024-01-15
+90000011,Keizersgracht,1,,1015CJ,Amsterdam,Noord-Holland,739481,171,42,5,4,E,beschikbaar,Ruim appartement met balkon aan de Keizersgracht.,koop,2024-01-15
+90000012,Keizersgracht,3,,1015CJ,Amsterdam,Noord-Holland,771838,47,,2,1,A,onder bod,"Karakteristiek pand in het centrum, Keizersgracht.",koop,2024-01-15
+90000013,Keizersgracht,5,,1015CJ,Amsterdam,Noord-Holland,602894,112,,3,2,D,onder bod,Lichte bovenwoning aan de Keizersgracht.,koop,2024-01-15
+90000014,Keizersgracht,7,,1015CJ,Amsterdam,Noord-Holland,580105,180,,6,5,C,beschikbaar,Sfeervolle woning aan de Keizersgracht.,koop,2024-01-15
+90000015,Keizersgracht,9,,1015CJ,Amsterdam,Noord-Holland,775758,65,154,2,1,E,onder bod,Ruim appartement met balkon aan de Keizersgracht.,koop,2024-01-15
+90000016,Keizersgracht,11,,1015CJ,Amsterdam,Noord-Holland,716373,87,185,2,1,B,beschikbaar,Lichte bovenwoning aan de Keizersgracht.,koop,2024-01-15
+90000017,Keizersgracht,13,,1015CJ,Amsterdam,Noord-Holland,729221,160,87,5,4,A,beschikbaar,"Compacte woning dichtbij het centrum, Keizersgracht.",koop,2024-01-15
+90000018,Keizersgracht,15,,1015CJ,Amsterdam,Noord-Holland,583234,46,191,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Keizersgracht.",koop,2024-01-15
+90000019,Keizersgracht,17,,1015CJ,Amsterdam,Noord-Holland,764622,116,,3,2,A,beschikbaar,"Compacte woning dichtbij het centrum, Keizersgracht.",koop,2024-01-15
+90000020,Keizersgracht,19,,1015CJ,Amsterdam,Noord-Holland,589200,155,135,5,4,C,verkocht onder voorbehoud,Lichte bovenwoning aan de Keizersgracht.,koop,2024-01-15
+90000021,Vondelstraat,1,,1054GD,Amsterdam,Noord-Holland,594761,159,76,5,4,B,beschikbaar,Modern herenhuis aan de Vondelstraat.,koop,2024-01-15
+90000022,Vondelstraat,3,,1054GD,Amsterdam,Noord-Holland,677346,147,,4,3,A,beschikbaar,"Karakteristiek pand in het centrum, Vondelstraat.",koop,2024-01-15
+90000023,Vondelstraat,5,,1054GD,Amsterdam,Noord-Holland,726828,169,105,5,4,A,beschikbaar,Lichte bovenwoning aan de Vondelstraat.,koop,2024-01-15
+90000024,Vondelstraat,7,,1054GD,Amsterdam,Noord-Holland,592962,180,160,6,5,A,beschikbaar,"Compacte woning dichtbij het centrum, Vondelstraat.",koop,2024-01-15
+90000025,Vondelstraat,9,,1054GD,Amsterdam,Noord-Holland,585418,105,175,3,2,A,onder bod,"Compacte woning dichtbij het centrum, Vondelstraat.",koop,2024-01-15
+90000026,Vondelstraat,11,,1054GD,Amsterdam,Noord-Holland,657361,178,96,5,4,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Vondelstraat.,koop,2024-01-15
+90000027,Vondelstraat,13,,1054GD,Amsterdam,Noord-Holland,695136,162,222,5,4,F,beschikbaar,"Compacte woning dichtbij het centrum, Vondelstraat.",koop,2024-01-15
+90000028,Vondelstraat,15,,1054GD,Amsterdam,Noord-Holland,654303,139,142,4,3,E,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Vondelstraat.",koop,2024-01-15
+90000029,Vondelstraat,17,,1054GD,Amsterdam,Noord-Holland,628371,84,184,2,1,A,beschikbaar,Lichte bovenwoning aan de Vondelstraat.,koop,2024-01-15
+90000030,Vondelstraat,19,,1054GD,Amsterdam,Noord-Holland,643670,115,115,3,2,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Vondelstraat.,koop,2024-01-15
+90000031,Overtoom,1,,1054HN,Amsterdam,Noord-Holland,585965,139,,4,3,A,beschikbaar,"Karakteristiek pand in het centrum, Overtoom.",koop,2024-01-15
+90000032,Overtoom,3,,1054HN,Amsterdam,Noord-Holland,737702,71,173,2,1,E,beschikbaar,Lichte bovenwoning aan de Overtoom.,koop,2024-01-15
+90000033,Overtoom,5,,1054HN,Amsterdam,Noord-Holland,581497,86,,2,1,E,beschikbaar,Ruim appartement met balkon aan de Overtoom.,koop,2024-01-15
+90000034,Overtoom,7,,1054HN,Amsterdam,Noord-Holland,698388,85,,2,1,A,beschikbaar,Ruim appartement met balkon aan de Overtoom.,koop,2024-01-15
+90000035,Overtoom,9,,1054HN,Amsterdam,Noord-Holland,581203,123,,4,3,E,beschikbaar,Lichte bovenwoning aan de Overtoom.,koop,2024-01-15
+90000036,Overtoom,11,,1054HN,Amsterdam,Noord-Holland,667050,116,,3,2,G,beschikbaar,Lichte bovenwoning aan de Overtoom.,koop,2024-01-15
+90000037,Overtoom,13,,1054HN,Amsterdam,Noord-Holland,689398,54,141,2,1,B,beschikbaar,"Compacte woning dichtbij het centrum, Overtoom.",koop,2024-01-15
+90000038,Overtoom,15,,1054HN,Amsterdam,Noord-Holland,763594,45,,2,1,E,verkocht onder voorbehoud,Lichte bovenwoning aan de Overtoom.,koop,2024-01-15
+90000039,Overtoom,17,,1054HN,Amsterdam,Noord-Holland,749821,76,,2,1,B,beschikbaar,Modern herenhuis aan de Overtoom.,koop,2024-01-15
+90000040,Overtoom,19,,1054HN,Amsterdam,Noord-Holland,736353,94,127,3,2,D,beschikbaar,"Compacte woning dichtbij het centrum, Overtoom.",koop,2024-01-15
+90000041,Ferdinand Bolstraat,1,,1072LM,Amsterdam,Noord-Holland,659475,118,231,3,2,C,verkocht onder voorbehoud,Modern herenhuis aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000042,Ferdinand Bolstraat,3,,1072LM,Amsterdam,Noord-Holland,740921,88,,2,1,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Ferdinand Bolstraat.",koop,2024-01-15
+90000043,Ferdinand Bolstraat,5,,1072LM,Amsterdam,Noord-Holland,735241,95,41,3,2,A,beschikbaar,Sfeervolle woning aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000044,Ferdinand Bolstraat,7,,1072LM,Amsterdam,Noord-Holland,576453,143,92,4,3,A,verkocht onder voorbehoud,Sfeervolle woning aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000045,Ferdinand Bolstraat,9,,1072LM,Amsterdam,Noord-Holland,694658,163,93,5,4,F,beschikbaar,Ruim appartement met balkon aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000046,Ferdinand Bolstraat,11,,1072LM,Amsterdam,Noord-Holland,769944,154,,5,4,C,beschikbaar,Modern herenhuis aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000047,Ferdinand Bolstraat,13,,1072LM,Amsterdam,Noord-Holland,762051,178,91,5,4,B,beschikbaar,"Karakteristiek pand in het centrum, Ferdinand Bolstraat.",koop,2024-01-15
+90000048,Ferdinand Bolstraat,15,,1072LM,Amsterdam,Noord-Holland,635623,126,,4,3,A,beschikbaar,Modern herenhuis aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000049,Ferdinand Bolstraat,17,,1072LM,Amsterdam,Noord-Holland,757327,60,137,2,1,B,onder bod,Sfeervolle woning aan de Ferdinand Bolstraat.,koop,2024-01-15
+90000050,Ferdinand Bolstraat,19,,1072LM,Amsterdam,Noord-Holland,676936,101,99,3,2,B,beschikbaar,"Karakteristiek pand in het centrum, Ferdinand Bolstraat.",koop,2024-01-15
+90000051,Oudegracht,1,,3511AZ,Utrecht,Utrecht,472639,51,139,2,1,A,beschikbaar,Sfeervolle woning aan de Oudegracht.,koop,2024-01-15
+90000052,Oudegracht,3,,3511AZ,Utrecht,Utrecht,491131,131,,4,3,B,beschikbaar,Sfeervolle woning aan de Oudegracht.,koop,2024-01-15
+90000053,Oudegracht,5,,3511AZ,Utrecht,Utrecht,435553,102,,3,2,D,verkocht onder voorbehoud,Sfeervolle woning aan de Oudegracht.,koop,2024-01-15
+90000054,Oudegracht,7,,3511AZ,Utrecht,Utrecht,600494,50,,2,1,A,beschikbaar,Sfeervolle woning aan de Oudegracht.,koop,2024-01-15
+90000055,Oudegracht,9,,3511AZ,Utrecht,Utrecht,453337,74,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Oudegracht.",koop,2024-01-15
+90000056,Oudegracht,11,,3511AZ,Utrecht,Utrecht,606040,141,213,4,3,A,onder bod,Lichte bovenwoning aan de Oudegracht.,koop,2024-01-15
+90000057,Oudegracht,13,,3511AZ,Utrecht,Utrecht,633726,122,,4,3,C,beschikbaar,"Compacte woning dichtbij het centrum, Oudegracht.",koop,2024-01-15
+90000058,Oudegracht,15,,3511AZ,Utrecht,Utrecht,514451,154,,5,4,A,verkocht onder voorbehoud,Sfeervolle woning aan de Oudegracht.,koop,2024-01-15
+90000059,Oudegracht,17,,3511AZ,Utrecht,Utrecht,561772,162,,5,4,B,verkocht onder voorbehoud,Lichte bovenwoning aan de Oudegracht.,koop,2024-01-15
+90000060,Oudegracht,19,,3511AZ,Utrecht,Utrecht,498119,113,92,3,2,E,beschikbaar,Modern herenhuis aan de Oudegracht.,koop,2024-01-15
+90000061,Neude,1,,3512JJ,Utrecht,Utrecht,552808,142,156,4,3,E,beschikbaar,Ruim appartement met balkon aan de Neude.,koop,2024-01-15
+90000062,Neude,3,,3512JJ,Utrecht,Utrecht,447442,115,,3,2,C,beschikbaar,Ruim appartement met balkon aan de Neude.,koop,2024-01-15
+90000063,Neude,5,,3512JJ,Utrecht,Utrecht,505270,49,86,2,1,B,beschikbaar,Lichte bovenwoning aan de Neude.,koop,2024-01-15
+90000064,Neude,7,,3512JJ,Utrecht,Utrecht,485434,129,146,4,3,B,beschikbaar,Sfeervolle woning aan de Neude.,koop,2024-01-15
+90000065,Neude,9,,3512JJ,Utrecht,Utrecht,624283,94,153,3,2,B,onder bod,"Compacte woning dichtbij het centrum, Neude.",koop,2024-01-15
+90000066,Neude,11,,3512JJ,Utrecht,Utrecht,439293,48,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Neude.",koop,2024-01-15
+90000067,Neude,13,,3512JJ,Utrecht,Utrecht,514314,48,,2,1,C,beschikbaar,Ruim appartement met balkon aan de Neude.,koop,2024-01-15
+90000068,Neude,15,,3512JJ,Utrecht,Utrecht,576262,167,46,5,4,B,beschikbaar,Lichte bovenwoning aan de Neude.,koop,2024-01-15
+90000069,Neude,17,,3512JJ,Utrecht,Utrecht,632287,75,,2,1,B,onder bod,"Compacte woning dichtbij het centrum, Neude.",koop,2024-01-15
+90000070,Neude,19,,3512JJ,Utrecht,Utrecht,537415,160,,5,4,B,onder bod,"Karakteristiek pand in het centrum, Neude.",koop,2024-01-15
+90000071,Biltstraat,1,,3572AR,Utrecht,Utrecht,543096,106,49,3,2,A,beschikbaar,Lichte bovenwoning aan de Biltstraat.,koop,2024-01-15
+90000072,Biltstraat,3,,3572AR,Utrecht,Utrecht,579609,161,89,5,4,F,verkocht onder voorbehoud,Lichte bovenwoning aan de Biltstraat.,koop,2024-01-15
+90000073,Biltstraat,5,,3572AR,Utrecht,Utrecht,443719,102,,3,2,F,beschikbaar,Sfeervolle woning aan de Biltstraat.,koop,2024-01-15
+90000074,Biltstraat,7,,3572AR,Utrecht,Utrecht,530515,118,149,3,2,D,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Biltstraat.",koop,2024-01-15
+90000075,Biltstraat,9,,3572AR,Utrecht,Utrecht,578910,109,88,3,2,G,onder bod,Sfeervolle woning aan de Biltstraat.,koop,2024-01-15
+90000076,Biltstraat,11,,3572AR,Utrecht,Utrecht,448918,91,,3,2,B,beschikbaar,Modern herenhuis aan de Biltstraat.,koop,2024-01-15
+90000077,Biltstraat,13,,3572AR,Utrecht,Utrecht,529976,86,207,2,1,C,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Biltstraat.",koop,2024-01-15
+90000078,Biltstraat,15,,3572AR,Utrecht,Utrecht,559898,125,59,4,3,G,beschikbaar,Sfeervolle woning aan de Biltstraat.,koop,2024-01-15
+90000079,Biltstraat,17,,3572AR,Utrecht,Utrecht,459344,158,,5,4,A,onder bod,"Karakteristiek pand in het centrum, Biltstraat.",koop,2024-01-15
+90000080,Biltstraat,19,,3572AR,Utrecht,Utrecht,569769,106,,3,2,B,beschikbaar,Modern herenhuis aan de Biltstraat.,koop,2024-01-15
+90000081,Amsterdamsestraatweg,1,,3513AB,Utrecht,Utrecht,555646,74,60,2,1,C,beschikbaar,Lichte bovenwoning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000082,Amsterdamsestraatweg,3,,3513AB,Utrecht,Utrecht,558232,107,67,3,2,B,onder bod,Lichte bovenwoning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000083,Amsterdamsestraatweg,5,,3513AB,Utrecht,Utrecht,499144,151,231,5,4,C,beschikbaar,Lichte bovenwoning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000084,Amsterdamsestraatweg,7,,3513AB,Utrecht,Utrecht,509352,133,225,4,3,C,beschikbaar,Ruim appartement met balkon aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000085,Amsterdamsestraatweg,9,,3513AB,Utrecht,Utrecht,598982,166,,5,4,E,beschikbaar,Lichte bovenwoning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000086,Amsterdamsestraatweg,11,,3513AB,Utrecht,Utrecht,646522,77,,2,1,C,beschikbaar,Modern herenhuis aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000087,Amsterdamsestraatweg,13,,3513AB,Utrecht,Utrecht,465464,48,,2,1,B,verkocht onder voorbehoud,Sfeervolle woning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000088,Amsterdamsestraatweg,15,,3513AB,Utrecht,Utrecht,524617,65,,2,1,E,onder bod,"Karakteristiek pand in het centrum, Amsterdamsestraatweg.",koop,2024-01-15
+90000089,Amsterdamsestraatweg,17,,3513AB,Utrecht,Utrecht,624326,103,,3,2,B,beschikbaar,Lichte bovenwoning aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000090,Amsterdamsestraatweg,19,,3513AB,Utrecht,Utrecht,564242,59,125,2,1,B,beschikbaar,Modern herenhuis aan de Amsterdamsestraatweg.,koop,2024-01-15
+90000091,Twijnstraat,1,,3511ZK,Utrecht,Utrecht,592222,172,,5,4,A,beschikbaar,"Karakteristiek pand in het centrum, Twijnstraat.",koop,2024-01-15
+90000092,Twijnstraat,3,,3511ZK,Utrecht,Utrecht,592493,85,118,2,1,G,beschikbaar,Modern herenhuis aan de Twijnstraat.,koop,2024-01-15
+90000093,Twijnstraat,5,,3511ZK,Utrecht,Utrecht,502392,105,121,3,2,C,verkocht onder voorbehoud,Sfeervolle woning aan de Twijnstraat.,koop,2024-01-15
+90000094,Twijnstraat,7,,3511ZK,Utrecht,Utrecht,584138,172,,5,4,F,beschikbaar,"Karakteristiek pand in het centrum, Twijnstraat.",koop,2024-01-15
+90000095,Twijnstraat,9,,3511ZK,Utrecht,Utrecht,603482,109,,3,2,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Twijnstraat.,koop,2024-01-15
+90000096,Twijnstraat,11,,3511ZK,Utrecht,Utrecht,471042,68,,2,1,B,beschikbaar,Ruim appartement met balkon aan de Twijnstraat.,koop,2024-01-15
+90000097,Twijnstraat,13,,3511ZK,Utrecht,Utrecht,492363,180,,6,5,B,beschikbaar,Modern herenhuis aan de Twijnstraat.,koop,2024-01-15
+90000098,Twijnstraat,15,,3511ZK,Utrecht,Utrecht,646706,102,,3,2,D,beschikbaar,"Compacte woning dichtbij het centrum, Twijnstraat.",koop,2024-01-15
+90000099,Twijnstraat,17,,3511ZK,Utrecht,Utrecht,578238,76,202,2,1,D,beschikbaar,Modern herenhuis aan de Twijnstraat.,koop,2024-01-15
+90000100,Twijnstraat,19,,3511ZK,Utrecht,Utrecht,591567,128,,4,3,A,beschikbaar,Modern herenhuis aan de Twijnstraat.,koop,2024-01-15
+90000101,Coolsingel,1,,3011AD,Rotterdam,Zuid-Holland,447258,74,167,2,1,A,beschikbaar,Lichte bovenwoning aan de Coolsingel.,koop,2024-01-15
+90000102,Coolsingel,3,,3011AD,Rotterdam,Zuid-Holland,447132,149,,4,3,B,verkocht onder voorbehoud,Ruim appartement met balkon aan de Coolsingel.,koop,2024-01-15
+90000103,Coolsingel,5,,3011AD,Rotterdam,Zuid-Holland,365872,139,,4,3,G,beschikbaar,Modern herenhuis aan de Coolsingel.,koop,2024-01-15
+90000104,Coolsingel,7,,3011AD,Rotterdam,Zuid-Holland,363258,99,,3,2,C,beschikbaar,"Karakteristiek pand in het centrum, Coolsingel.",koop,2024-01-15
+90000105,Coolsingel,9,,3011AD,Rotterdam,Zuid-Holland,406610,97,225,3,2,C,onder bod,Ruim appartement met balkon aan de Coolsingel.,koop,2024-01-15
+90000106,Coolsingel,11,,3011AD,Rotterdam,Zuid-Holland,378816,82,,2,1,C,beschikbaar,Lichte bovenwoning aan de Coolsingel.,koop,2024-01-15
+90000107,Coolsingel,13,,3011AD,Rotterdam,Zuid-Holland,354136,136,,4,3,A,beschikbaar,Ruim appartement met balkon aan de Coolsingel.,koop,2024-01-15
+90000108,Coolsingel,15,,3011AD,Rotterdam,Zuid-Holland,484542,74,,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Coolsingel.",koop,2024-01-15
+90000109,Coolsingel,17,,3011AD,Rotterdam,Zuid-Holland,486695,101,,3,2,A,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Coolsingel.",koop,2024-01-15
+90000110,Coolsingel,19,,3011AD,Rotterdam,Zuid-Holland,434439,72,143,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Coolsingel.",koop,2024-01-15
+90000111,Witte de Withstraat,1,,3012BM,Rotterdam,Zuid-Holland,435245,115,,3,2,C,verkocht onder voorbehoud,Modern herenhuis aan de Witte de Withstraat.,koop,2024-01-15
+90000112,Witte de Withstraat,3,,3012BM,Rotterdam,Zuid-Holland,454524,100,88,3,2,B,beschikbaar,Modern herenhuis aan de Witte de Withstraat.,koop,2024-01-15
+90000113,Witte de Withstraat,5,,3012BM,Rotterdam,Zuid-Holland,375313,166,242,5,4,A,beschikbaar,Lichte bovenwoning aan de Witte de Withstraat.,koop,2024-01-15
+90000114,Witte de Withstraat,7,,3012BM,Rotterdam,Zuid-Holland,539021,76,200,2,1,F,beschikbaar,Sfeervolle woning aan de Witte de Withstraat.,koop,2024-01-15
+90000115,Witte de Withstraat,9,,3012BM,Rotterdam,Zuid-Holland,441780,99,153,3,2,A,beschikbaar,"Compacte woning dichtbij het centrum, Witte de Withstraat.",koop,2024-01-15
+90000116,Witte de Withstraat,11,,3012BM,Rotterdam,Zuid-Holland,510844,154,,5,4,G,onder bod,Lichte bovenwoning aan de Witte de Withstraat.,koop,2024-01-15
+90000117,Witte de Withstraat,13,,3012BM,Rotterdam,Zuid-Holland,368241,134,66,4,3,C,beschikbaar,Ruim appartement met balkon aan de Witte de Withstraat.,koop,2024-01-15
+90000118,Witte de Withstraat,15,,3012BM,Rotterdam,Zuid-Holland,506296,124,,4,3,D,onder bod,Sfeervolle woning aan de Witte de Withstraat.,koop,2024-01-15
+90000119,Witte de Withstraat,17,,3012BM,Rotterdam,Zuid-Holland,461152,57,,2,1,B,verkocht onder voorbehoud,Modern herenhuis aan de Witte de Withstraat.,koop,2024-01-15
+90000120,Witte de Withstraat,19,,3012BM,Rotterdam,Zuid-Holland,524884,73,203,2,1,C,onder bod,"Karakteristiek pand in het centrum, Witte de Withstraat.",koop,2024-01-15
+90000121,Nieuwe Binnenweg,1,,3014GA,Rotterdam,Zuid-Holland,550320,59,107,2,1,F,beschikbaar,"Karakteristiek pand in het centrum, Nieuwe Binnenweg.",koop,2024-01-15
+90000122,Nieuwe Binnenweg,3,,3014GA,Rotterdam,Zuid-Holland,481140,155,127,5,4,C,beschikbaar,"Compacte woning dichtbij het centrum, Nieuwe Binnenweg.",koop,2024-01-15
+90000123,Nieuwe Binnenweg,5,,3014GA,Rotterdam,Zuid-Holland,462534,162,,5,4,E,onder bod,"Compacte woning dichtbij het centrum, Nieuwe Binnenweg.",koop,2024-01-15
+90000124,Nieuwe Binnenweg,7,,3014GA,Rotterdam,Zuid-Holland,444857,128,188,4,3,C,verkocht onder voorbehoud,Sfeervolle woning aan de Nieuwe Binnenweg.,koop,2024-01-15
+90000125,Nieuwe Binnenweg,9,,3014GA,Rotterdam,Zuid-Holland,437311,179,109,5,4,D,beschikbaar,Ruim appartement met balkon aan de Nieuwe Binnenweg.,koop,2024-01-15
+90000126,Nieuwe Binnenweg,11,,3014GA,Rotterdam,Zuid-Holland,442038,74,,2,1,A,beschikbaar,Lichte bovenwoning aan de Nieuwe Binnenweg.,koop,2024-01-15
+90000127,Nieuwe Binnenweg,13,,3014GA,Rotterdam,Zuid-Holland,547773,64,227,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Nieuwe Binnenweg.",koop,2024-01-15
+90000128,Nieuwe Binnenweg,15,,3014GA,Rotterdam,Zuid-Holland,364725,158,,5,4,D,onder bod,"Karakteristiek pand in het centrum, Nieuwe Binnenweg.",koop,2024-01-15
+90000129,Nieuwe Binnenweg,17,,3014GA,Rotterdam,Zuid-Holland,482924,118,248,3,2,A,onder bod,Modern herenhuis aan de Nieuwe Binnenweg.,koop,2024-01-15
+90000130,Nieuwe Binnenweg,19,,3014GA,Rotterdam,Zuid-Holland,468101,93,151,3,2,C,beschikbaar,Sfeervolle woning aan de Nieuwe Binnenweg.,koop,2024-01-15
+90000131,Meent,1,,3011JJ,Rotterdam,Zuid-Holland,487035,108,,3,2,G,onder bod,"Compacte woning dichtbij het centrum, Meent.",koop,2024-01-15
+90000132,Meent,3,,3011JJ,Rotterdam,Zuid-Holland,363727,117,228,3,2,B,onder bod,Lichte bovenwoning aan de Meent.,koop,2024-01-15
+90000133,Meent,5,,3011JJ,Rotterdam,Zuid-Holland,389419,109,,3,2,D,onder bod,"Karakteristiek pand in het centrum, Meent.",koop,2024-01-15
+90000134,Meent,7,,3011JJ,Rotterdam,Zuid-Holland,533102,81,,2,1,B,verkocht onder voorbehoud,Lichte bovenwoning aan de Meent.,koop,2024-01-15
+90000135,Meent,9,,3011JJ,Rotterdam,Zuid-Holland,525666,141,,4,3,B,beschikbaar,Lichte bovenwoning aan de Meent.,koop,2024-01-15
+90000136,Meent,11,,3011JJ,Rotterdam,Zuid-Holland,386061,99,226,3,2,C,beschikbaar,Ruim appartement met balkon aan de Meent.,koop,2024-01-15
+90000137,Meent,13,,3011JJ,Rotterdam,Zuid-Holland,488027,70,,2,1,C,verkocht onder voorbehoud,Sfeervolle woning aan de Meent.,koop,2024-01-15
+90000138,Meent,15,,3011JJ,Rotterdam,Zuid-Holland,527304,87,,2,1,A,beschikbaar,Lichte bovenwoning aan de Meent.,koop,2024-01-15
+90000139,Meent,17,,3011JJ,Rotterdam,Zuid-Holland,489987,117,,3,2,D,beschikbaar,Ruim appartement met balkon aan de Meent.,koop,2024-01-15
+90000140,Meent,19,,3011JJ,Rotterdam,Zuid-Holland,488270,157,102,5,4,D,onder bod,Modern herenhuis aan de Meent.,koop,2024-01-15
+90000141,Kruiskade,1,,3012EE,Rotterdam,Zuid-Holland,447311,80,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Kruiskade.",koop,2024-01-15
+90000142,Kruiskade,3,,3012EE,Rotterdam,Zuid-Holland,421510,177,,5,4,B,beschikbaar,Modern herenhuis aan de Kruiskade.,koop,2024-01-15
+90000143,Kruiskade,5,,3012EE,Rotterdam,Zuid-Holland,448281,58,125,2,1,A,beschikbaar,Ruim appartement met balkon aan de Kruiskade.,koop,2024-01-15
+90000144,Kruiskade,7,,3012EE,Rotterdam,Zuid-Holland,567517,130,,4,3,A,beschikbaar,Modern herenhuis aan de Kruiskade.,koop,2024-01-15
+90000145,Kruiskade,9,,3012EE,Rotterdam,Zuid-Holland,509614,100,,3,2,C,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Kruiskade.",koop,2024-01-15
+90000146,Kruiskade,11,,3012EE,Rotterdam,Zuid-Holland,366464,57,193,2,1,D,beschikbaar,Sfeervolle woning aan de Kruiskade.,koop,2024-01-15
+90000147,Kruiskade,13,,3012EE,Rotterdam,Zuid-Holland,499596,81,30,2,1,C,beschikbaar,Modern herenhuis aan de Kruiskade.,koop,2024-01-15
+90000148,Kruiskade,15,,3012EE,Rotterdam,Zuid-Holland,492627,66,,2,1,B,onder bod,"Compacte woning dichtbij het centrum, Kruiskade.",koop,2024-01-15
+90000149,Kruiskade,17,,3012EE,Rotterdam,Zuid-Holland,522255,49,47,2,1,B,verkocht onder voorbehoud,Lichte bovenwoning aan de Kruiskade.,koop,2024-01-15
+90000150,Kruiskade,19,,3012EE,Rotterdam,Zuid-Holland,395898,130,120,4,3,C,verkocht onder voorbehoud,Lichte bovenwoning aan de Kruiskade.,koop,2024-01-15
+90000151,Stratumseind,1,,5611ET,Eindhoven,Noord-Brabant,335985,162,81,5,4,A,beschikbaar,"Karakteristiek pand in het centrum, Stratumseind.",koop,2024-01-15
+90000152,Stratumseind,3,,5611ET,Eindhoven,Noord-Brabant,412012,93,250,3,2,D,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Stratumseind.",koop,2024-01-15
+90000153,Stratumseind,5,,5611ET,Eindhoven,Noord-Brabant,413876,147,,4,3,E,beschikbaar,Ruim appartement met balkon aan de Stratumseind.,koop,2024-01-15
+90000154,Stratumseind,7,,5611ET,Eindhoven,Noord-Brabant,540571,66,,2,1,A,onder bod,Ruim appartement met balkon aan de Stratumseind.,koop,2024-01-15
+90000155,Stratumseind,9,,5611ET,Eindhoven,Noord-Brabant,515530,154,143,5,4,B,beschikbaar,"Karakteristiek pand in het centrum, Stratumseind.",koop,2024-01-15
+90000156,Stratumseind,11,,5611ET,Eindhoven,Noord-Brabant,333163,148,235,4,3,D,beschikbaar,Ruim appartement met balkon aan de Stratumseind.,koop,2024-01-15
+90000157,Stratumseind,13,,5611ET,Eindhoven,Noord-Brabant,503012,137,175,4,3,A,beschikbaar,Modern herenhuis aan de Stratumseind.,koop,2024-01-15
+90000158,Stratumseind,15,,5611ET,Eindhoven,Noord-Brabant,398056,80,,2,1,B,verkocht onder voorbehoud,Ruim appartement met balkon aan de Stratumseind.,koop,2024-01-15
+90000159,Stratumseind,17,,5611ET,Eindhoven,Noord-Brabant,393623,92,129,3,2,F,beschikbaar,"Karakteristiek pand in het centrum, Stratumseind.",koop,2024-01-15
+90000160,Stratumseind,19,,5611ET,Eindhoven,Noord-Brabant,441683,79,,2,1,C,verkocht onder voorbehoud,Sfeervolle woning aan de Stratumseind.,koop,2024-01-15
+90000161,Kruisstraat,1,,5612AJ,Eindhoven,Noord-Brabant,377685,89,,2,1,C,beschikbaar,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000162,Kruisstraat,3,,5612AJ,Eindhoven,Noord-Brabant,359018,137,,4,3,B,onder bod,"Compacte woning dichtbij het centrum, Kruisstraat.",koop,2024-01-15
+90000163,Kruisstraat,5,,5612AJ,Eindhoven,Noord-Brabant,432687,146,,4,3,D,onder bod,Modern herenhuis aan de Kruisstraat.,koop,2024-01-15
+90000164,Kruisstraat,7,,5612AJ,Eindhoven,Noord-Brabant,479084,177,242,5,4,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000165,Kruisstraat,9,,5612AJ,Eindhoven,Noord-Brabant,368163,59,,2,1,C,beschikbaar,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000166,Kruisstraat,11,,5612AJ,Eindhoven,Noord-Brabant,357812,65,192,2,1,F,beschikbaar,Lichte bovenwoning aan de Kruisstraat.,koop,2024-01-15
+90000167,Kruisstraat,13,,5612AJ,Eindhoven,Noord-Brabant,413504,84,189,2,1,D,onder bod,"Compacte woning dichtbij het centrum, Kruisstraat.",koop,2024-01-15
+90000168,Kruisstraat,15,,5612AJ,Eindhoven,Noord-Brabant,495689,56,,2,1,D,beschikbaar,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000169,Kruisstraat,17,,5612AJ,Eindhoven,Noord-Brabant,443893,168,236,5,4,D,beschikbaar,Sfeervolle woning aan de Kruisstraat.,koop,2024-01-15
+90000170,Kruisstraat,19,,5612AJ,Eindhoven,Noord-Brabant,429521,81,213,2,1,B,beschikbaar,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000171,Vestdijk,1,,5611CA,Eindhoven,Noord-Brabant,425702,113,66,3,2,A,beschikbaar,"Compacte woning dichtbij het centrum, Vestdijk.",koop,2024-01-15
+90000172,Vestdijk,3,,5611CA,Eindhoven,Noord-Brabant,447372,125,70,4,3,C,onder bod,Modern herenhuis aan de Vestdijk.,koop,2024-01-15
+90000173,Vestdijk,5,,5611CA,Eindhoven,Noord-Brabant,337755,162,,5,4,A,beschikbaar,Sfeervolle woning aan de Vestdijk.,koop,2024-01-15
+90000174,Vestdijk,7,,5611CA,Eindhoven,Noord-Brabant,360110,165,32,5,4,E,beschikbaar,"Karakteristiek pand in het centrum, Vestdijk.",koop,2024-01-15
+90000175,Vestdijk,9,,5611CA,Eindhoven,Noord-Brabant,443057,94,103,3,2,A,onder bod,"Compacte woning dichtbij het centrum, Vestdijk.",koop,2024-01-15
+90000176,Vestdijk,11,,5611CA,Eindhoven,Noord-Brabant,377181,131,,4,3,B,beschikbaar,"Compacte woning dichtbij het centrum, Vestdijk.",koop,2024-01-15
+90000177,Vestdijk,13,,5611CA,Eindhoven,Noord-Brabant,361642,166,,5,4,A,onder bod,"Karakteristiek pand in het centrum, Vestdijk.",koop,2024-01-15
+90000178,Vestdijk,15,,5611CA,Eindhoven,Noord-Brabant,510791,131,,4,3,C,beschikbaar,"Compacte woning dichtbij het centrum, Vestdijk.",koop,2024-01-15
+90000179,Vestdijk,17,,5611CA,Eindhoven,Noord-Brabant,505366,73,,2,1,C,verkocht onder voorbehoud,Lichte bovenwoning aan de Vestdijk.,koop,2024-01-15
+90000180,Vestdijk,19,,5611CA,Eindhoven,Noord-Brabant,476423,112,,3,2,D,onder bod,Ruim appartement met balkon aan de Vestdijk.,koop,2024-01-15
+90000181,Woenselse Markt,1,,5621CS,Eindhoven,Noord-Brabant,508637,142,204,4,3,A,onder bod,Sfeervolle woning aan de Woenselse Markt.,koop,2024-01-15
+90000182,Woenselse Markt,3,,5621CS,Eindhoven,Noord-Brabant,456548,125,135,4,3,D,beschikbaar,"Compacte woning dichtbij het centrum, Woenselse Markt.",koop,2024-01-15
+90000183,Woenselse Markt,5,,5621CS,Eindhoven,Noord-Brabant,407248,128,,4,3,C,beschikbaar,Ruim appartement met balkon aan de Woenselse Markt.,koop,2024-01-15
+90000184,Woenselse Markt,7,,5621CS,Eindhoven,Noord-Brabant,398139,112,,3,2,A,beschikbaar,"Compacte woning dichtbij het centrum, Woenselse Markt.",koop,2024-01-15
+90000185,Woenselse Markt,9,,5621CS,Eindhoven,Noord-Brabant,416436,98,,3,2,C,beschikbaar,"Compacte woning dichtbij het centrum, Woenselse Markt.",koop,2024-01-15
+90000186,Woenselse Markt,11,,5621CS,Eindhoven,Noord-Brabant,336027,133,,4,3,E,beschikbaar,"Karakteristiek pand in het centrum, Woenselse Markt.",koop,2024-01-15
+90000187,Woenselse Markt,13,,5621CS,Eindhoven,Noord-Brabant,507497,96,,3,2,B,onder bod,"Karakteristiek pand in het centrum, Woenselse Markt.",koop,2024-01-15
+90000188,Woenselse Markt,15,,5621CS,Eindhoven,Noord-Brabant,492233,106,201,3,2,F,beschikbaar,Ruim appartement met balkon aan de Woenselse Markt.,koop,2024-01-15
+90000189,Woenselse Markt,17,,5621CS,Eindhoven,Noord-Brabant,326358,129,,4,3,A,beschikbaar,"Compacte woning dichtbij het centrum, Woenselse Markt.",koop,2024-01-15
+90000190,Woenselse Markt,19,,5621CS,Eindhoven,Noord-Brabant,409192,166,81,5,4,D,beschikbaar,"Karakteristiek pand in het centrum, Woenselse Markt.",koop,2024-01-15
+90000191,Fuutlaan,1,,5613AB,Eindhoven,Noord-Brabant,544205,151,,5,4,A,beschikbaar,Modern herenhuis aan de Fuutlaan.,koop,2024-01-15
+90000192,Fuutlaan,3,,5613AB,Eindhoven,Noord-Brabant,399596,47,184,2,1,A,beschikbaar,Modern herenhuis aan de Fuutlaan.,koop,2024-01-15
+90000193,Fuutlaan,5,,5613AB,Eindhoven,Noord-Brabant,373810,86,,2,1,C,verkocht onder voorbehoud,Sfeervolle woning aan de Fuutlaan.,koop,2024-01-15
+90000194,Fuutlaan,7,,5613AB,Eindhoven,Noord-Brabant,450161,128,201,4,3,A,beschikbaar,"Karakteristiek pand in het centrum, Fuutlaan.",koop,2024-01-15
+90000195,Fuutlaan,9,,5613AB,Eindhoven,Noord-Brabant,404153,143,222,4,3,B,beschikbaar,"Compacte woning dichtbij het centrum, Fuutlaan.",koop,2024-01-15
+90000196,Fuutlaan,11,,5613AB,Eindhoven,Noord-Brabant,509433,75,70,2,1,B,onder bod,"Karakteristiek pand in het centrum, Fuutlaan.",koop,2024-01-15
+90000197,Fuutlaan,13,,5613AB,Eindhoven,Noord-Brabant,468978,84,185,2,1,B,verkocht onder voorbehoud,Modern herenhuis aan de Fuutlaan.,koop,2024-01-15
+90000198,Fuutlaan,15,,5613AB,Eindhoven,Noord-Brabant,475130,73,170,2,1,F,beschikbaar,"Compacte woning dichtbij het centrum, Fuutlaan.",koop,2024-01-15
+90000199,Fuutlaan,17,,5613AB,Eindhoven,Noord-Brabant,453143,178,204,5,4,A,onder bod,Sfeervolle woning aan de Fuutlaan.,koop,2024-01-15
+90000200,Fuutlaan,19,,5613AB,Eindhoven,Noord-Brabant,514603,59,,2,1,D,beschikbaar,Sfeervolle woning aan de Fuutlaan.,koop,2024-01-15
+90000201,Grote Markt,1,,2011RD,Haarlem,Noord-Holland,415795,63,118,2,1,D,onder bod,Sfeervolle woning aan de Grote Markt.,koop,2024-01-15
+90000202,Grote Markt,3,,2011RD,Haarlem,Noord-Holland,510195,79,,2,1,G,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000203,Grote Markt,5,,2011RD,Haarlem,Noord-Holland,540839,79,,2,1,B,beschikbaar,Modern herenhuis aan de Grote Markt.,koop,2024-01-15
+90000204,Grote Markt,7,,2011RD,Haarlem,Noord-Holland,520750,153,,5,4,E,beschikbaar,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000205,Grote Markt,9,,2011RD,Haarlem,Noord-Holland,463089,73,199,2,1,B,beschikbaar,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000206,Grote Markt,11,,2011RD,Haarlem,Noord-Holland,464155,53,202,2,1,D,beschikbaar,Lichte bovenwoning aan de Grote Markt.,koop,2024-01-15
+90000207,Grote Markt,13,,2011RD,Haarlem,Noord-Holland,436735,104,,3,2,D,beschikbaar,"Compacte woning dichtbij het centrum, Grote Markt.",koop,2024-01-15
+90000208,Grote Markt,15,,2011RD,Haarlem,Noord-Holland,457945,127,66,4,3,G,onder bod,Modern herenhuis aan de Grote Markt.,koop,2024-01-15
+90000209,Grote Markt,17,,2011RD,Haarlem,Noord-Holland,412290,89,,2,1,B,beschikbaar,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000210,Grote Markt,19,,2011RD,Haarlem,Noord-Holland,478836,92,,3,2,C,beschikbaar,Lichte bovenwoning aan de Grote Markt.,koop,2024-01-15
+90000211,Barteljorisstraat,1,,2011RA,Haarlem,Noord-Holland,501821,150,,5,4,C,beschikbaar,Ruim appartement met balkon aan de Barteljorisstraat.,koop,2024-01-15
+90000212,Barteljorisstraat,3,,2011RA,Haarlem,Noord-Holland,470375,139,215,4,3,E,beschikbaar,Modern herenhuis aan de Barteljorisstraat.,koop,2024-01-15
+90000213,Barteljorisstraat,5,,2011RA,Haarlem,Noord-Holland,455524,98,,3,2,B,beschikbaar,Ruim appartement met balkon aan de Barteljorisstraat.,koop,2024-01-15
+90000214,Barteljorisstraat,7,,2011RA,Haarlem,Noord-Holland,522224,106,,3,2,D,beschikbaar,"Compacte woning dichtbij het centrum, Barteljorisstraat.",koop,2024-01-15
+90000215,Barteljorisstraat,9,,2011RA,Haarlem,Noord-Holland,594314,139,41,4,3,C,beschikbaar,Ruim appartement met balkon aan de Barteljorisstraat.,koop,2024-01-15
+90000216,Barteljorisstraat,11,,2011RA,Haarlem,Noord-Holland,549366,151,80,5,4,B,beschikbaar,Ruim appartement met balkon aan de Barteljorisstraat.,koop,2024-01-15
+90000217,Barteljorisstraat,13,,2011RA,Haarlem,Noord-Holland,436689,170,217,5,4,D,beschikbaar,Lichte bovenwoning aan de Barteljorisstraat.,koop,2024-01-15
+90000218,Barteljorisstraat,15,,2011RA,Haarlem,Noord-Holland,508106,64,,2,1,D,beschikbaar,Ruim appartement met balkon aan de Barteljorisstraat.,koop,2024-01-15
+90000219,Barteljorisstraat,17,,2011RA,Haarlem,Noord-Holland,526669,140,193,4,3,D,onder bod,Lichte bovenwoning aan de Barteljorisstraat.,koop,2024-01-15
+90000220,Barteljorisstraat,19,,2011RA,Haarlem,Noord-Holland,404493,48,214,2,1,B,beschikbaar,"Compacte woning dichtbij het centrum, Barteljorisstraat.",koop,2024-01-15
+90000221,Kruisstraat,1,,2011PV,Haarlem,Noord-Holland,420714,179,120,5,4,B,beschikbaar,"Karakteristiek pand in het centrum, Kruisstraat.",koop,2024-01-15
+90000222,Kruisstraat,3,,2011PV,Haarlem,Noord-Holland,624977,121,,4,3,E,verkocht onder voorbehoud,Lichte bovenwoning aan de Kruisstraat.,koop,2024-01-15
+90000223,Kruisstraat,5,,2011PV,Haarlem,Noord-Holland,584246,142,151,4,3,A,beschikbaar,Ruim appartement met balkon aan de Kruisstraat.,koop,2024-01-15
+90000224,Kruisstraat,7,,2011PV,Haarlem,Noord-Holland,538453,156,,5,4,B,beschikbaar,Sfeervolle woning aan de Kruisstraat.,koop,2024-01-15
+90000225,Kruisstraat,9,,2011PV,Haarlem,Noord-Holland,542352,166,49,5,4,D,beschikbaar,"Compacte woning dichtbij het centrum, Kruisstraat.",koop,2024-01-15
+90000226,Kruisstraat,11,,2011PV,Haarlem,Noord-Holland,463038,146,,4,3,B,onder bod,"Compacte woning dichtbij het centrum, Kruisstraat.",koop,2024-01-15
+90000227,Kruisstraat,13,,2011PV,Haarlem,Noord-Holland,425607,65,,2,1,G,beschikbaar,Modern herenhuis aan de Kruisstraat.,koop,2024-01-15
+90000228,Kruisstraat,15,,2011PV,Haarlem,Noord-Holland,471651,146,,4,3,B,verkocht onder voorbehoud,Modern herenhuis aan de Kruisstraat.,koop,2024-01-15
+90000229,Kruisstraat,17,,2011PV,Haarlem,Noord-Holland,602419,92,,3,2,D,beschikbaar,"Compacte woning dichtbij het centrum, Kruisstraat.",koop,2024-01-15
+90000230,Kruisstraat,19,,2011PV,Haarlem,Noord-Holland,502137,84,230,2,1,C,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Kruisstraat.",koop,2024-01-15
+90000231,Zijlstraat,1,,2011TL,Haarlem,Noord-Holland,449123,137,,4,3,A,beschikbaar,Modern herenhuis aan de Zijlstraat.,koop,2024-01-15
+90000232,Zijlstraat,3,,2011TL,Haarlem,Noord-Holland,403235,68,,2,1,D,beschikbaar,"Karakteristiek pand in het centrum, Zijlstraat.",koop,2024-01-15
+90000233,Zijlstraat,5,,2011TL,Haarlem,Noord-Holland,478939,178,127,5,4,A,beschikbaar,"Karakteristiek pand in het centrum, Zijlstraat.",koop,2024-01-15
+90000234,Zijlstraat,7,,2011TL,Haarlem,Noord-Holland,464642,152,230,5,4,A,beschikbaar,Lichte bovenwoning aan de Zijlstraat.,koop,2024-01-15
+90000235,Zijlstraat,9,,2011TL,Haarlem,Noord-Holland,515401,130,,4,3,B,beschikbaar,"Karakteristiek pand in het centrum, Zijlstraat.",koop,2024-01-15
+90000236,Zijlstraat,11,,2011TL,Haarlem,Noord-Holland,476401,96,75,3,2,G,beschikbaar,Lichte bovenwoning aan de Zijlstraat.,koop,2024-01-15
+90000237,Zijlstraat,13,,2011TL,Haarlem,Noord-Holland,447166,74,,2,1,A,onder bod,Lichte bovenwoning aan de Zijlstraat.,koop,2024-01-15
+90000238,Zijlstraat,15,,2011TL,Haarlem,Noord-Holland,576417,62,,2,1,D,beschikbaar,Modern herenhuis aan de Zijlstraat.,koop,2024-01-15
+90000239,Zijlstraat,17,,2011TL,Haarlem,Noord-Holland,419389,106,69,3,2,D,beschikbaar,Modern herenhuis aan de Zijlstraat.,koop,2024-01-15
+90000240,Zijlstraat,19,,2011TL,Haarlem,Noord-Holland,443604,72,,2,1,D,beschikbaar,Lichte bovenwoning aan de Zijlstraat.,koop,2024-01-15
+90000241,Nieuwe Groenmarkt,1,,2011TW,Haarlem,Noord-Holland,580267,111,221,3,2,C,onder bod,"Compacte woning dichtbij het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000242,Nieuwe Groenmarkt,3,,2011TW,Haarlem,Noord-Holland,439516,145,203,4,3,C,onder bod,"Karakteristiek pand in het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000243,Nieuwe Groenmarkt,5,,2011TW,Haarlem,Noord-Holland,437139,120,51,4,3,A,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000244,Nieuwe Groenmarkt,7,,2011TW,Haarlem,Noord-Holland,518606,168,54,5,4,B,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000245,Nieuwe Groenmarkt,9,,2011TW,Haarlem,Noord-Holland,609728,74,117,2,1,C,verkocht onder voorbehoud,Ruim appartement met balkon aan de Nieuwe Groenmarkt.,koop,2024-01-15
+90000246,Nieuwe Groenmarkt,11,,2011TW,Haarlem,Noord-Holland,593301,92,198,3,2,B,beschikbaar,"Compacte woning dichtbij het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000247,Nieuwe Groenmarkt,13,,2011TW,Haarlem,Noord-Holland,597217,154,210,5,4,A,beschikbaar,Lichte bovenwoning aan de Nieuwe Groenmarkt.,koop,2024-01-15
+90000248,Nieuwe Groenmarkt,15,,2011TW,Haarlem,Noord-Holland,575820,92,80,3,2,C,beschikbaar,Modern herenhuis aan de Nieuwe Groenmarkt.,koop,2024-01-15
+90000249,Nieuwe Groenmarkt,17,,2011TW,Haarlem,Noord-Holland,609875,162,,5,4,E,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Nieuwe Groenmarkt.",koop,2024-01-15
+90000250,Nieuwe Groenmarkt,19,,2011TW,Haarlem,Noord-Holland,556349,140,,4,3,C,beschikbaar,Ruim appartement met balkon aan de Nieuwe Groenmarkt.,koop,2024-01-15
+90000251,Nieuwstraat,1,,6001EM,Weert,Limburg,412374,87,65,2,1,A,beschikbaar,Sfeervolle woning aan de Nieuwstraat.,koop,2024-01-15
+90000252,Nieuwstraat,3,,6001EM,Weert,Limburg,357252,143,,4,3,C,beschikbaar,Lichte bovenwoning aan de Nieuwstraat.,koop,2024-01-15
+90000253,Nieuwstraat,5,,6001EM,Weert,Limburg,326569,87,37,2,1,D,beschikbaar,Sfeervolle woning aan de Nieuwstraat.,koop,2024-01-15
+90000254,Nieuwstraat,7,,6001EM,Weert,Limburg,394107,162,,5,4,D,beschikbaar,"Compacte woning dichtbij het centrum, Nieuwstraat.",koop,2024-01-15
+90000255,Nieuwstraat,9,,6001EM,Weert,Limburg,392093,113,,3,2,E,beschikbaar,Sfeervolle woning aan de Nieuwstraat.,koop,2024-01-15
+90000256,Nieuwstraat,11,,6001EM,Weert,Limburg,464100,108,38,3,2,B,beschikbaar,Sfeervolle woning aan de Nieuwstraat.,koop,2024-01-15
+90000257,Nieuwstraat,13,,6001EM,Weert,Limburg,293511,134,,4,3,C,beschikbaar,"Compacte woning dichtbij het centrum, Nieuwstraat.",koop,2024-01-15
+90000258,Nieuwstraat,15,,6001EM,Weert,Limburg,323684,97,,3,2,C,onder bod,"Compacte woning dichtbij het centrum, Nieuwstraat.",koop,2024-01-15
+90000259,Nieuwstraat,17,,6001EM,Weert,Limburg,285543,176,,5,4,D,beschikbaar,Modern herenhuis aan de Nieuwstraat.,koop,2024-01-15
+90000260,Nieuwstraat,19,,6001EM,Weert,Limburg,436487,77,,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Nieuwstraat.",koop,2024-01-15
+90000261,Hegstraat,1,,6001CX,Weert,Limburg,348349,170,191,5,4,B,beschikbaar,Modern herenhuis aan de Hegstraat.,koop,2024-01-15
+90000262,Hegstraat,3,,6001CX,Weert,Limburg,369195,68,221,2,1,B,beschikbaar,Modern herenhuis aan de Hegstraat.,koop,2024-01-15
+90000263,Hegstraat,5,,6001CX,Weert,Limburg,307102,136,,4,3,D,beschikbaar,Modern herenhuis aan de Hegstraat.,koop,2024-01-15
+90000264,Hegstraat,7,,6001CX,Weert,Limburg,284234,127,,4,3,B,onder bod,"Compacte woning dichtbij het centrum, Hegstraat.",koop,2024-01-15
+90000265,Hegstraat,9,,6001CX,Weert,Limburg,282568,70,,2,1,E,beschikbaar,Ruim appartement met balkon aan de Hegstraat.,koop,2024-01-15
+90000266,Hegstraat,11,,6001CX,Weert,Limburg,274468,78,,2,1,B,beschikbaar,Lichte bovenwoning aan de Hegstraat.,koop,2024-01-15
+90000267,Hegstraat,13,,6001CX,Weert,Limburg,447979,87,190,2,1,B,verkocht onder voorbehoud,Ruim appartement met balkon aan de Hegstraat.,koop,2024-01-15
+90000268,Hegstraat,15,,6001CX,Weert,Limburg,366671,167,181,5,4,A,verkocht onder voorbehoud,Sfeervolle woning aan de Hegstraat.,koop,2024-01-15
+90000269,Hegstraat,17,,6001CX,Weert,Limburg,375226,75,,2,1,B,beschikbaar,Sfeervolle woning aan de Hegstraat.,koop,2024-01-15
+90000270,Hegstraat,19,,6001CX,Weert,Limburg,350328,71,124,2,1,E,beschikbaar,Ruim appartement met balkon aan de Hegstraat.,koop,2024-01-15
+90000271,Wilhelminasingel,1,,6001GS,Weert,Limburg,357927,157,84,5,4,C,beschikbaar,"Compacte woning dichtbij het centrum, Wilhelminasingel.",koop,2024-01-15
+90000272,Wilhelminasingel,3,,6001GS,Weert,Limburg,314955,143,139,4,3,B,beschikbaar,"Karakteristiek pand in het centrum, Wilhelminasingel.",koop,2024-01-15
+90000273,Wilhelminasingel,5,,6001GS,Weert,Limburg,303856,51,,2,1,D,beschikbaar,"Compacte woning dichtbij het centrum, Wilhelminasingel.",koop,2024-01-15
+90000274,Wilhelminasingel,7,,6001GS,Weert,Limburg,388487,143,157,4,3,C,beschikbaar,Sfeervolle woning aan de Wilhelminasingel.,koop,2024-01-15
+90000275,Wilhelminasingel,9,,6001GS,Weert,Limburg,451947,138,,4,3,A,beschikbaar,Sfeervolle woning aan de Wilhelminasingel.,koop,2024-01-15
+90000276,Wilhelminasingel,11,,6001GS,Weert,Limburg,382804,48,40,2,1,F,beschikbaar,"Karakteristiek pand in het centrum, Wilhelminasingel.",koop,2024-01-15
+90000277,Wilhelminasingel,13,,6001GS,Weert,Limburg,390611,66,160,2,1,F,beschikbaar,"Karakteristiek pand in het centrum, Wilhelminasingel.",koop,2024-01-15
+90000278,Wilhelminasingel,15,,6001GS,Weert,Limburg,368848,106,52,3,2,F,beschikbaar,"Compacte woning dichtbij het centrum, Wilhelminasingel.",koop,2024-01-15
+90000279,Wilhelminasingel,17,,6001GS,Weert,Limburg,380131,48,,2,1,D,beschikbaar,"Karakteristiek pand in het centrum, Wilhelminasingel.",koop,2024-01-15
+90000280,Wilhelminasingel,19,,6001GS,Weert,Limburg,321298,75,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Wilhelminasingel.",koop,2024-01-15
+90000281,Beekstraat,1,,6001BB,Weert,Limburg,398605,64,160,2,1,B,beschikbaar,Ruim appartement met balkon aan de Beekstraat.,koop,2024-01-15
+90000282,Beekstraat,3,,6001BB,Weert,Limburg,314107,74,160,2,1,A,beschikbaar,Sfeervolle woning aan de Beekstraat.,koop,2024-01-15
+90000283,Beekstraat,5,,6001BB,Weert,Limburg,421888,54,,2,1,F,verkocht onder voorbehoud,Modern herenhuis aan de Beekstraat.,koop,2024-01-15
+90000284,Beekstraat,7,,6001BB,Weert,Limburg,399824,151,,5,4,B,beschikbaar,"Karakteristiek pand in het centrum, Beekstraat.",koop,2024-01-15
+90000285,Beekstraat,9,,6001BB,Weert,Limburg,355100,58,235,2,1,C,beschikbaar,Sfeervolle woning aan de Beekstraat.,koop,2024-01-15
+90000286,Beekstraat,11,,6001BB,Weert,Limburg,443875,161,81,5,4,B,beschikbaar,"Compacte woning dichtbij het centrum, Beekstraat.",koop,2024-01-15
+90000287,Beekstraat,13,,6001BB,Weert,Limburg,393277,171,,5,4,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Beekstraat.,koop,2024-01-15
+90000288,Beekstraat,15,,6001BB,Weert,Limburg,252515,51,118,2,1,C,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Beekstraat.",koop,2024-01-15
+90000289,Beekstraat,17,,6001BB,Weert,Limburg,378982,123,165,4,3,G,beschikbaar,Sfeervolle woning aan de Beekstraat.,koop,2024-01-15
+90000290,Beekstraat,19,,6001BB,Weert,Limburg,358280,68,89,2,1,E,onder bod,Lichte bovenwoning aan de Beekstraat.,koop,2024-01-15
+90000291,Emmasingel,1,,6001BT,Weert,Limburg,398850,174,239,5,4,B,onder bod,Sfeervolle woning aan de Emmasingel.,koop,2024-01-15
+90000292,Emmasingel,3,,6001BT,Weert,Limburg,335524,125,,4,3,B,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Emmasingel.",koop,2024-01-15
+90000293,Emmasingel,5,,6001BT,Weert,Limburg,356564,72,72,2,1,B,beschikbaar,Sfeervolle woning aan de Emmasingel.,koop,2024-01-15
+90000294,Emmasingel,7,,6001BT,Weert,Limburg,432682,85,,2,1,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Emmasingel.",koop,2024-01-15
+90000295,Emmasingel,9,,6001BT,Weert,Limburg,353873,128,212,4,3,A,beschikbaar,"Compacte woning dichtbij het centrum, Emmasingel.",koop,2024-01-15
+90000296,Emmasingel,11,,6001BT,Weert,Limburg,474028,111,,3,2,A,beschikbaar,Modern herenhuis aan de Emmasingel.,koop,2024-01-15
+90000297,Emmasingel,13,,6001BT,Weert,Limburg,415228,101,240,3,2,B,verkocht onder voorbehoud,Lichte bovenwoning aan de Emmasingel.,koop,2024-01-15
+90000298,Emmasingel,15,,6001BT,Weert,Limburg,301839,111,,3,2,A,beschikbaar,Lichte bovenwoning aan de Emmasingel.,koop,2024-01-15
+90000299,Emmasingel,17,,6001BT,Weert,Limburg,363549,55,,2,1,A,onder bod,Lichte bovenwoning aan de Emmasingel.,koop,2024-01-15
+90000300,Emmasingel,19,,6001BT,Weert,Limburg,288962,89,77,2,1,B,beschikbaar,Sfeervolle woning aan de Emmasingel.,koop,2024-01-15
+90000301,Grote Markt,1,,9711LV,Groningen,Groningen,340312,116,137,3,2,A,onder bod,Lichte bovenwoning aan de Grote Markt.,koop,2024-01-15
+90000302,Grote Markt,3,,9711LV,Groningen,Groningen,431530,173,99,5,4,A,beschikbaar,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000303,Grote Markt,5,,9711LV,Groningen,Groningen,316844,165,,5,4,D,beschikbaar,Sfeervolle woning aan de Grote Markt.,koop,2024-01-15
+90000304,Grote Markt,7,,9711LV,Groningen,Groningen,289656,113,,3,2,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000305,Grote Markt,9,,9711LV,Groningen,Groningen,367191,136,,4,3,A,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Grote Markt.",koop,2024-01-15
+90000306,Grote Markt,11,,9711LV,Groningen,Groningen,275179,59,86,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000307,Grote Markt,13,,9711LV,Groningen,Groningen,294013,81,,2,1,E,beschikbaar,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000308,Grote Markt,15,,9711LV,Groningen,Groningen,358173,156,,5,4,G,verkocht onder voorbehoud,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000309,Grote Markt,17,,9711LV,Groningen,Groningen,425165,120,216,4,3,A,verkocht onder voorbehoud,Modern herenhuis aan de Grote Markt.,koop,2024-01-15
+90000310,Grote Markt,19,,9711LV,Groningen,Groningen,295396,71,,2,1,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000311,Herestraat,1,,9711LC,Groningen,Groningen,292771,130,97,4,3,A,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Herestraat.",koop,2024-01-15
+90000312,Herestraat,3,,9711LC,Groningen,Groningen,404258,157,,5,4,G,beschikbaar,Modern herenhuis aan de Herestraat.,koop,2024-01-15
+90000313,Herestraat,5,,9711LC,Groningen,Groningen,352308,102,48,3,2,D,beschikbaar,Sfeervolle woning aan de Herestraat.,koop,2024-01-15
+90000314,Herestraat,7,,9711LC,Groningen,Groningen,363591,141,49,4,3,C,beschikbaar,"Compacte woning dichtbij het centrum, Herestraat.",koop,2024-01-15
+90000315,Herestraat,9,,9711LC,Groningen,Groningen,457765,58,82,2,1,G,beschikbaar,"Compacte woning dichtbij het centrum, Herestraat.",koop,2024-01-15
+90000316,Herestraat,11,,9711LC,Groningen,Groningen,352214,170,122,5,4,A,beschikbaar,Lichte bovenwoning aan de Herestraat.,koop,2024-01-15
+90000317,Herestraat,13,,9711LC,Groningen,Groningen,398455,65,59,2,1,B,beschikbaar,Modern herenhuis aan de Herestraat.,koop,2024-01-15
+90000318,Herestraat,15,,9711LC,Groningen,Groningen,344048,139,41,4,3,B,beschikbaar,Ruim appartement met balkon aan de Herestraat.,koop,2024-01-15
+90000319,Herestraat,17,,9711LC,Groningen,Groningen,473300,69,118,2,1,E,beschikbaar,"Compacte woning dichtbij het centrum, Herestraat.",koop,2024-01-15
+90000320,Herestraat,19,,9711LC,Groningen,Groningen,455110,144,,4,3,B,onder bod,Modern herenhuis aan de Herestraat.,koop,2024-01-15
+90000321,Oude Ebbingestraat,1,,9712HA,Groningen,Groningen,452611,173,,5,4,C,onder bod,"Compacte woning dichtbij het centrum, Oude Ebbingestraat.",koop,2024-01-15
+90000322,Oude Ebbingestraat,3,,9712HA,Groningen,Groningen,308078,159,72,5,4,G,beschikbaar,Sfeervolle woning aan de Oude Ebbingestraat.,koop,2024-01-15
+90000323,Oude Ebbingestraat,5,,9712HA,Groningen,Groningen,486640,82,,2,1,B,verkocht onder voorbehoud,Sfeervolle woning aan de Oude Ebbingestraat.,koop,2024-01-15
+90000324,Oude Ebbingestraat,7,,9712HA,Groningen,Groningen,395103,146,,4,3,E,onder bod,Sfeervolle woning aan de Oude Ebbingestraat.,koop,2024-01-15
+90000325,Oude Ebbingestraat,9,,9712HA,Groningen,Groningen,480978,70,,2,1,C,beschikbaar,"Karakteristiek pand in het centrum, Oude Ebbingestraat.",koop,2024-01-15
+90000326,Oude Ebbingestraat,11,,9712HA,Groningen,Groningen,434555,166,100,5,4,B,onder bod,Lichte bovenwoning aan de Oude Ebbingestraat.,koop,2024-01-15
+90000327,Oude Ebbingestraat,13,,9712HA,Groningen,Groningen,363569,166,,5,4,E,beschikbaar,"Karakteristiek pand in het centrum, Oude Ebbingestraat.",koop,2024-01-15
+90000328,Oude Ebbingestraat,15,,9712HA,Groningen,Groningen,469962,70,,2,1,A,beschikbaar,Modern herenhuis aan de Oude Ebbingestraat.,koop,2024-01-15
+90000329,Oude Ebbingestraat,17,,9712HA,Groningen,Groningen,469234,67,84,2,1,F,beschikbaar,Modern herenhuis aan de Oude Ebbingestraat.,koop,2024-01-15
+90000330,Oude Ebbingestraat,19,,9712HA,Groningen,Groningen,282588,174,229,5,4,E,onder bod,Ruim appartement met balkon aan de Oude Ebbingestraat.,koop,2024-01-15
+90000331,Vismarkt,1,,9712CB,Groningen,Groningen,459715,59,146,2,1,A,beschikbaar,Ruim appartement met balkon aan de Vismarkt.,koop,2024-01-15
+90000332,Vismarkt,3,,9712CB,Groningen,Groningen,430724,76,,2,1,A,beschikbaar,Modern herenhuis aan de Vismarkt.,koop,2024-01-15
+90000333,Vismarkt,5,,9712CB,Groningen,Groningen,492807,134,244,4,3,E,verkocht onder voorbehoud,Lichte bovenwoning aan de Vismarkt.,koop,2024-01-15
+90000334,Vismarkt,7,,9712CB,Groningen,Groningen,499686,143,248,4,3,C,beschikbaar,Ruim appartement met balkon aan de Vismarkt.,koop,2024-01-15
+90000335,Vismarkt,9,,9712CB,Groningen,Groningen,484941,166,,5,4,C,onder bod,Sfeervolle woning aan de Vismarkt.,koop,2024-01-15
+90000336,Vismarkt,11,,9712CB,Groningen,Groningen,386098,123,,4,3,D,beschikbaar,Modern herenhuis aan de Vismarkt.,koop,2024-01-15
+90000337,Vismarkt,13,,9712CB,Groningen,Groningen,276926,178,,5,4,B,beschikbaar,"Compacte woning dichtbij het centrum, Vismarkt.",koop,2024-01-15
+90000338,Vismarkt,15,,9712CB,Groningen,Groningen,353326,115,212,3,2,F,verkocht onder voorbehoud,Ruim appartement met balkon aan de Vismarkt.,koop,2024-01-15
+90000339,Vismarkt,17,,9712CB,Groningen,Groningen,380931,106,,3,2,E,onder bod,Lichte bovenwoning aan de Vismarkt.,koop,2024-01-15
+90000340,Vismarkt,19,,9712CB,Groningen,Groningen,284258,120,137,4,3,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Vismarkt.",koop,2024-01-15
+90000341,Folkingestraat,1,,9711JW,Groningen,Groningen,353694,166,,5,4,D,onder bod,Ruim appartement met balkon aan de Folkingestraat.,koop,2024-01-15
+90000342,Folkingestraat,3,,9711JW,Groningen,Groningen,298409,91,,3,2,E,verkocht onder voorbehoud,Ruim appartement met balkon aan de Folkingestraat.,koop,2024-01-15
+90000343,Folkingestraat,5,,9711JW,Groningen,Groningen,398348,129,179,4,3,B,beschikbaar,Sfeervolle woning aan de Folkingestraat.,koop,2024-01-15
+90000344,Folkingestraat,7,,9711JW,Groningen,Groningen,311009,180,43,6,5,E,beschikbaar,Ruim appartement met balkon aan de Folkingestraat.,koop,2024-01-15
+90000345,Folkingestraat,9,,9711JW,Groningen,Groningen,321353,91,,3,2,C,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Folkingestraat.",koop,2024-01-15
+90000346,Folkingestraat,11,,9711JW,Groningen,Groningen,387466,67,141,2,1,C,beschikbaar,Modern herenhuis aan de Folkingestraat.,koop,2024-01-15
+90000347,Folkingestraat,13,,9711JW,Groningen,Groningen,324958,140,,4,3,E,onder bod,Sfeervolle woning aan de Folkingestraat.,koop,2024-01-15
+90000348,Folkingestraat,15,,9711JW,Groningen,Groningen,490965,143,,4,3,B,beschikbaar,Sfeervolle woning aan de Folkingestraat.,koop,2024-01-15
+90000349,Folkingestraat,17,,9711JW,Groningen,Groningen,403497,179,205,5,4,G,beschikbaar,"Karakteristiek pand in het centrum, Folkingestraat.",koop,2024-01-15
+90000350,Folkingestraat,19,,9711JW,Groningen,Groningen,330362,148,87,4,3,D,beschikbaar,Lichte bovenwoning aan de Folkingestraat.,koop,2024-01-15
+90000351,Vrijthof,1,,6211LD,Maastricht,Limburg,398354,88,212,2,1,D,beschikbaar,Lichte bovenwoning aan de Vrijthof.,koop,2024-01-15
+90000352,Vrijthof,3,,6211LD,Maastricht,Limburg,332399,50,59,2,1,B,beschikbaar,"Compacte woning dichtbij het centrum, Vrijthof.",koop,2024-01-15
+90000353,Vrijthof,5,,6211LD,Maastricht,Limburg,370772,47,199,2,1,A,onder bod,"Compacte woning dichtbij het centrum, Vrijthof.",koop,2024-01-15
+90000354,Vrijthof,7,,6211LD,Maastricht,Limburg,352363,74,,2,1,C,onder bod,"Karakteristiek pand in het centrum, Vrijthof.",koop,2024-01-15
+90000355,Vrijthof,9,,6211LD,Maastricht,Limburg,386665,172,,5,4,D,beschikbaar,Ruim appartement met balkon aan de Vrijthof.,koop,2024-01-15
+90000356,Vrijthof,11,,6211LD,Maastricht,Limburg,429526,67,,2,1,E,verkocht onder voorbehoud,Ruim appartement met balkon aan de Vrijthof.,koop,2024-01-15
+90000357,Vrijthof,13,,6211LD,Maastricht,Limburg,377600,70,,2,1,C,beschikbaar,"Karakteristiek pand in het centrum, Vrijthof.",koop,2024-01-15
+90000358,Vrijthof,15,,6211LD,Maastricht,Limburg,381974,55,,2,1,B,verkocht onder voorbehoud,Modern herenhuis aan de Vrijthof.,koop,2024-01-15
+90000359,Vrijthof,17,,6211LD,Maastricht,Limburg,347938,113,,3,2,A,beschikbaar,Sfeervolle woning aan de Vrijthof.,koop,2024-01-15
+90000360,Vrijthof,19,,6211LD,Maastricht,Limburg,329637,167,,5,4,C,beschikbaar,Ruim appartement met balkon aan de Vrijthof.,koop,2024-01-15
+90000361,Grote Staat,1,,6211CT,Maastricht,Limburg,307554,157,127,5,4,D,onder bod,Lichte bovenwoning aan de Grote Staat.,koop,2024-01-15
+90000362,Grote Staat,3,,6211CT,Maastricht,Limburg,437577,111,,3,2,A,verkocht onder voorbehoud,Lichte bovenwoning aan de Grote Staat.,koop,2024-01-15
+90000363,Grote Staat,5,,6211CT,Maastricht,Limburg,473987,155,,5,4,A,beschikbaar,Lichte bovenwoning aan de Grote Staat.,koop,2024-01-15
+90000364,Grote Staat,7,,6211CT,Maastricht,Limburg,319625,174,,5,4,E,beschikbaar,Modern herenhuis aan de Grote Staat.,koop,2024-01-15
+90000365,Grote Staat,9,,6211CT,Maastricht,Limburg,320664,102,,3,2,B,beschikbaar,Modern herenhuis aan de Grote Staat.,koop,2024-01-15
+90000366,Grote Staat,11,,6211CT,Maastricht,Limburg,326907,125,157,4,3,D,beschikbaar,Modern herenhuis aan de Grote Staat.,koop,2024-01-15
+90000367,Grote Staat,13,,6211CT,Maastricht,Limburg,379848,68,,2,1,G,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Grote Staat.",koop,2024-01-15
+90000368,Grote Staat,15,,6211CT,Maastricht,Limburg,487867,161,226,5,4,C,beschikbaar,Lichte bovenwoning aan de Grote Staat.,koop,2024-01-15
+90000369,Grote Staat,17,,6211CT,Maastricht,Limburg,443573,45,242,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Grote Staat.",koop,2024-01-15
+90000370,Grote Staat,19,,6211CT,Maastricht,Limburg,523397,149,186,4,3,A,beschikbaar,Modern herenhuis aan de Grote Staat.,koop,2024-01-15
+90000371,Wycker Brugstraat,1,,6221ED,Maastricht,Limburg,312189,93,,3,2,A,beschikbaar,Lichte bovenwoning aan de Wycker Brugstraat.,koop,2024-01-15
+90000372,Wycker Brugstraat,3,,6221ED,Maastricht,Limburg,519890,46,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Wycker Brugstraat.",koop,2024-01-15
+90000373,Wycker Brugstraat,5,,6221ED,Maastricht,Limburg,432149,77,198,2,1,C,beschikbaar,Modern herenhuis aan de Wycker Brugstraat.,koop,2024-01-15
+90000374,Wycker Brugstraat,7,,6221ED,Maastricht,Limburg,483504,160,,5,4,A,onder bod,Lichte bovenwoning aan de Wycker Brugstraat.,koop,2024-01-15
+90000375,Wycker Brugstraat,9,,6221ED,Maastricht,Limburg,470416,133,,4,3,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Wycker Brugstraat.,koop,2024-01-15
+90000376,Wycker Brugstraat,11,,6221ED,Maastricht,Limburg,374954,151,,5,4,E,onder bod,Modern herenhuis aan de Wycker Brugstraat.,koop,2024-01-15
+90000377,Wycker Brugstraat,13,,6221ED,Maastricht,Limburg,369986,51,43,2,1,D,beschikbaar,Ruim appartement met balkon aan de Wycker Brugstraat.,koop,2024-01-15
+90000378,Wycker Brugstraat,15,,6221ED,Maastricht,Limburg,326864,120,168,4,3,A,beschikbaar,"Compacte woning dichtbij het centrum, Wycker Brugstraat.",koop,2024-01-15
+90000379,Wycker Brugstraat,17,,6221ED,Maastricht,Limburg,381960,57,,2,1,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Wycker Brugstraat.",koop,2024-01-15
+90000380,Wycker Brugstraat,19,,6221ED,Maastricht,Limburg,517575,109,229,3,2,E,beschikbaar,Ruim appartement met balkon aan de Wycker Brugstraat.,koop,2024-01-15
+90000381,Stokstraat,1,,6211GP,Maastricht,Limburg,398880,64,74,2,1,D,beschikbaar,Sfeervolle woning aan de Stokstraat.,koop,2024-01-15
+90000382,Stokstraat,3,,6211GP,Maastricht,Limburg,310470,110,149,3,2,D,beschikbaar,Ruim appartement met balkon aan de Stokstraat.,koop,2024-01-15
+90000383,Stokstraat,5,,6211GP,Maastricht,Limburg,505529,170,,5,4,C,beschikbaar,Lichte bovenwoning aan de Stokstraat.,koop,2024-01-15
+90000384,Stokstraat,7,,6211GP,Maastricht,Limburg,391593,174,169,5,4,C,beschikbaar,Ruim appartement met balkon aan de Stokstraat.,koop,2024-01-15
+90000385,Stokstraat,9,,6211GP,Maastricht,Limburg,439067,129,85,4,3,F,onder bod,Modern herenhuis aan de Stokstraat.,koop,2024-01-15
+90000386,Stokstraat,11,,6211GP,Maastricht,Limburg,401155,55,,2,1,B,beschikbaar,"Karakteristiek pand in het centrum, Stokstraat.",koop,2024-01-15
+90000387,Stokstraat,13,,6211GP,Maastricht,Limburg,321586,169,196,5,4,A,onder bod,Sfeervolle woning aan de Stokstraat.,koop,2024-01-15
+90000388,Stokstraat,15,,6211GP,Maastricht,Limburg,502789,46,,2,1,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Stokstraat.,koop,2024-01-15
+90000389,Stokstraat,17,,6211GP,Maastricht,Limburg,487922,63,,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Stokstraat.",koop,2024-01-15
+90000390,Stokstraat,19,,6211GP,Maastricht,Limburg,515382,58,94,2,1,C,onder bod,Ruim appartement met balkon aan de Stokstraat.,koop,2024-01-15
+90000391,Rechtstraat,1,,6221EG,Maastricht,Limburg,301546,155,129,5,4,D,onder bod,Lichte bovenwoning aan de Rechtstraat.,koop,2024-01-15
+90000392,Rechtstraat,3,,6221EG,Maastricht,Limburg,308079,67,142,2,1,B,verkocht onder voorbehoud,Modern herenhuis aan de Rechtstraat.,koop,2024-01-15
+90000393,Rechtstraat,5,,6221EG,Maastricht,Limburg,377326,79,,2,1,D,onder bod,Lichte bovenwoning aan de Rechtstraat.,koop,2024-01-15
+90000394,Rechtstraat,7,,6221EG,Maastricht,Limburg,337060,140,,4,3,A,onder bod,Sfeervolle woning aan de Rechtstraat.,koop,2024-01-15
+90000395,Rechtstraat,9,,6221EG,Maastricht,Limburg,355064,145,,4,3,F,beschikbaar,Lichte bovenwoning aan de Rechtstraat.,koop,2024-01-15
+90000396,Rechtstraat,11,,6221EG,Maastricht,Limburg,347541,101,,3,2,B,beschikbaar,Lichte bovenwoning aan de Rechtstraat.,koop,2024-01-15
+90000397,Rechtstraat,13,,6221EG,Maastricht,Limburg,393621,109,215,3,2,C,beschikbaar,Ruim appartement met balkon aan de Rechtstraat.,koop,2024-01-15
+90000398,Rechtstraat,15,,6221EG,Maastricht,Limburg,339949,160,198,5,4,B,onder bod,"Compacte woning dichtbij het centrum, Rechtstraat.",koop,2024-01-15
+90000399,Rechtstraat,17,,6221EG,Maastricht,Limburg,386917,156,122,5,4,A,verkocht onder voorbehoud,Modern herenhuis aan de Rechtstraat.,koop,2024-01-15
+90000400,Rechtstraat,19,,6221EG,Maastricht,Limburg,516647,72,185,2,1,A,beschikbaar,Ruim appartement met balkon aan de Rechtstraat.,koop,2024-01-15
+90000401,Heuvel,1,,5038CS,Tilburg,Noord-Brabant,371203,174,,5,4,E,onder bod,"Compacte woning dichtbij het centrum, Heuvel.",koop,2024-01-15
+90000402,Heuvel,3,,5038CS,Tilburg,Noord-Brabant,436418,111,,3,2,G,beschikbaar,Ruim appartement met balkon aan de Heuvel.,koop,2024-01-15
+90000403,Heuvel,5,,5038CS,Tilburg,Noord-Brabant,360385,119,158,3,2,C,beschikbaar,"Compacte woning dichtbij het centrum, Heuvel.",koop,2024-01-15
+90000404,Heuvel,7,,5038CS,Tilburg,Noord-Brabant,311961,87,,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Heuvel.",koop,2024-01-15
+90000405,Heuvel,9,,5038CS,Tilburg,Noord-Brabant,400760,61,89,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Heuvel.",koop,2024-01-15
+90000406,Heuvel,11,,5038CS,Tilburg,Noord-Brabant,483856,127,163,4,3,C,beschikbaar,Lichte bovenwoning aan de Heuvel.,koop,2024-01-15
+90000407,Heuvel,13,,5038CS,Tilburg,Noord-Brabant,400363,64,,2,1,B,beschikbaar,Modern herenhuis aan de Heuvel.,koop,2024-01-15
+90000408,Heuvel,15,,5038CS,Tilburg,Noord-Brabant,325290,46,,2,1,A,beschikbaar,Sfeervolle woning aan de Heuvel.,koop,2024-01-15
+90000409,Heuvel,17,,5038CS,Tilburg,Noord-Brabant,453810,75,,2,1,B,beschikbaar,Sfeervolle woning aan de Heuvel.,koop,2024-01-15
+90000410,Heuvel,19,,5038CS,Tilburg,Noord-Brabant,307239,150,41,5,4,A,onder bod,Ruim appartement met balkon aan de Heuvel.,koop,2024-01-15
+90000411,Piusstraat,1,,5038WP,Tilburg,Noord-Brabant,287478,49,,2,1,D,beschikbaar,Ruim appartement met balkon aan de Piusstraat.,koop,2024-01-15
+90000412,Piusstraat,3,,5038WP,Tilburg,Noord-Brabant,428371,150,,5,4,D,beschikbaar,Lichte bovenwoning aan de Piusstraat.,koop,2024-01-15
+90000413,Piusstraat,5,,5038WP,Tilburg,Noord-Brabant,318044,62,128,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Piusstraat.",koop,2024-01-15
+90000414,Piusstraat,7,,5038WP,Tilburg,Noord-Brabant,289429,54,,2,1,C,beschikbaar,Modern herenhuis aan de Piusstraat.,koop,2024-01-15
+90000415,Piusstraat,9,,5038WP,Tilburg,Noord-Brabant,471977,56,,2,1,B,beschikbaar,Modern herenhuis aan de Piusstraat.,koop,2024-01-15
+90000416,Piusstraat,11,,5038WP,Tilburg,Noord-Brabant,407535,104,,3,2,A,onder bod,Modern herenhuis aan de Piusstraat.,koop,2024-01-15
+90000417,Piusstraat,13,,5038WP,Tilburg,Noord-Brabant,363311,46,,2,1,A,beschikbaar,Lichte bovenwoning aan de Piusstraat.,koop,2024-01-15
+90000418,Piusstraat,15,,5038WP,Tilburg,Noord-Brabant,418451,125,57,4,3,A,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Piusstraat.",koop,2024-01-15
+90000419,Piusstraat,17,,5038WP,Tilburg,Noord-Brabant,391476,146,,4,3,B,onder bod,Ruim appartement met balkon aan de Piusstraat.,koop,2024-01-15
+90000420,Piusstraat,19,,5038WP,Tilburg,Noord-Brabant,296217,146,,4,3,E,verkocht onder voorbehoud,Lichte bovenwoning aan de Piusstraat.,koop,2024-01-15
+90000421,Korte Heuvel,1,,5038CT,Tilburg,Noord-Brabant,474939,86,160,2,1,B,beschikbaar,"Compacte woning dichtbij het centrum, Korte Heuvel.",koop,2024-01-15
+90000422,Korte Heuvel,3,,5038CT,Tilburg,Noord-Brabant,333967,82,183,2,1,B,beschikbaar,Ruim appartement met balkon aan de Korte Heuvel.,koop,2024-01-15
+90000423,Korte Heuvel,5,,5038CT,Tilburg,Noord-Brabant,421623,147,,4,3,C,verkocht onder voorbehoud,Sfeervolle woning aan de Korte Heuvel.,koop,2024-01-15
+90000424,Korte Heuvel,7,,5038CT,Tilburg,Noord-Brabant,339974,157,247,5,4,D,onder bod,Ruim appartement met balkon aan de Korte Heuvel.,koop,2024-01-15
+90000425,Korte Heuvel,9,,5038CT,Tilburg,Noord-Brabant,274453,177,,5,4,C,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Korte Heuvel.",koop,2024-01-15
+90000426,Korte Heuvel,11,,5038CT,Tilburg,Noord-Brabant,440547,85,100,2,1,D,beschikbaar,Modern herenhuis aan de Korte Heuvel.,koop,2024-01-15
+90000427,Korte Heuvel,13,,5038CT,Tilburg,Noord-Brabant,482517,62,,2,1,C,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Korte Heuvel.",koop,2024-01-15
+90000428,Korte Heuvel,15,,5038CT,Tilburg,Noord-Brabant,396902,111,159,3,2,A,beschikbaar,"Karakteristiek pand in het centrum, Korte Heuvel.",koop,2024-01-15
+90000429,Korte Heuvel,17,,5038CT,Tilburg,Noord-Brabant,391780,109,,3,2,G,onder bod,Ruim appartement met balkon aan de Korte Heuvel.,koop,2024-01-15
+90000430,Korte Heuvel,19,,5038CT,Tilburg,Noord-Brabant,471741,52,96,2,1,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Korte Heuvel.,koop,2024-01-15
+90000431,NS-plein,1,,5014DA,Tilburg,Noord-Brabant,480239,112,53,3,2,B,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, NS-plein.",koop,2024-01-15
+90000432,NS-plein,3,,5014DA,Tilburg,Noord-Brabant,312915,166,85,5,4,E,beschikbaar,Lichte bovenwoning aan de NS-plein.,koop,2024-01-15
+90000433,NS-plein,5,,5014DA,Tilburg,Noord-Brabant,358330,112,81,3,2,E,onder bod,Ruim appartement met balkon aan de NS-plein.,koop,2024-01-15
+90000434,NS-plein,7,,5014DA,Tilburg,Noord-Brabant,276079,171,,5,4,D,onder bod,Modern herenhuis aan de NS-plein.,koop,2024-01-15
+90000435,NS-plein,9,,5014DA,Tilburg,Noord-Brabant,369301,91,,3,2,F,beschikbaar,Ruim appartement met balkon aan de NS-plein.,koop,2024-01-15
+90000436,NS-plein,11,,5014DA,Tilburg,Noord-Brabant,384851,173,250,5,4,D,beschikbaar,Sfeervolle woning aan de NS-plein.,koop,2024-01-15
+90000437,NS-plein,13,,5014DA,Tilburg,Noord-Brabant,408802,70,186,2,1,E,beschikbaar,"Karakteristiek pand in het centrum, NS-plein.",koop,2024-01-15
+90000438,NS-plein,15,,5014DA,Tilburg,Noord-Brabant,448687,132,157,4,3,B,beschikbaar,"Karakteristiek pand in het centrum, NS-plein.",koop,2024-01-15
+90000439,NS-plein,17,,5014DA,Tilburg,Noord-Brabant,453957,78,,2,1,D,beschikbaar,"Karakteristiek pand in het centrum, NS-plein.",koop,2024-01-15
+90000440,NS-plein,19,,5014DA,Tilburg,Noord-Brabant,388990,142,234,4,3,F,beschikbaar,Sfeervolle woning aan de NS-plein.,koop,2024-01-15
+90000441,Stationsstraat,1,,5038EA,Tilburg,Noord-Brabant,404980,79,,2,1,E,onder bod,Lichte bovenwoning aan de Stationsstraat.,koop,2024-01-15
+90000442,Stationsstraat,3,,5038EA,Tilburg,Noord-Brabant,478337,57,206,2,1,A,beschikbaar,"Karakteristiek pand in het centrum, Stationsstraat.",koop,2024-01-15
+90000443,Stationsstraat,5,,5038EA,Tilburg,Noord-Brabant,355214,137,172,4,3,F,beschikbaar,Sfeervolle woning aan de Stationsstraat.,koop,2024-01-15
+90000444,Stationsstraat,7,,5038EA,Tilburg,Noord-Brabant,310754,95,,3,2,C,onder bod,"Karakteristiek pand in het centrum, Stationsstraat.",koop,2024-01-15
+90000445,Stationsstraat,9,,5038EA,Tilburg,Noord-Brabant,386569,159,,5,4,B,beschikbaar,Lichte bovenwoning aan de Stationsstraat.,koop,2024-01-15
+90000446,Stationsstraat,11,,5038EA,Tilburg,Noord-Brabant,285738,131,186,4,3,C,beschikbaar,Ruim appartement met balkon aan de Stationsstraat.,koop,2024-01-15
+90000447,Stationsstraat,13,,5038EA,Tilburg,Noord-Brabant,469727,113,,3,2,B,beschikbaar,"Karakteristiek pand in het centrum, Stationsstraat.",koop,2024-01-15
+90000448,Stationsstraat,15,,5038EA,Tilburg,Noord-Brabant,320200,109,,3,2,D,beschikbaar,Ruim appartement met balkon aan de Stationsstraat.,koop,2024-01-15
+90000449,Stationsstraat,17,,5038EA,Tilburg,Noord-Brabant,292244,58,131,2,1,C,beschikbaar,"Karakteristiek pand in het centrum, Stationsstraat.",koop,2024-01-15
+90000450,Stationsstraat,19,,5038EA,Tilburg,Noord-Brabant,272489,117,62,3,2,A,beschikbaar,Sfeervolle woning aan de Stationsstraat.,koop,2024-01-15
+90000451,Grote Markt,1,,6511KB,Nijmegen,Gelderland,469882,79,,2,1,D,beschikbaar,"Compacte woning dichtbij het centrum, Grote Markt.",koop,2024-01-15
+90000452,Grote Markt,3,,6511KB,Nijmegen,Gelderland,525949,124,,4,3,C,beschikbaar,Sfeervolle woning aan de Grote Markt.,koop,2024-01-15
+90000453,Grote Markt,5,,6511KB,Nijmegen,Gelderland,405147,122,163,4,3,E,beschikbaar,"Karakteristiek pand in het centrum, Grote Markt.",koop,2024-01-15
+90000454,Grote Markt,7,,6511KB,Nijmegen,Gelderland,375611,47,,2,1,D,onder bod,Sfeervolle woning aan de Grote Markt.,koop,2024-01-15
+90000455,Grote Markt,9,,6511KB,Nijmegen,Gelderland,425687,144,,4,3,A,beschikbaar,Lichte bovenwoning aan de Grote Markt.,koop,2024-01-15
+90000456,Grote Markt,11,,6511KB,Nijmegen,Gelderland,423240,114,220,3,2,C,beschikbaar,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000457,Grote Markt,13,,6511KB,Nijmegen,Gelderland,498624,119,146,3,2,C,beschikbaar,"Compacte woning dichtbij het centrum, Grote Markt.",koop,2024-01-15
+90000458,Grote Markt,15,,6511KB,Nijmegen,Gelderland,502484,50,56,2,1,B,beschikbaar,Modern herenhuis aan de Grote Markt.,koop,2024-01-15
+90000459,Grote Markt,17,,6511KB,Nijmegen,Gelderland,436552,152,234,5,4,C,beschikbaar,Lichte bovenwoning aan de Grote Markt.,koop,2024-01-15
+90000460,Grote Markt,19,,6511KB,Nijmegen,Gelderland,438246,82,228,2,1,B,onder bod,Ruim appartement met balkon aan de Grote Markt.,koop,2024-01-15
+90000461,Lange Hezelstraat,1,,6511CD,Nijmegen,Gelderland,380263,142,,4,3,A,verkocht onder voorbehoud,Modern herenhuis aan de Lange Hezelstraat.,koop,2024-01-15
+90000462,Lange Hezelstraat,3,,6511CD,Nijmegen,Gelderland,417006,69,,2,1,G,beschikbaar,Lichte bovenwoning aan de Lange Hezelstraat.,koop,2024-01-15
+90000463,Lange Hezelstraat,5,,6511CD,Nijmegen,Gelderland,409483,178,153,5,4,C,beschikbaar,Sfeervolle woning aan de Lange Hezelstraat.,koop,2024-01-15
+90000464,Lange Hezelstraat,7,,6511CD,Nijmegen,Gelderland,317340,115,,3,2,B,beschikbaar,Sfeervolle woning aan de Lange Hezelstraat.,koop,2024-01-15
+90000465,Lange Hezelstraat,9,,6511CD,Nijmegen,Gelderland,330742,68,,2,1,B,verkocht onder voorbehoud,Sfeervolle woning aan de Lange Hezelstraat.,koop,2024-01-15
+90000466,Lange Hezelstraat,11,,6511CD,Nijmegen,Gelderland,526163,169,172,5,4,D,beschikbaar,Modern herenhuis aan de Lange Hezelstraat.,koop,2024-01-15
+90000467,Lange Hezelstraat,13,,6511CD,Nijmegen,Gelderland,497724,55,142,2,1,C,onder bod,Modern herenhuis aan de Lange Hezelstraat.,koop,2024-01-15
+90000468,Lange Hezelstraat,15,,6511CD,Nijmegen,Gelderland,460364,134,149,4,3,B,onder bod,Ruim appartement met balkon aan de Lange Hezelstraat.,koop,2024-01-15
+90000469,Lange Hezelstraat,17,,6511CD,Nijmegen,Gelderland,315188,160,97,5,4,C,beschikbaar,Lichte bovenwoning aan de Lange Hezelstraat.,koop,2024-01-15
+90000470,Lange Hezelstraat,19,,6511CD,Nijmegen,Gelderland,529708,127,,4,3,D,onder bod,Modern herenhuis aan de Lange Hezelstraat.,koop,2024-01-15
+90000471,Molenstraat,1,,6511EA,Nijmegen,Gelderland,399567,172,,5,4,A,beschikbaar,Modern herenhuis aan de Molenstraat.,koop,2024-01-15
+90000472,Molenstraat,3,,6511EA,Nijmegen,Gelderland,365231,78,38,2,1,A,beschikbaar,Sfeervolle woning aan de Molenstraat.,koop,2024-01-15
+90000473,Molenstraat,5,,6511EA,Nijmegen,Gelderland,469743,144,,4,3,C,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Molenstraat.",koop,2024-01-15
+90000474,Molenstraat,7,,6511EA,Nijmegen,Gelderland,437698,63,83,2,1,D,beschikbaar,Lichte bovenwoning aan de Molenstraat.,koop,2024-01-15
+90000475,Molenstraat,9,,6511EA,Nijmegen,Gelderland,530913,151,,5,4,D,beschikbaar,"Compacte woning dichtbij het centrum, Molenstraat.",koop,2024-01-15
+90000476,Molenstraat,11,,6511EA,Nijmegen,Gelderland,375559,100,,3,2,A,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Molenstraat.",koop,2024-01-15
+90000477,Molenstraat,13,,6511EA,Nijmegen,Gelderland,342659,90,,3,2,C,verkocht onder voorbehoud,Lichte bovenwoning aan de Molenstraat.,koop,2024-01-15
+90000478,Molenstraat,15,,6511EA,Nijmegen,Gelderland,356465,91,,3,2,C,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Molenstraat.",koop,2024-01-15
+90000479,Molenstraat,17,,6511EA,Nijmegen,Gelderland,462625,155,,5,4,B,beschikbaar,"Compacte woning dichtbij het centrum, Molenstraat.",koop,2024-01-15
+90000480,Molenstraat,19,,6511EA,Nijmegen,Gelderland,315051,110,145,3,2,B,beschikbaar,Lichte bovenwoning aan de Molenstraat.,koop,2024-01-15
+90000481,Hertogstraat,1,,6511TA,Nijmegen,Gelderland,316721,49,,2,1,G,beschikbaar,"Karakteristiek pand in het centrum, Hertogstraat.",koop,2024-01-15
+90000482,Hertogstraat,3,,6511TA,Nijmegen,Gelderland,460139,125,240,4,3,F,beschikbaar,"Compacte woning dichtbij het centrum, Hertogstraat.",koop,2024-01-15
+90000483,Hertogstraat,5,,6511TA,Nijmegen,Gelderland,527618,138,,4,3,A,beschikbaar,"Karakteristiek pand in het centrum, Hertogstraat.",koop,2024-01-15
+90000484,Hertogstraat,7,,6511TA,Nijmegen,Gelderland,360325,100,,3,2,D,beschikbaar,Modern herenhuis aan de Hertogstraat.,koop,2024-01-15
+90000485,Hertogstraat,9,,6511TA,Nijmegen,Gelderland,424188,59,,2,1,B,beschikbaar,Sfeervolle woning aan de Hertogstraat.,koop,2024-01-15
+90000486,Hertogstraat,11,,6511TA,Nijmegen,Gelderland,394897,47,,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Hertogstraat.",koop,2024-01-15
+90000487,Hertogstraat,13,,6511TA,Nijmegen,Gelderland,491589,83,208,2,1,A,beschikbaar,Lichte bovenwoning aan de Hertogstraat.,koop,2024-01-15
+90000488,Hertogstraat,15,,6511TA,Nijmegen,Gelderland,403124,101,231,3,2,B,beschikbaar,Sfeervolle woning aan de Hertogstraat.,koop,2024-01-15
+90000489,Hertogstraat,17,,6511TA,Nijmegen,Gelderland,514762,147,,4,3,D,beschikbaar,Ruim appartement met balkon aan de Hertogstraat.,koop,2024-01-15
+90000490,Hertogstraat,19,,6511TA,Nijmegen,Gelderland,379551,95,,3,2,G,onder bod,Ruim appartement met balkon aan de Hertogstraat.,koop,2024-01-15
+90000491,Bloemerstraat,1,,6511EM,Nijmegen,Gelderland,423418,155,177,5,4,A,verkocht onder voorbehoud,Modern herenhuis aan de Bloemerstraat.,koop,2024-01-15
+90000492,Bloemerstraat,3,,6511EM,Nijmegen,Gelderland,476538,51,,2,1,A,beschikbaar,Modern herenhuis aan de Bloemerstraat.,koop,2024-01-15
+90000493,Bloemerstraat,5,,6511EM,Nijmegen,Gelderland,508876,84,,2,1,E,beschikbaar,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
+90000494,Bloemerstraat,7,,6511EM,Nijmegen,Gelderland,432980,118,207,3,2,E,beschikbaar,Modern herenhuis aan de Bloemerstraat.,koop,2024-01-15
+90000495,Bloemerstraat,9,,6511EM,Nijmegen,Gelderland,441622,99,163,3,2,D,onder bod,"Compacte woning dichtbij het centrum, Bloemerstraat.",koop,2024-01-15
+90000496,Bloemerstraat,11,,6511EM,Nijmegen,Gelderland,386114,88,81,2,1,D,onder bod,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
+90000497,Bloemerstraat,13,,6511EM,Nijmegen,Gelderland,416324,137,,4,3,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Bloemerstraat.,koop,2024-01-15
+90000498,Bloemerstraat,15,,6511EM,Nijmegen,Gelderland,501769,67,158,2,1,G,onder bod,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
+90000499,Bloemerstraat,17,,6511EM,Nijmegen,Gelderland,405906,123,130,4,3,D,beschikbaar,Lichte bovenwoning aan de Bloemerstraat.,koop,2024-01-15
+90000500,Bloemerstraat,19,,6511EM,Nijmegen,Gelderland,528610,115,,3,2,C,beschikbaar,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
