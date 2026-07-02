@@ -47,8 +47,8 @@ class ScrapingWorker {
         }
 
         List<RawListing> all = new ArrayList<>();
-        int limit = Math.min(session.getPageLimit(), 5);
-        for (int page = 1; page <= limit; page++) {
+        int limit = session.getPageLimit();
+        for (int page = 0; page < limit; page++) {
             List<RawListing> pageResults = proxyClient.search(
                 session.getCity(), session.getMinPrice(), session.getMaxPrice(),
                 session.getMinArea(), session.getMaxArea(), page);

@@ -89,8 +89,8 @@ class ScrapingWorkerTest {
         session.setPageLimit(3);
         session.setFundaUrl("https://funda.nl/...");
         RawListing listing = mock(RawListing.class);
-        when(proxyClient.search("amsterdam", null, null, null, null, 1)).thenReturn(List.of(listing));
-        when(proxyClient.search("amsterdam", null, null, null, null, 2)).thenReturn(List.of());
+        when(proxyClient.search("amsterdam", null, null, null, null, 0)).thenReturn(List.of(listing));
+        when(proxyClient.search("amsterdam", null, null, null, null, 1)).thenReturn(List.of());
 
         worker.process(session);
 
@@ -106,10 +106,26 @@ class ScrapingWorkerTest {
         session.setPageLimit(1);
         session.setFundaUrl("https://funda.nl/...");
         RawListing listing = mock(RawListing.class);
-        when(proxyClient.search("rotterdam", null, null, null, null, 1)).thenReturn(List.of(listing));
+        when(proxyClient.search("rotterdam", null, null, null, null, 0)).thenReturn(List.of(listing));
 
         worker.process(session);
 
         verify(sessionStore).complete(any(), argThat(list -> list.size() == 1));
+    }
+
+    @Test
+    void search_respectsSessionPageLimitWithoutAdditionalClamping() {
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
+        session.setType(ScrapingSessionType.SEARCH);
+        session.setCity("amsterdam");
+        session.setPageLimit(8);
+        session.setFundaUrl("https://funda.nl/...");
+        RawListing listing = mock(RawListing.class);
+        when(proxyClient.search(eq("amsterdam"), any(), any(), any(), any(), anyInt()))
+            .thenReturn(List.of(listing));
+
+        worker.process(session);
+
+        verify(proxyClient, times(8)).search(any(), any(), any(), any(), any(), anyInt());
     }
 }
