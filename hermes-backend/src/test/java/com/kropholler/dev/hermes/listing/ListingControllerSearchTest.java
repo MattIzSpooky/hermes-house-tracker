@@ -28,6 +28,7 @@ class ListingControllerSearchTest {
     @MockitoBean ListingSummaryService summaryService;
     @MockitoBean ListingApiMapper listingApiMapper;
     @MockitoBean RescrapeMapper rescrapeMapper;
+    @MockitoBean com.kropholler.dev.hermes.listing.geocoding.ListingGeocodingBackfillService backfillService;
 
     @Test
     void getListings_passesStreetParamToService() throws Exception {

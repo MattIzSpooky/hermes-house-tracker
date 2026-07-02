@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.listing.geocoding.ListingGeocodingBackfillService;
 import com.kropholler.dev.hermes.listing.openapi.*;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
@@ -24,6 +25,7 @@ public class ListingController implements ListingsApi {
     private final ListingSummaryService summaryService;
     private final ListingApiMapper listingApiMapper;
     private final RescrapeMapper rescrapeMapper;
+    private final ListingGeocodingBackfillService backfillService;
 
     @Override
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
@@ -78,5 +80,12 @@ public class ListingController implements ListingsApi {
                 "Listing " + id + " not found"));
         summaryService.requestGeneration(id);
         return ResponseEntity.accepted().build();
+    }
+
+    @Override
+    public ResponseEntity<GeocodingBackfillResponse> backfillListingGeocoding() {
+        int queuedCount = backfillService.queueMissingGeocoding();
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+            .body(new GeocodingBackfillResponse().queuedCount(queuedCount));
     }
 }

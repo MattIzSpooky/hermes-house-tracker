@@ -33,6 +33,7 @@ class ListingControllerTest {
     @MockitoBean ListingSummaryService summaryService;
     @MockitoBean ListingApiMapper listingApiMapper;
     @MockitoBean RescrapeMapper rescrapeMapper;
+    @MockitoBean com.kropholler.dev.hermes.listing.geocoding.ListingGeocodingBackfillService backfillService;
 
     private ListingDto minimalDto(UUID id) {
         return new ListingDto(id, "funda-1", "https://funda.nl/1",
@@ -138,5 +139,14 @@ class ListingControllerTest {
 
         mockMvc.perform(post("/api/listings/{id}/summary/generate", id))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void backfillListingGeocoding_returns202WithQueuedCount() throws Exception {
+        when(backfillService.queueMissingGeocoding()).thenReturn(7);
+
+        mockMvc.perform(post("/api/listings/geocoding/backfill"))
+            .andExpect(status().isAccepted())
+            .andExpect(jsonPath("$.queuedCount").value(7));
     }
 }
