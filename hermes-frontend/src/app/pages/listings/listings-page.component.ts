@@ -1,4 +1,4 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,11 +12,12 @@ import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { SpinnerComponent } from '../../shared/spinner.component';
 import { ErrorAlertComponent } from '../../shared/error-alert.component';
 import { SectionCardComponent } from '../../shared/section-card.component';
+import { ListingMapComponent, MapListing } from '../../shared/listing-map.component';
 
 @Component({
   selector: 'app-listings-page',
   standalone: true,
-  imports: [DatePipe, FormsModule, StatusBadgeComponent, EuroPricePipe, SpinnerComponent, ErrorAlertComponent, SectionCardComponent],
+  imports: [DatePipe, FormsModule, StatusBadgeComponent, EuroPricePipe, SpinnerComponent, ErrorAlertComponent, SectionCardComponent, ListingMapComponent],
   templateUrl: './listings-page.component.html',
 })
 
@@ -27,6 +28,27 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
 
   protected currentPage = 0;
   protected pageSize = 20;
+
+  protected viewMode: 'list' | 'map' = 'list';
+
+  protected readonly mapListings = computed<MapListing[]>(() =>
+    this.svc.listings().content.map(l => ({
+      id: l.id,
+      street: l.street,
+      houseNumber: l.houseNumber,
+      city: l.city,
+      currentPrice: l.askingPrice,
+      location: l.location,
+    })),
+  );
+
+  protected readonly listingsWithoutLocationCount = computed(
+    () => this.mapListings().filter(l => l.location == null).length,
+  );
+
+  toggleView(mode: 'list' | 'map'): void {
+    this.viewMode = mode;
+  }
 
   protected street = '';
   protected houseNumber = '';

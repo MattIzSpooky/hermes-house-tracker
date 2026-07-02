@@ -48,6 +48,19 @@
   </button>
 </app-section-card>
 
+<div class="flex items-center gap-2 mb-4">
+  <button (click)="toggleView('list')"
+    class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+    [class]="viewMode === 'list' ? 'bg-cyan-500 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'">
+    List
+  </button>
+  <button (click)="toggleView('map')"
+    class="rounded-lg px-3 py-1.5 text-sm font-medium transition-colors"
+    [class]="viewMode === 'map' ? 'bg-cyan-500 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'">
+    Map
+  </button>
+</div>
+
 @if (svc.error()) {
   <app-error-alert [message]="svc.error()!" />
 }
@@ -56,7 +69,7 @@
   <div class="text-sm text-slate-500">
     <app-spinner label="Loading listings..." />
   </div>
-} @else {
+} @else if (viewMode === 'list') {
   <app-section-card padding="" extraClass="overflow-hidden">
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-slate-200 text-sm">
@@ -140,4 +153,14 @@
       </button>
     </div>
   </div>
+} @else {
+  @if (listingsWithoutLocationCount() > 0) {
+    <p class="text-xs text-slate-400 mb-2">
+      {{ mapListings().length - listingsWithoutLocationCount() }} of {{ mapListings().length }} shown on map
+      ({{ listingsWithoutLocationCount() }} without location data yet)
+    </p>
+  }
+  <app-section-card padding="p-2" extraClass="h-[480px]">
+    <app-listing-map [listings]="mapListings()" (listingSelected)="navigate($event)" />
+  </app-section-card>
 }
