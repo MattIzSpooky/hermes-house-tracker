@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.data.ListingEntity;
+import com.kropholler.dev.hermes.listing.data.ListingGeoProjection;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -416,5 +418,77 @@ class ListingServiceTest {
         assertThat(results.get(0).dropPercent()).isGreaterThan(results.get(1).dropPercent());
         assertThat(results.get(0).listing()).isEqualTo(dto2); // 20% drop comes first
         assertThat(results.get(1).listing()).isEqualTo(dto1); // 5% drop comes second
+    }
+
+    // ── geo resilience ───────────────────────────────────────────────────────
+
+    @Test
+    void findById_geoLookupThrows_returnsDtoWithNullLocation() {
+        UUID id = UUID.randomUUID();
+        ListingEntity e = entity(id);
+        when(listingRepository.findById(id)).thenReturn(Optional.of(e));
+        when(priceHistoryRepository.findFirstByListingIdAndStatusOrderByTimestampDesc(id, "asking_price"))
+                .thenReturn(Optional.empty());
+        when(listingRepository.findGeoByIds(List.of(id))).thenThrow(new RuntimeException("DB error"));
+        ListingDto expected = dto(id);
+        when(mapper.toDto(e, null, null)).thenReturn(expected);
+
+        Optional<ListingDto> result = service.findById(id);
+
+        assertThat(result).contains(expected);
+    }
+
+    @Test
+    void findAll_geoLookupThrows_pageStillReturned() {
+        Pageable pageable = PageRequest.of(0, 20);
+        var params = new ListingSearchParams(null, null, null, null, null, null, null, null, null, null, null);
+        UUID id = UUID.randomUUID();
+        ListingEntity e = entity(id);
+        when(listingRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(e)));
+        when(priceHistoryRepository.findFirstByListingIdAndStatusOrderByTimestampDesc(id, "asking_price"))
+                .thenReturn(Optional.empty());
+        when(listingRepository.findGeoByIds(anyList())).thenThrow(new RuntimeException("DB error"));
+        ListingDto expected = dto(id);
+        when(mapper.toDto(e, null, null)).thenReturn(expected);
+
+        var result = service.findAll(params, pageable);
+
+        assertThat(result.getContent()).containsExactly(expected);
+    }
+
+    @Test
+    void findById_geoLookupSucceeds_locationPassedToMapper() {
+        UUID id = UUID.randomUUID();
+        ListingEntity e = entity(id);
+        when(listingRepository.findById(id)).thenReturn(Optional.of(e));
+        when(priceHistoryRepository.findFirstByListingIdAndStatusOrderByTimestampDesc(id, "asking_price"))
+                .thenReturn(Optional.empty());
+        ListingGeoProjection projection = mock(ListingGeoProjection.class);
+        when(projection.getId()).thenReturn(id);
+        when(projection.getLatitude()).thenReturn(52.3676);
+        when(projection.getLongitude()).thenReturn(4.9041);
+        when(projection.getBboxLatMin()).thenReturn(52.3666);
+        when(projection.getBboxLatMax()).thenReturn(52.3686);
+        when(projection.getBboxLonMin()).thenReturn(4.9031);
+        when(projection.getBboxLonMax()).thenReturn(4.9051);
+        when(listingRepository.findGeoByIds(List.of(id))).thenReturn(List.of(projection));
+        GeoLocation expectedLocation = new GeoLocation(52.3676, 4.9041, 52.3666, 52.3686, 4.9031, 4.9051);
+        ListingDto expected = dto(id);
+        when(mapper.toDto(e, null, expectedLocation)).thenReturn(expected);
+
+        Optional<ListingDto> result = service.findById(id);
+
+        assertThat(result).contains(expected);
+    }
+
+    @Test
+    void findAll_emptyPage_doesNotCallGeoLookup() {
+        Pageable pageable = PageRequest.of(0, 20);
+        var params = new ListingSearchParams(null, null, null, null, null, null, null, null, null, null, null);
+        when(listingRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of()));
+
+        service.findAll(params, pageable);
+
+        verify(listingRepository, never()).findGeoByIds(any());
     }
 }

@@ -3,11 +3,13 @@ package com.kropholler.dev.hermes.listing;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.listing.data.ListingEntity;
+import com.kropholler.dev.hermes.listing.data.ListingGeoProjection;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryEntity;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryEntryRepository;
 import com.kropholler.dev.hermes.listing.pricehistory.PriceHistoryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,10 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ListingService {
@@ -32,7 +37,9 @@ public class ListingService {
     @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
         if (params.isEmpty()) {
-            return listingRepository.findAll(pageable).map(this::toDto);
+            Page<ListingEntity> page = listingRepository.findAll(pageable);
+            Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(page.getContent()));
+            return page.map(l -> toDto(l, geoById));
         }
         Specification<ListingEntity> spec = params.hasRadiusSearch()
                 ? ListingSpecifications.withParamsForRadius(params)
@@ -43,9 +50,9 @@ public class ListingService {
                 spec = spec.and(ListingSpecifications.withinRadius(latLon.lon(), latLon.lat(), params.radiusKm() * 1000));
             }
         }
-        return listingRepository
-                .findAll(spec, pageable)
-                .map(this::toDto);
+        Page<ListingEntity> page = listingRepository.findAll(spec, pageable);
+        Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(page.getContent()));
+        return page.map(l -> toDto(l, geoById));
     }
 
     private GeocodeResult resolveRadiusCenter(ListingSearchParams params) {
@@ -85,7 +92,9 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public Page<ListingDto> findAllActive(Pageable pageable) {
-        return listingRepository.findAllByDeletedAtIsNull(pageable).map(this::toDto);
+        Page<ListingEntity> page = listingRepository.findAllByDeletedAtIsNull(pageable);
+        Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(page.getContent()));
+        return page.map(l -> toDto(l, geoById));
     }
 
     @Transactional(readOnly = true)
@@ -98,18 +107,18 @@ public class ListingService {
         if (radiusKm != null && (nearAddress != null || nearCity != null)) {
             GeocodeResult latLon = resolveLatLon(nearAddress, nearCity);
             if (latLon != null) {
-                return listingRepository.searchForChatNearLocation(
+                List<ListingEntity> results = listingRepository.searchForChatNearLocation(
                                 minBedrooms, minRooms, minLivingAreaM2,
                                 province, keywords, minPrice, maxPrice,
-                                latLon.lon(), latLon.lat(), radiusKm * 1000)
-                        .stream().map(this::toDto).toList();
+                                latLon.lon(), latLon.lat(), radiusKm * 1000);
+                Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
+                return results.stream().map(l -> toDto(l, geoById)).toList();
             }
         }
-        return listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
-                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc)
-                .stream()
-                .map(this::toDto)
-                .toList();
+        List<ListingEntity> results = listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
+                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc);
+        Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
+        return results.stream().map(l -> toDto(l, geoById)).toList();
     }
 
     @Transactional(readOnly = true)
@@ -164,13 +173,42 @@ public class ListingService {
                 .stream().map(mapper::toDto).toList();
     }
 
-    private ListingDto toDto(ListingEntity l) {
+    private List<UUID> idsOf(List<ListingEntity> entities) {
+        return entities.stream().map(ListingEntity::getId).toList();
+    }
+
+    /**
+     * Best-effort batched geo lookup. A failure here (e.g. a transient DB issue) must never
+     * break listing search or detail — it only means the affected listings won't show a
+     * location on the map.
+     */
+    private Map<UUID, ListingGeoProjection> fetchGeoSafely(List<UUID> ids) {
+        if (ids.isEmpty()) return Map.of();
+        try {
+            return listingRepository.findGeoByIds(ids).stream()
+                    .collect(Collectors.toMap(ListingGeoProjection::getId, p -> p));
+        } catch (Exception e) {
+            log.warn("Failed to load geo data for {} listing(s); continuing without map data", ids.size(), e);
+            return Map.of();
+        }
+    }
+
+    private GeoLocation toGeoLocation(ListingGeoProjection p) {
+        if (p == null || p.getLatitude() == null || p.getLongitude() == null) return null;
+        return new GeoLocation(p.getLatitude(), p.getLongitude(),
+                p.getBboxLatMin(), p.getBboxLatMax(), p.getBboxLonMin(), p.getBboxLonMax());
+    }
+
+    private ListingDto toDto(ListingEntity l, Map<UUID, ListingGeoProjection> geoById) {
         Integer currentPrice = priceHistoryRepository
                 .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
                 .map(PriceHistoryEntryEntity::getPrice)
                 .orElse(null);
-        return mapper.toDto(l, currentPrice, null);
+        GeoLocation location = toGeoLocation(geoById.get(l.getId()));
+        return mapper.toDto(l, currentPrice, location);
     }
 
-
+    private ListingDto toDto(ListingEntity l) {
+        return toDto(l, fetchGeoSafely(List.of(l.getId())));
+    }
 }
