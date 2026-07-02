@@ -62,6 +62,27 @@ public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, J
                            @Param("lonMax") double lonMax, @Param("latMax") double latMax);
 
     @Query(value = """
+            SELECT
+              l.id                              AS id,
+              ST_Y(l.location)                   AS latitude,
+              ST_X(l.location)                   AS longitude,
+              ST_YMin(l.bounding_box)             AS bboxLatMin,
+              ST_YMax(l.bounding_box)             AS bboxLatMax,
+              ST_XMin(l.bounding_box)             AS bboxLonMin,
+              ST_XMax(l.bounding_box)             AS bboxLonMax
+            FROM listings l
+            WHERE l.id IN (:ids) AND l.location IS NOT NULL
+            """, nativeQuery = true)
+    List<ListingGeoProjection> findGeoByIds(@Param("ids") List<UUID> ids);
+
+    @Query(value = """
+            SELECT l.id::text FROM listings l
+            WHERE l.deleted_at IS NULL AND l.location IS NULL
+              AND l.street IS NOT NULL AND l.city IS NOT NULL
+            """, nativeQuery = true)
+    List<String> findIdsMissingLocation();
+
+    @Query(value = """
             SELECT l.* FROM listings l
             LEFT JOIN LATERAL (
                 SELECT phe.price
