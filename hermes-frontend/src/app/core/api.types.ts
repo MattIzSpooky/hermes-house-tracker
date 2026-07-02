@@ -33,6 +33,19 @@ export interface CreateScrapingSessionRequest {
   pageLimit: number;
 }
 
+export interface GeocodingBackfillResponse {
+  queuedCount: number;
+}
+
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+  bboxLatMin?: number | null;
+  bboxLatMax?: number | null;
+  bboxLonMin?: number | null;
+  bboxLonMax?: number | null;
+}
+
 export interface ListingPage {
   content: ListingSummaryResponse[];
   totalElements: number;
@@ -52,6 +65,7 @@ export interface ListingSummaryResponse {
   askingPrice?: number;
   status?: ListingStatus;
   firstSeenAt: string;
+  location?: GeoLocation | null;
 }
 
 export interface ListingDetailResponse {
@@ -74,6 +88,7 @@ export interface ListingDetailResponse {
   rooms?: number | null;
   bedrooms?: number | null;
   energyLabel?: string | null;
+  location?: GeoLocation | null;
 }
 
 export interface PricePointResponse {
