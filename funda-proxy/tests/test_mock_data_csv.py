@@ -7,6 +7,7 @@ MOCK_DATA_DIR = Path(__file__).resolve().parent.parent / "mock_data"
 EXPECTED_CITIES = {
     "Amsterdam", "Utrecht", "Rotterdam", "Eindhoven", "Haarlem",
     "Weert", "Groningen", "Maastricht", "Tilburg", "Nijmegen",
+    "Nederweert", "Stramproy",
 }
 
 
@@ -20,13 +21,13 @@ def _read_price_histories():
         return list(csv.DictReader(f))
 
 
-def test_listings_csv_has_500_rows():
-    assert len(_read_listings()) == 500
+def test_listings_csv_has_600_rows():
+    assert len(_read_listings()) == 600
 
 
 def test_listings_csv_global_ids_are_unique_and_sequential():
     ids = [int(row["global_id"]) for row in _read_listings()]
-    assert sorted(ids) == list(range(90000001, 90000501))
+    assert sorted(ids) == list(range(90000001, 90000601))
 
 
 def test_listings_csv_only_contains_expected_cities():

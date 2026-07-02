@@ -499,3 +499,103 @@ global_id,street_name,house_number,house_number_suffix,postcode,city,province,pr
 90000498,Bloemerstraat,15,,6511EM,Nijmegen,Gelderland,501769,67,158,2,1,G,onder bod,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
 90000499,Bloemerstraat,17,,6511EM,Nijmegen,Gelderland,405906,123,130,4,3,D,beschikbaar,Lichte bovenwoning aan de Bloemerstraat.,koop,2024-01-15
 90000500,Bloemerstraat,19,,6511EM,Nijmegen,Gelderland,528610,115,,3,2,C,beschikbaar,Sfeervolle woning aan de Bloemerstraat.,koop,2024-01-15
+90000501,Kerkstraat,1,,6031CJ,Nederweert,Limburg,404967,142,,4,3,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Kerkstraat.,koop,2024-01-15
+90000502,Kerkstraat,3,,6031CJ,Nederweert,Limburg,377313,129,63,4,3,A,beschikbaar,"Compacte woning dichtbij het centrum, Kerkstraat.",koop,2024-01-15
+90000503,Kerkstraat,5,,6031CJ,Nederweert,Limburg,308229,82,,2,1,C,beschikbaar,Sfeervolle woning aan de Kerkstraat.,koop,2024-01-15
+90000504,Kerkstraat,7,,6031CJ,Nederweert,Limburg,304520,126,,4,3,B,beschikbaar,Modern herenhuis aan de Kerkstraat.,koop,2024-01-15
+90000505,Kerkstraat,9,,6031CJ,Nederweert,Limburg,285865,113,,3,2,C,onder bod,Ruim appartement met balkon aan de Kerkstraat.,koop,2024-01-15
+90000506,Kerkstraat,11,,6031CJ,Nederweert,Limburg,353829,165,,5,4,B,beschikbaar,Modern herenhuis aan de Kerkstraat.,koop,2024-01-15
+90000507,Kerkstraat,13,,6031CJ,Nederweert,Limburg,333277,102,225,3,2,G,beschikbaar,Ruim appartement met balkon aan de Kerkstraat.,koop,2024-01-15
+90000508,Kerkstraat,15,,6031CJ,Nederweert,Limburg,384365,162,,5,4,B,beschikbaar,Lichte bovenwoning aan de Kerkstraat.,koop,2024-01-15
+90000509,Kerkstraat,17,,6031CJ,Nederweert,Limburg,361485,179,,5,4,D,beschikbaar,Sfeervolle woning aan de Kerkstraat.,koop,2024-01-15
+90000510,Kerkstraat,19,,6031CJ,Nederweert,Limburg,360299,146,,4,3,A,beschikbaar,Lichte bovenwoning aan de Kerkstraat.,koop,2024-01-15
+90000511,Brugstraat,1,,6031EA,Nederweert,Limburg,345939,157,107,5,4,D,beschikbaar,Ruim appartement met balkon aan de Brugstraat.,koop,2024-01-15
+90000512,Brugstraat,3,,6031EA,Nederweert,Limburg,356244,81,195,2,1,C,verkocht onder voorbehoud,Sfeervolle woning aan de Brugstraat.,koop,2024-01-15
+90000513,Brugstraat,5,,6031EA,Nederweert,Limburg,343929,79,112,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Brugstraat.",koop,2024-01-15
+90000514,Brugstraat,7,,6031EA,Nederweert,Limburg,410133,86,,2,1,A,beschikbaar,Modern herenhuis aan de Brugstraat.,koop,2024-01-15
+90000515,Brugstraat,9,,6031EA,Nederweert,Limburg,312868,85,127,2,1,A,beschikbaar,"Compacte woning dichtbij het centrum, Brugstraat.",koop,2024-01-15
+90000516,Brugstraat,11,,6031EA,Nederweert,Limburg,388200,91,63,3,2,G,beschikbaar,"Karakteristiek pand in het centrum, Brugstraat.",koop,2024-01-15
+90000517,Brugstraat,13,,6031EA,Nederweert,Limburg,287358,172,,5,4,A,beschikbaar,Ruim appartement met balkon aan de Brugstraat.,koop,2024-01-15
+90000518,Brugstraat,15,,6031EA,Nederweert,Limburg,234626,98,67,3,2,A,beschikbaar,Ruim appartement met balkon aan de Brugstraat.,koop,2024-01-15
+90000519,Brugstraat,17,,6031EA,Nederweert,Limburg,271726,121,52,4,3,A,beschikbaar,Ruim appartement met balkon aan de Brugstraat.,koop,2024-01-15
+90000520,Brugstraat,19,,6031EA,Nederweert,Limburg,446068,121,127,4,3,E,beschikbaar,"Compacte woning dichtbij het centrum, Brugstraat.",koop,2024-01-15
+90000521,Sint Rochusstraat,1,,6031BK,Nederweert,Limburg,333464,79,250,2,1,B,onder bod,"Compacte woning dichtbij het centrum, Sint Rochusstraat.",koop,2024-01-15
+90000522,Sint Rochusstraat,3,,6031BK,Nederweert,Limburg,247982,59,216,2,1,G,onder bod,Modern herenhuis aan de Sint Rochusstraat.,koop,2024-01-15
+90000523,Sint Rochusstraat,5,,6031BK,Nederweert,Limburg,361237,135,,4,3,C,beschikbaar,Lichte bovenwoning aan de Sint Rochusstraat.,koop,2024-01-15
+90000524,Sint Rochusstraat,7,,6031BK,Nederweert,Limburg,447316,75,190,2,1,D,verkocht onder voorbehoud,Ruim appartement met balkon aan de Sint Rochusstraat.,koop,2024-01-15
+90000525,Sint Rochusstraat,9,,6031BK,Nederweert,Limburg,432145,47,,2,1,D,beschikbaar,Sfeervolle woning aan de Sint Rochusstraat.,koop,2024-01-15
+90000526,Sint Rochusstraat,11,,6031BK,Nederweert,Limburg,374139,46,115,2,1,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Sint Rochusstraat.",koop,2024-01-15
+90000527,Sint Rochusstraat,13,,6031BK,Nederweert,Limburg,349387,129,,4,3,F,beschikbaar,Sfeervolle woning aan de Sint Rochusstraat.,koop,2024-01-15
+90000528,Sint Rochusstraat,15,,6031BK,Nederweert,Limburg,239685,163,,5,4,B,verkocht onder voorbehoud,"Compacte woning dichtbij het centrum, Sint Rochusstraat.",koop,2024-01-15
+90000529,Sint Rochusstraat,17,,6031BK,Nederweert,Limburg,242357,129,,4,3,E,beschikbaar,Ruim appartement met balkon aan de Sint Rochusstraat.,koop,2024-01-15
+90000530,Sint Rochusstraat,19,,6031BK,Nederweert,Limburg,255630,87,,2,1,B,onder bod,"Karakteristiek pand in het centrum, Sint Rochusstraat.",koop,2024-01-15
+90000531,Schoolstraat,1,,6031CS,Nederweert,Limburg,304250,160,,5,4,B,onder bod,Ruim appartement met balkon aan de Schoolstraat.,koop,2024-01-15
+90000532,Schoolstraat,3,,6031CS,Nederweert,Limburg,357643,54,,2,1,F,beschikbaar,Sfeervolle woning aan de Schoolstraat.,koop,2024-01-15
+90000533,Schoolstraat,5,,6031CS,Nederweert,Limburg,440518,179,113,5,4,A,beschikbaar,"Compacte woning dichtbij het centrum, Schoolstraat.",koop,2024-01-15
+90000534,Schoolstraat,7,,6031CS,Nederweert,Limburg,247826,46,41,2,1,D,onder bod,"Karakteristiek pand in het centrum, Schoolstraat.",koop,2024-01-15
+90000535,Schoolstraat,9,,6031CS,Nederweert,Limburg,309116,124,224,4,3,B,beschikbaar,Ruim appartement met balkon aan de Schoolstraat.,koop,2024-01-15
+90000536,Schoolstraat,11,,6031CS,Nederweert,Limburg,264143,126,,4,3,D,beschikbaar,Ruim appartement met balkon aan de Schoolstraat.,koop,2024-01-15
+90000537,Schoolstraat,13,,6031CS,Nederweert,Limburg,262108,71,119,2,1,C,beschikbaar,Lichte bovenwoning aan de Schoolstraat.,koop,2024-01-15
+90000538,Schoolstraat,15,,6031CS,Nederweert,Limburg,348400,131,,4,3,A,beschikbaar,Lichte bovenwoning aan de Schoolstraat.,koop,2024-01-15
+90000539,Schoolstraat,17,,6031CS,Nederweert,Limburg,380387,58,130,2,1,A,onder bod,Lichte bovenwoning aan de Schoolstraat.,koop,2024-01-15
+90000540,Schoolstraat,19,,6031CS,Nederweert,Limburg,373842,65,,2,1,D,beschikbaar,Ruim appartement met balkon aan de Schoolstraat.,koop,2024-01-15
+90000541,Lambertushof,1,,6031EX,Nederweert,Limburg,348350,69,205,2,1,C,beschikbaar,Ruim appartement met balkon aan de Lambertushof.,koop,2024-01-15
+90000542,Lambertushof,3,,6031EX,Nederweert,Limburg,399373,111,,3,2,B,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Lambertushof.",koop,2024-01-15
+90000543,Lambertushof,5,,6031EX,Nederweert,Limburg,426311,73,148,2,1,E,beschikbaar,"Karakteristiek pand in het centrum, Lambertushof.",koop,2024-01-15
+90000544,Lambertushof,7,,6031EX,Nederweert,Limburg,379805,63,,2,1,C,beschikbaar,Modern herenhuis aan de Lambertushof.,koop,2024-01-15
+90000545,Lambertushof,9,,6031EX,Nederweert,Limburg,279588,85,,2,1,B,beschikbaar,Lichte bovenwoning aan de Lambertushof.,koop,2024-01-15
+90000546,Lambertushof,11,,6031EX,Nederweert,Limburg,254969,64,,2,1,D,beschikbaar,"Compacte woning dichtbij het centrum, Lambertushof.",koop,2024-01-15
+90000547,Lambertushof,13,,6031EX,Nederweert,Limburg,427203,62,,2,1,D,onder bod,Modern herenhuis aan de Lambertushof.,koop,2024-01-15
+90000548,Lambertushof,15,,6031EX,Nederweert,Limburg,437294,100,,3,2,E,verkocht onder voorbehoud,Sfeervolle woning aan de Lambertushof.,koop,2024-01-15
+90000549,Lambertushof,17,,6031EX,Nederweert,Limburg,342220,160,,5,4,B,onder bod,Ruim appartement met balkon aan de Lambertushof.,koop,2024-01-15
+90000550,Lambertushof,19,,6031EX,Nederweert,Limburg,338961,121,,4,3,F,beschikbaar,Lichte bovenwoning aan de Lambertushof.,koop,2024-01-15
+90000551,Dorpsstraat,1,,6039AA,Stramproy,Limburg,296789,148,,4,3,E,beschikbaar,"Compacte woning dichtbij het centrum, Dorpsstraat.",koop,2024-01-15
+90000552,Dorpsstraat,3,,6039AA,Stramproy,Limburg,313171,136,102,4,3,E,beschikbaar,Lichte bovenwoning aan de Dorpsstraat.,koop,2024-01-15
+90000553,Dorpsstraat,5,,6039AA,Stramproy,Limburg,345600,99,,3,2,C,beschikbaar,Modern herenhuis aan de Dorpsstraat.,koop,2024-01-15
+90000554,Dorpsstraat,7,,6039AA,Stramproy,Limburg,327585,79,195,2,1,A,verkocht onder voorbehoud,Lichte bovenwoning aan de Dorpsstraat.,koop,2024-01-15
+90000555,Dorpsstraat,9,,6039AA,Stramproy,Limburg,358447,151,,5,4,E,verkocht onder voorbehoud,Modern herenhuis aan de Dorpsstraat.,koop,2024-01-15
+90000556,Dorpsstraat,11,,6039AA,Stramproy,Limburg,330588,135,138,4,3,C,onder bod,Lichte bovenwoning aan de Dorpsstraat.,koop,2024-01-15
+90000557,Dorpsstraat,13,,6039AA,Stramproy,Limburg,209926,113,169,3,2,C,beschikbaar,"Compacte woning dichtbij het centrum, Dorpsstraat.",koop,2024-01-15
+90000558,Dorpsstraat,15,,6039AA,Stramproy,Limburg,321880,65,217,2,1,C,beschikbaar,"Compacte woning dichtbij het centrum, Dorpsstraat.",koop,2024-01-15
+90000559,Dorpsstraat,17,,6039AA,Stramproy,Limburg,220468,67,191,2,1,D,verkocht onder voorbehoud,Lichte bovenwoning aan de Dorpsstraat.,koop,2024-01-15
+90000560,Dorpsstraat,19,,6039AA,Stramproy,Limburg,409249,165,,5,4,B,beschikbaar,"Karakteristiek pand in het centrum, Dorpsstraat.",koop,2024-01-15
+90000561,Broekkantstraat,1,,6039AR,Stramproy,Limburg,364967,122,,4,3,C,beschikbaar,Modern herenhuis aan de Broekkantstraat.,koop,2024-01-15
+90000562,Broekkantstraat,3,,6039AR,Stramproy,Limburg,266073,169,159,5,4,A,beschikbaar,Ruim appartement met balkon aan de Broekkantstraat.,koop,2024-01-15
+90000563,Broekkantstraat,5,,6039AR,Stramproy,Limburg,268485,83,,2,1,B,beschikbaar,Lichte bovenwoning aan de Broekkantstraat.,koop,2024-01-15
+90000564,Broekkantstraat,7,,6039AR,Stramproy,Limburg,238029,180,,6,5,B,beschikbaar,"Compacte woning dichtbij het centrum, Broekkantstraat.",koop,2024-01-15
+90000565,Broekkantstraat,9,,6039AR,Stramproy,Limburg,390316,150,,5,4,A,beschikbaar,Lichte bovenwoning aan de Broekkantstraat.,koop,2024-01-15
+90000566,Broekkantstraat,11,,6039AR,Stramproy,Limburg,213768,133,97,4,3,D,beschikbaar,Ruim appartement met balkon aan de Broekkantstraat.,koop,2024-01-15
+90000567,Broekkantstraat,13,,6039AR,Stramproy,Limburg,238050,104,210,3,2,B,beschikbaar,"Compacte woning dichtbij het centrum, Broekkantstraat.",koop,2024-01-15
+90000568,Broekkantstraat,15,,6039AR,Stramproy,Limburg,225523,125,,4,3,D,beschikbaar,"Compacte woning dichtbij het centrum, Broekkantstraat.",koop,2024-01-15
+90000569,Broekkantstraat,17,,6039AR,Stramproy,Limburg,396369,70,179,2,1,B,verkocht onder voorbehoud,Ruim appartement met balkon aan de Broekkantstraat.,koop,2024-01-15
+90000570,Broekkantstraat,19,,6039AR,Stramproy,Limburg,337694,47,,2,1,A,beschikbaar,Sfeervolle woning aan de Broekkantstraat.,koop,2024-01-15
+90000571,Pastoor Ottenstraat,1,,6039BE,Stramproy,Limburg,372125,51,,2,1,A,onder bod,Ruim appartement met balkon aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000572,Pastoor Ottenstraat,3,,6039BE,Stramproy,Limburg,367452,92,149,3,2,D,beschikbaar,Modern herenhuis aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000573,Pastoor Ottenstraat,5,,6039BE,Stramproy,Limburg,300348,86,,2,1,B,beschikbaar,Modern herenhuis aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000574,Pastoor Ottenstraat,7,,6039BE,Stramproy,Limburg,369209,157,81,5,4,C,beschikbaar,Modern herenhuis aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000575,Pastoor Ottenstraat,9,,6039BE,Stramproy,Limburg,387537,155,194,5,4,A,beschikbaar,"Karakteristiek pand in het centrum, Pastoor Ottenstraat.",koop,2024-01-15
+90000576,Pastoor Ottenstraat,11,,6039BE,Stramproy,Limburg,204919,63,,2,1,B,beschikbaar,Modern herenhuis aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000577,Pastoor Ottenstraat,13,,6039BE,Stramproy,Limburg,239742,45,,2,1,D,beschikbaar,Lichte bovenwoning aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000578,Pastoor Ottenstraat,15,,6039BE,Stramproy,Limburg,341591,170,133,5,4,E,beschikbaar,Ruim appartement met balkon aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000579,Pastoor Ottenstraat,17,,6039BE,Stramproy,Limburg,287409,168,167,5,4,F,beschikbaar,Lichte bovenwoning aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000580,Pastoor Ottenstraat,19,,6039BE,Stramproy,Limburg,420510,138,,4,3,G,beschikbaar,Modern herenhuis aan de Pastoor Ottenstraat.,koop,2024-01-15
+90000581,Wertdijk,1,,6039BS,Stramproy,Limburg,380575,93,129,3,2,E,verkocht onder voorbehoud,"Karakteristiek pand in het centrum, Wertdijk.",koop,2024-01-15
+90000582,Wertdijk,3,,6039BS,Stramproy,Limburg,262517,80,36,2,1,D,onder bod,Modern herenhuis aan de Wertdijk.,koop,2024-01-15
+90000583,Wertdijk,5,,6039BS,Stramproy,Limburg,214694,160,,5,4,A,beschikbaar,"Karakteristiek pand in het centrum, Wertdijk.",koop,2024-01-15
+90000584,Wertdijk,7,,6039BS,Stramproy,Limburg,209667,83,,2,1,A,beschikbaar,Lichte bovenwoning aan de Wertdijk.,koop,2024-01-15
+90000585,Wertdijk,9,,6039BS,Stramproy,Limburg,370075,49,188,2,1,A,verkocht onder voorbehoud,Ruim appartement met balkon aan de Wertdijk.,koop,2024-01-15
+90000586,Wertdijk,11,,6039BS,Stramproy,Limburg,319586,57,,2,1,E,beschikbaar,"Compacte woning dichtbij het centrum, Wertdijk.",koop,2024-01-15
+90000587,Wertdijk,13,,6039BS,Stramproy,Limburg,216543,72,182,2,1,D,beschikbaar,Ruim appartement met balkon aan de Wertdijk.,koop,2024-01-15
+90000588,Wertdijk,15,,6039BS,Stramproy,Limburg,284302,75,,2,1,C,beschikbaar,Ruim appartement met balkon aan de Wertdijk.,koop,2024-01-15
+90000589,Wertdijk,17,,6039BS,Stramproy,Limburg,244053,130,100,4,3,A,beschikbaar,Lichte bovenwoning aan de Wertdijk.,koop,2024-01-15
+90000590,Wertdijk,19,,6039BS,Stramproy,Limburg,403859,79,246,2,1,C,beschikbaar,Ruim appartement met balkon aan de Wertdijk.,koop,2024-01-15
+90000591,Sint Jozefstraat,1,,6039CB,Stramproy,Limburg,274378,46,52,2,1,D,onder bod,Modern herenhuis aan de Sint Jozefstraat.,koop,2024-01-15
+90000592,Sint Jozefstraat,3,,6039CB,Stramproy,Limburg,356309,150,74,5,4,C,beschikbaar,Ruim appartement met balkon aan de Sint Jozefstraat.,koop,2024-01-15
+90000593,Sint Jozefstraat,5,,6039CB,Stramproy,Limburg,294870,105,165,3,2,G,onder bod,"Compacte woning dichtbij het centrum, Sint Jozefstraat.",koop,2024-01-15
+90000594,Sint Jozefstraat,7,,6039CB,Stramproy,Limburg,330420,73,,2,1,D,beschikbaar,Ruim appartement met balkon aan de Sint Jozefstraat.,koop,2024-01-15
+90000595,Sint Jozefstraat,9,,6039CB,Stramproy,Limburg,265898,58,,2,1,B,beschikbaar,"Karakteristiek pand in het centrum, Sint Jozefstraat.",koop,2024-01-15
+90000596,Sint Jozefstraat,11,,6039CB,Stramproy,Limburg,389111,52,59,2,1,A,beschikbaar,Modern herenhuis aan de Sint Jozefstraat.,koop,2024-01-15
+90000597,Sint Jozefstraat,13,,6039CB,Stramproy,Limburg,252417,73,55,2,1,A,beschikbaar,Modern herenhuis aan de Sint Jozefstraat.,koop,2024-01-15
+90000598,Sint Jozefstraat,15,,6039CB,Stramproy,Limburg,319273,169,141,5,4,A,onder bod,Ruim appartement met balkon aan de Sint Jozefstraat.,koop,2024-01-15
+90000599,Sint Jozefstraat,17,,6039CB,Stramproy,Limburg,208413,136,,4,3,A,beschikbaar,Lichte bovenwoning aan de Sint Jozefstraat.,koop,2024-01-15
+90000600,Sint Jozefstraat,19,,6039CB,Stramproy,Limburg,360308,132,105,4,3,C,verkocht onder voorbehoud,Ruim appartement met balkon aan de Sint Jozefstraat.,koop,2024-01-15

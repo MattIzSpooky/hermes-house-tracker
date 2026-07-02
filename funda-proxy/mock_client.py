@@ -30,10 +30,7 @@ class MockFunda:
             needle = location.strip().casefold()
             results = [
                 l for l in results
-                if l.address.city and (
-                    needle in l.address.city.casefold()
-                    or l.address.city.casefold() in needle
-                )
+                if l.address.city and l.address.city.casefold() == needle
             ]
         if min_price is not None:
             results = [

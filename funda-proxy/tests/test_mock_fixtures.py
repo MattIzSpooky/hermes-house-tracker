@@ -3,14 +3,14 @@ from funda.listing import Listing, PriceHistory
 import mock_fixtures
 
 
-def test_loads_500_listings():
-    assert len(mock_fixtures.MOCK_LISTINGS) == 500
+def test_loads_600_listings():
+    assert len(mock_fixtures.MOCK_LISTINGS) == 600
     assert all(isinstance(l, Listing) for l in mock_fixtures.MOCK_LISTINGS)
 
 
 def test_global_ids_match_expected_range():
     ids = {l.global_id for l in mock_fixtures.MOCK_LISTINGS}
-    assert ids == set(range(90000001, 90000501))
+    assert ids == set(range(90000001, 90000601))
 
 
 def test_every_listing_has_a_price_history_entry():

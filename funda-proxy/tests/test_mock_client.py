@@ -20,6 +20,20 @@ def test_search_filters_by_city_exact_match(mock_funda):
     assert all(l.address.city == "Weert" for l in results)
 
 
+def test_search_does_not_cross_match_city_names_that_are_substrings(mock_funda):
+    # "Nederweert" contains "weert" — the filter must not treat that as a match.
+    weert_ids = {l.global_id for l in mock_funda.search("Weert", page=0)} | {
+        l.global_id for l in mock_funda.search("Weert", page=1)
+    } | {l.global_id for l in mock_funda.search("Weert", page=2)} | {
+        l.global_id for l in mock_funda.search("Weert", page=3)
+    }
+    assert mock_funda.search("Weert", page=4) == []
+    nederweert = mock_funda.search("Nederweert")
+    assert len(nederweert) == 15
+    assert all(l.address.city == "Nederweert" for l in nederweert)
+    assert weert_ids.isdisjoint({l.global_id for l in nederweert})
+
+
 def test_search_filters_by_city_case_insensitive(mock_funda):
     results = mock_funda.search("weert")
     assert len(results) == 15
@@ -80,7 +94,7 @@ def test_listing_unknown_id_raises_not_found(mock_funda):
 
 
 def test_price_history_returns_one_to_three_changes_for_any_listing(mock_funda):
-    for global_id in ("90000001", "90000500"):
+    for global_id in ("90000001", "90000600"):
         history = mock_funda.price_history(global_id)
         assert 1 <= len(history.changes) <= 3
 

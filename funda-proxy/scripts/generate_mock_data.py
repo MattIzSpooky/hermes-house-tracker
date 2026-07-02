@@ -115,6 +115,26 @@ CITIES: dict[str, tuple[list[tuple[str, str, str]], int]] = {
         ],
         390000,
     ),
+    "Nederweert": (
+        [
+            ("Kerkstraat", "6031CJ", "Limburg"),
+            ("Brugstraat", "6031EA", "Limburg"),
+            ("Sint Rochusstraat", "6031BK", "Limburg"),
+            ("Schoolstraat", "6031CS", "Limburg"),
+            ("Lambertushof", "6031EX", "Limburg"),
+        ],
+        300000,
+    ),
+    "Stramproy": (
+        [
+            ("Dorpsstraat", "6039AA", "Limburg"),
+            ("Broekkantstraat", "6039AR", "Limburg"),
+            ("Pastoor Ottenstraat", "6039BE", "Limburg"),
+            ("Wertdijk", "6039BS", "Limburg"),
+            ("Sint Jozefstraat", "6039CB", "Limburg"),
+        ],
+        275000,
+    ),
 }
 
 ENERGY_LABELS = ["A", "B", "C", "D", "E", "F", "G"]
