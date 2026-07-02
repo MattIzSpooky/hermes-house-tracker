@@ -50,8 +50,4 @@ export class ScrapingPageComponent implements OnDestroy {
     };
     this.svc.createSession(req);
   }
-
-  seedMockData(): void {
-    this.svc.createSession({ city: 'Mock data', pageLimit: 1 });
-  }
 }
