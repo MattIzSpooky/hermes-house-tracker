@@ -34,7 +34,7 @@
 | Task 6: Frontend — `api.types.ts` geo fields | ⬜ Pending | — |
 | Task 7: Frontend — `ListingMapComponent` | ✅ Complete | 803de4d |
 | Task 8: Frontend — listings page list/map toggle | ✅ Complete | 8b7bef1 |
-| Task 9: Frontend — listing detail page map | ⬜ Pending | — |
+| Task 9: Frontend — listing detail page map | ✅ Complete | bf4e5f2 |
 | Task 10: Frontend — admin backfill trigger | ⬜ Pending | — |
 
 **Resuming after an interruption:** re-read this table. Pick up at the first `⬜ Pending` row — every task before it is done and its commit is on `main`. Each task's own section below is self-contained (files, code, exact commands), so you don't need prior tasks' sections in context to execute it, only their *outputs* (types/signatures), which are listed under each task's "Interfaces" block.
