@@ -26,13 +26,13 @@
 
 | Task | Status | Commit |
 |------|--------|--------|
-| Task 1: Repository — `ListingGeoProjection`, `findGeoByIds`, `findIdsMissingLocation` | ⬜ Pending | — |
-| Task 2: `GeoLocation` DTO + `ListingDto`/`ListingMapper`/OpenAPI wiring + fix all call sites | ⬜ Pending | — |
-| Task 3: `ListingService` — resilient batched geo merge | ⬜ Pending | — |
+| Task 1: Repository — `ListingGeoProjection`, `findGeoByIds`, `findIdsMissingLocation` | ✅ Complete | 5a4b6e5 |
+| Task 2: `GeoLocation` DTO + `ListingDto`/`ListingMapper`/OpenAPI wiring + fix all call sites | ✅ Complete | f912189 |
+| Task 3: `ListingService` — resilient batched geo merge | ✅ Complete | 090eedb |
 | Task 4: Geocoding backfill endpoint | ⬜ Pending | — |
 | Task 5: Frontend — add Leaflet dependency | ⬜ Pending | — |
 | Task 6: Frontend — `api.types.ts` geo fields | ⬜ Pending | — |
-| Task 7: Frontend — `ListingMapComponent` | ⬜ Pending | — |
+| Task 7: Frontend — `ListingMapComponent` | ✅ Complete | 803de4d |
 | Task 8: Frontend — listings page list/map toggle | ⬜ Pending | — |
 | Task 9: Frontend — listing detail page map | ⬜ Pending | — |
 | Task 10: Frontend — admin backfill trigger | ⬜ Pending | — |
