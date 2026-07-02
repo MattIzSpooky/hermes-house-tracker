@@ -23,7 +23,7 @@ class MockFunda:
         page=0,
         **_ignored,
     ) -> list[Listing]:
-        if page > 0:
+        if page > 1:
             return []
         results = list(MOCK_LISTINGS)
         if min_price is not None:

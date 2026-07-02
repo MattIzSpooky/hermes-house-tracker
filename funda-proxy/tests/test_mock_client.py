@@ -17,8 +17,18 @@ def test_search_returns_all_fixtures_by_default(mock_funda):
     }
 
 
+def test_search_page_one_returns_all_fixtures(mock_funda):
+    # The real Java ScrapingWorker caller is 1-based and only ever requests
+    # page=1, so this must return the same fixture set as the default page.
+    results = mock_funda.search("anything", page=1)
+    assert len(results) == 5
+    assert {l.global_id for l in results} == {
+        90000001, 90000002, 90000003, 90000004, 90000005,
+    }
+
+
 def test_search_page_beyond_first_returns_empty(mock_funda):
-    assert mock_funda.search("anything", page=1) == []
+    assert mock_funda.search("anything", page=2) == []
 
 
 def test_search_filters_by_price(mock_funda):
