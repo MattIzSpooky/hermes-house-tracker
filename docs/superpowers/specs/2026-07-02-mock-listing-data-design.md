@@ -40,8 +40,10 @@ mock mode is active.
 - `MockFunda.search()` applies `min_price`/`max_price`/`min_area`/`max_area`
   filters against the fixture set for realism. Location text is not matched
   against city — mock mode is a proxy-wide toggle, not a per-request
-  feature, so any search returns the (filtered) fixture set. Page > 0
-  returns an empty list, mirroring pagination exhaustion.
+  feature, so any search returns the (filtered) fixture set. Pages 0 and 1
+  both return the fixture set (the real scraping caller is 1-based and
+  requests page 1 first); page > 1 returns an empty list, mirroring
+  pagination exhaustion.
 - `docker-compose.yml`: `FUNDA_MOCK_MODE: ${FUNDA_MOCK_MODE:-false}` added to
   the `funda-proxy` service definition, off by default, overridable via a
   local `.env` file without editing the compose file.
