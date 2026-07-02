@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionEntity
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -15,15 +16,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ScrapingQueueService {
 
-    private static final int MAX_PAGE_LIMIT = 5;
-
     private final ScrapingSessionRepository sessionRepository;
     private final ScrapingSessionMapper mapper;
+
+    @Value("${scraping.page-limit.max:5}")
+    private int maxPageLimit = 5;
 
     @Transactional
     public ScrapingSessionDto enqueueSearch(String city, Integer minPrice, Integer maxPrice,
                                             Integer minArea, Integer maxArea, int pageLimit) {
-        int clampedLimit = Math.min(pageLimit, MAX_PAGE_LIMIT);
+        int clampedLimit = Math.min(pageLimit, maxPageLimit);
         String url = buildSearchUrl(city, minPrice, maxPrice, minArea, maxArea, 1);
 
         ScrapingSessionEntity session = new ScrapingSessionEntity();

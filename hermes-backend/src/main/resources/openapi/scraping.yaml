@@ -71,7 +71,6 @@ components:
         pageLimit:
           type: integer
           minimum: 1
-          maximum: 5
 
     ScrapingSessionResponse:
       type: object

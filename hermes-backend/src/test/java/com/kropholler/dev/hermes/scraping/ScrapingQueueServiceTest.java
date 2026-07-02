@@ -54,6 +54,23 @@ class ScrapingQueueServiceTest {
     }
 
     @Test
+    void enqueueSearch_clampsPageLimitToConfiguredMax() {
+        org.springframework.test.util.ReflectionTestUtils.setField(service, "maxPageLimit", 8);
+        ScrapingSessionEntity session = new ScrapingSessionEntity();
+        session.setType(ScrapingSessionType.SEARCH);
+        session.setCity("amsterdam");
+        session.setPageLimit(8);
+        when(repository.save(any())).thenReturn(session);
+
+        service.enqueueSearch("amsterdam", null, null, null, null, 20);
+
+        org.mockito.ArgumentCaptor<ScrapingSessionEntity> captor =
+            org.mockito.ArgumentCaptor.forClass(ScrapingSessionEntity.class);
+        org.mockito.Mockito.verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getPageLimit()).isEqualTo(8);
+    }
+
+    @Test
     void enqueueSearch_setsCorrectType() {
         ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
