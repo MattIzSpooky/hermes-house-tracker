@@ -20,7 +20,7 @@ class ListingApiMapperTest {
         return new ListingDto(id, "funda-1", "https://funda.nl/1",
             "Dorpstraat", "10", "A", "1234AB", "Utrecht", "Utrecht",
             Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-06-01T00:00:00Z"),
-            350000, ListingStatus.FOR_SALE, "Nice house", 90, 5, 3, "B", 120);
+            350000, ListingStatus.FOR_SALE, "Nice house", 90, 5, 3, "B", 120, null);
     }
 
     @Test
@@ -47,7 +47,7 @@ class ListingApiMapperTest {
     void toSummaryResponse_nullStatus_producesNullStatus() {
         ListingDto dto = new ListingDto(UUID.randomUUID(), "f", "u",
             "S", "1", null, "Z", "C", "P",
-            Instant.now(), Instant.now(), null, null, null, null, null, null, null, null);
+            Instant.now(), Instant.now(), null, null, null, null, null, null, null, null, null);
 
         ListingSummaryResponse response = mapper.toSummaryResponse(dto);
 
@@ -71,5 +71,32 @@ class ListingApiMapperTest {
     @Test
     void toOffsetDateTime_returnsNullForNull() {
         assertThat(mapper.toOffsetDateTime(null)).isNull();
+    }
+
+    @Test
+    void toDetailResponse_withLocation_mapsNestedGeoLocation() {
+        UUID id = UUID.randomUUID();
+        ListingDto base = dto(id);
+        ListingDto withLocation = new ListingDto(base.id(), base.fundaId(), base.url(),
+            base.street(), base.houseNumber(), base.houseNumberAddition(), base.zipCode(),
+            base.city(), base.province(), base.firstSeenAt(), base.lastSeenAt(),
+            base.currentPrice(), base.status(), base.description(), base.livingAreaM2(),
+            base.rooms(), base.bedrooms(), base.energyLabel(), base.plotAreaM2(),
+            new GeoLocation(52.3676, 4.9041, 52.3666, 52.3686, 4.9031, 4.9051));
+
+        var response = mapper.toDetailResponse(withLocation);
+
+        assertThat(response.getLocation().getLatitude()).isEqualTo(52.3676);
+        assertThat(response.getLocation().getLongitude()).isEqualTo(4.9041);
+        assertThat(response.getLocation().getBboxLatMin()).isEqualTo(52.3666);
+    }
+
+    @Test
+    void toDetailResponse_nullLocation_producesNullLocation() {
+        ListingDto dto = dto(UUID.randomUUID());
+
+        var response = mapper.toDetailResponse(dto);
+
+        assertThat(response.getLocation()).isNull();
     }
 }

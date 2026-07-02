@@ -18,7 +18,7 @@ class ChatListingCardMapperTest {
         return new ListingDto(UUID.randomUUID(), "funda-1", "https://funda.nl/1",
             "Hoofdstraat", "12", "B", "2000AB", "Rotterdam", "Zuid-Holland",
             Instant.now(), Instant.now(), 420000, status,
-            "Description", 100, 5, 3, "A", 200);
+            "Description", 100, 5, 3, "A", 200, null);
     }
 
     @Test

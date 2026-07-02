@@ -35,7 +35,7 @@ class GetFavouriteListingsToolTest {
     private ListingDto dto(UUID id) {
         return new ListingDto(id, "f", "u", "Straat", "5", null, "1234AB",
             "Rotterdam", "Zuid-Holland", Instant.now(), Instant.now(),
-            400000, ListingStatus.FOR_SALE, null, 100, 5, 3, "A", null);
+            400000, ListingStatus.FOR_SALE, null, 100, 5, 3, "A", null, null);
     }
 
     private GetFavouriteListingsTool tool(AtomicReference<List<ChatListingCard>> holder) {

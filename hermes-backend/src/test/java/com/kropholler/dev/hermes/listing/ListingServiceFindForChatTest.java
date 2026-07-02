@@ -61,8 +61,8 @@ class ListingServiceFindForChatTest {
         }
 
         ListingDto dto = new ListingDto(id, null, null, null, null, null, null, null, null,
-                null, null, price, null, null, null, null, null, null, null);
-        when(mapper.toDto(listing, price)).thenReturn(dto);
+                null, null, price, null, null, null, null, null, null, null, null);
+        when(mapper.toDto(listing, price, null)).thenReturn(dto);
 
 
         return listing;

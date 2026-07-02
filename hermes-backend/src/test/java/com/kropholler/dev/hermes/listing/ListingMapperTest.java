@@ -25,7 +25,7 @@ class ListingMapperTest {
         listing.setFirstSeenAt(Instant.now());
         listing.setLastSeenAt(Instant.now());
 
-        ListingDto dto = mapper.toDto(listing, 275000);
+        ListingDto dto = mapper.toDto(listing, 275000, null);
 
         assertThat(dto.currentPrice()).isEqualTo(275000);
         assertThat(dto.street()).isEqualTo("Kerkstraat");
@@ -38,7 +38,7 @@ class ListingMapperTest {
         listing.setFirstSeenAt(Instant.now());
         listing.setLastSeenAt(Instant.now());
 
-        ListingDto dto = mapper.toDto(listing, null);
+        ListingDto dto = mapper.toDto(listing, null, null);
 
         assertThat(dto.currentPrice()).isNull();
     }
@@ -58,5 +58,28 @@ class ListingMapperTest {
         assertThat(dto.price()).isEqualTo(300000);
         assertThat(dto.status()).isEqualTo("asking_price");
         assertThat(dto.timestamp()).isEqualTo(Instant.parse("2026-02-10T08:00:00Z"));
+    }
+
+    @Test
+    void toDto_withGeoLocation_mapsLocationField() {
+        ListingEntity listing = new ListingEntity();
+        listing.setFirstSeenAt(Instant.now());
+        listing.setLastSeenAt(Instant.now());
+        GeoLocation location = new GeoLocation(52.3676, 4.9041, 52.3666, 52.3686, 4.9031, 4.9051);
+
+        ListingDto dto = mapper.toDto(listing, null, location);
+
+        assertThat(dto.location()).isEqualTo(location);
+    }
+
+    @Test
+    void toDto_nullGeoLocation_producesNullLocation() {
+        ListingEntity listing = new ListingEntity();
+        listing.setFirstSeenAt(Instant.now());
+        listing.setLastSeenAt(Instant.now());
+
+        ListingDto dto = mapper.toDto(listing, null, null);
+
+        assertThat(dto.location()).isNull();
     }
 }

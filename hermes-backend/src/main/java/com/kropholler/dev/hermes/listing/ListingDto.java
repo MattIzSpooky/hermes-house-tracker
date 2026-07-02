@@ -22,5 +22,6 @@ public record ListingDto(
     Integer rooms,
     Integer bedrooms,
     String energyLabel,
-    Integer plotAreaM2
+    Integer plotAreaM2,
+    GeoLocation location
 ) {}

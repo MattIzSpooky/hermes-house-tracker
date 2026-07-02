@@ -32,7 +32,7 @@ class GetPriceHistoryToolTest {
     private ListingDto dto(UUID id) {
         return new ListingDto(id, "f", "u", "Dorpstraat", "10", null, "1234AB",
             "Utrecht", "Utrecht", Instant.now(), Instant.now(),
-            280000, ListingStatus.FOR_SALE, null, 85, 4, 2, "B", null);
+            280000, ListingStatus.FOR_SALE, null, 85, 4, 2, "B", null, null);
     }
 
     private PriceHistoryEntryDto priceEntry(int price) {

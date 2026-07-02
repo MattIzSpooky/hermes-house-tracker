@@ -52,7 +52,7 @@ class ListingSummaryGenerationServiceTest {
         ListingDto listing = new ListingDto(id, "fnd1", "http://x.com",
             "Kerkstraat", "12", "A", "1234AB", "Amsterdam", "Noord-Holland",
             Instant.now(), Instant.now(), 450000, ListingStatus.FOR_SALE,
-            "Beautiful house.", 120, 5, 3, "A", 200);
+            "Beautiful house.", 120, 5, 3, "A", 200, null);
         // entry with non-null price covers L77 true branch
         PriceHistoryEntryDto entry = new PriceHistoryEntryDto(
             UUID.randomUUID(), 450000, "asking_price", null, LocalDate.now(), Instant.now());
@@ -75,7 +75,7 @@ class ListingSummaryGenerationServiceTest {
         // null optionals cover false branches of L57, L63, L67-71; blank description covers L82 second false
         ListingDto listing = new ListingDto(id, "fnd2", "http://x.com",
             "Straat", "1", null, "5678CD", "Utrecht", "Utrecht",
-            Instant.now(), Instant.now(), null, null, "   ", null, null, null, null, null);
+            Instant.now(), Instant.now(), null, null, "   ", null, null, null, null, null, null);
         // empty price history covers L73 false branch
         when(listingService.findById(id)).thenReturn(Optional.of(listing));
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of());
@@ -110,7 +110,7 @@ class ListingSummaryGenerationServiceTest {
         ListingDto listing = new ListingDto(id, "fnd3", "http://x.com",
             "Laan", "99", null, "9999AA", "Rotterdam", "Zuid-Holland",
             Instant.now(), Instant.now(), 300000, ListingStatus.FOR_SALE,
-            null, 80, 4, 2, "B", null);
+            null, 80, 4, 2, "B", null, null);
 
         when(listingService.findById(id)).thenReturn(Optional.of(listing));
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of());
@@ -133,7 +133,7 @@ class ListingSummaryGenerationServiceTest {
         ListingDto listing = new ListingDto(id, "fnd4", "http://x.com",
             "Dorpstraat", "3", null, "1111BB", "Leiden", "Zuid-Holland",
             Instant.now(), Instant.now(), 250000, ListingStatus.FOR_SALE,
-            null, 70, 3, 2, "C", null);
+            null, 70, 3, 2, "C", null, null);
         // null price entry covers L77 false branch ("?")
         PriceHistoryEntryDto nullPriceEntry = new PriceHistoryEntryDto(
             UUID.randomUUID(), null, "asking_price", null, LocalDate.now(), Instant.now());

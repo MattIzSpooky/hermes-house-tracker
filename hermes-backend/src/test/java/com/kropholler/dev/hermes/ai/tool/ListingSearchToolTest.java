@@ -39,7 +39,7 @@ class ListingSearchToolTest {
                 Instant.now(), Instant.now(),
                 450000, ListingStatus.FOR_SALE,
                 "Ruim appartement met balkon.", 85, 4,
-                3, "A", null);
+                3, "A", null, null);
     }
 
     @Test

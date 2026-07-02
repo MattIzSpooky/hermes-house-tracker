@@ -200,6 +200,33 @@ components:
         size:
           type: integer
 
+    GeoLocation:
+      type: object
+      required: [latitude, longitude]
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        bboxLatMin:
+          type: number
+          format: double
+          nullable: true
+        bboxLatMax:
+          type: number
+          format: double
+          nullable: true
+        bboxLonMin:
+          type: number
+          format: double
+          nullable: true
+        bboxLonMax:
+          type: number
+          format: double
+          nullable: true
+
     ListingSummaryResponse:
       type: object
       properties:
@@ -228,6 +255,9 @@ components:
         firstSeenAt:
           type: string
           format: date-time
+        location:
+          $ref: '#/components/schemas/GeoLocation'
+          nullable: true
 
     ListingDetailResponse:
       type: object
@@ -281,6 +311,9 @@ components:
           nullable: true
         energyLabel:
           type: string
+          nullable: true
+        location:
+          $ref: '#/components/schemas/GeoLocation'
           nullable: true
 
     ScrapingSessionResponse:

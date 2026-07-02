@@ -45,7 +45,7 @@ class ListingServiceTest {
 
     private ListingDto dto(UUID id) {
         return new ListingDto(id, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     private PriceHistoryEntryDto historyDto(int price) {
@@ -63,7 +63,7 @@ class ListingServiceTest {
     private void stubToDto(ListingEntity e, ListingDto dto) {
         when(priceHistoryRepository.findFirstByListingIdAndStatusOrderByTimestampDesc(
                 e.getId(), "asking_price")).thenReturn(Optional.empty());
-        when(mapper.toDto(e, null)).thenReturn(dto);
+        when(mapper.toDto(e, null, null)).thenReturn(dto);
     }
 
     // ── findById ──────────────────────────────────────────────────────────────

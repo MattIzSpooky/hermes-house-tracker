@@ -37,7 +37,7 @@ class ReportServiceTest {
             listingId, "12345678", "https://funda.nl/...",
             "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
             now.minus(30, ChronoUnit.DAYS), now, 380000, ListingStatus.FOR_SALE,
-            null, null, null, null, null, null
+            null, null, null, null, null, null, null
         );
 
         List<PriceHistoryEntryDto> history = List.of(
@@ -74,7 +74,7 @@ class ReportServiceTest {
             listingId, "12345678", "https://funda.nl/...",
             "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
             now.minus(5, ChronoUnit.DAYS), now, null, null,
-            null, null, null, null, null, null
+            null, null, null, null, null, null, null
         );
 
         when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
@@ -92,7 +92,7 @@ class ReportServiceTest {
             listingId, "12345678", "https://funda.nl/...",
             "Teststraat", "1", null, "1234AB", "Amsterdam", "Noord-Holland",
             now.minus(10, ChronoUnit.DAYS), now, 400000, ListingStatus.SOLD,
-            null, null, null, null, null, null
+            null, null, null, null, null, null, null
         );
 
         when(listingService.findById(listingId)).thenReturn(Optional.of(listing));

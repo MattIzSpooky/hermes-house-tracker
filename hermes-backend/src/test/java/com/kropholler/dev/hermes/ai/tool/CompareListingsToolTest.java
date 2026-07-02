@@ -31,7 +31,7 @@ class CompareListingsToolTest {
     private ListingDto dto(UUID id, String street) {
         return new ListingDto(id, "f", "u", street, "1", null, "1234AB",
             "Amsterdam", "Noord-Holland", Instant.now(), Instant.now(),
-            300000, ListingStatus.FOR_SALE, null, 80, 4, 2, "B", null);
+            300000, ListingStatus.FOR_SALE, null, 80, 4, 2, "B", null, null);
     }
 
     private CompareListingsTool tool(AtomicReference<List<ChatListingCard>> holder) {
@@ -108,7 +108,7 @@ class CompareListingsToolTest {
         // null price/bedrooms/rooms/livingAreaM2/energyLabel/status cover the "unknown" branches on L63-69
         ListingDto sparse = new ListingDto(id, "f", "u", "Sparsestraat", "3", "A",
             "5678CD", "Utrecht", "Utrecht", Instant.now(), Instant.now(),
-            null, null, null, null, null, null, null, 50);
+            null, null, null, null, null, null, null, 50, null);
         ChatListingCard card = new ChatListingCard(id, "Sparsestraat", "3", "A", "Utrecht", "Utrecht", null, null, null, null, null);
 
         when(listingService.findByAddress("Sparsestraat", "3", "Utrecht")).thenReturn(Optional.of(sparse));

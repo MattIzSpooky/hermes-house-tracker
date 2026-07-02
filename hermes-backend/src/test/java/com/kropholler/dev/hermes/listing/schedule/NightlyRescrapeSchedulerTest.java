@@ -36,7 +36,7 @@ class NightlyRescrapeSchedulerTest {
         return new ListingDto(UUID.randomUUID(), "funda-1", url,
             "Straat", "1", null, "1000AA", city, "Noord-Holland",
             Instant.now(), Instant.now(), 250000, ListingStatus.FOR_SALE,
-            null, 70, 3, 2, "B", null);
+            null, 70, 3, 2, "B", null, null);
     }
 
     @Test

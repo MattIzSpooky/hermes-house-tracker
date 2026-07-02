@@ -38,7 +38,7 @@ class ListingControllerTest {
         return new ListingDto(id, "funda-1", "https://funda.nl/1",
             "Dorpstraat", "10", null, "1234AB", "Utrecht", "Utrecht",
             Instant.now(), Instant.now(), 300000, ListingStatus.FOR_SALE,
-            null, 80, 4, 2, "A", null);
+            null, 80, 4, 2, "A", null, null);
     }
 
     @Test

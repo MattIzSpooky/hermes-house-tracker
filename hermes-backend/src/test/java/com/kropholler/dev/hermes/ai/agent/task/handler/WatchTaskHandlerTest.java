@@ -149,7 +149,7 @@ class WatchTaskHandlerTest {
         ListingDto noPrice = new ListingDto(
             UUID.randomUUID(), "funda1", "http://x.com", "Kerkstraat", "5", null,
             "1234AB", "Utrecht", "Utrecht", Instant.now().minusSeconds(60), Instant.now(),
-            null, ListingStatus.FOR_SALE, null, 90, 3, 2, null, null);
+            null, ListingStatus.FOR_SALE, null, 90, 3, 2, null, null, null);
         when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
             any(Boolean.class), any(), any(), any())).thenReturn(List.of(noPrice));
 
@@ -203,7 +203,8 @@ class WatchTaskHandlerTest {
             5,                      // rooms
             3,                      // bedrooms
             null,                   // energyLabel
-            null                    // plotAreaM2
+            null,                   // plotAreaM2
+            null                    // location
         );
     }
 }

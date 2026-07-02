@@ -30,7 +30,7 @@ class FindPriceDropToolTest {
     private ListingDto dto(UUID id) {
         return new ListingDto(id, "f", "u", "Straat", "1", null, "1234AB",
             "Utrecht", "Utrecht", Instant.now(), Instant.now(),
-            280000, ListingStatus.FOR_SALE, null, 90, 4, 2, "B", null);
+            280000, ListingStatus.FOR_SALE, null, 90, 4, 2, "B", null, null);
     }
 
     private FindPriceDropTool tool(AtomicReference<List<ChatListingCard>> holder) {
@@ -100,7 +100,7 @@ class FindPriceDropToolTest {
         UUID id = UUID.randomUUID();
         ListingDto withAddition = new ListingDto(id, "f", "u", "Straat", "1", "B", "1234AB",
             "Utrecht", "Utrecht", Instant.now(), Instant.now(),
-            280000, ListingStatus.FOR_SALE, null, 90, 4, 2, "B", null);
+            280000, ListingStatus.FOR_SALE, null, 90, 4, 2, "B", null, null);
         PriceDropResult drop = new PriceDropResult(withAddition, 300000, 280000, 6.67);
         ChatListingCard card = new ChatListingCard(id, "Straat", "1", "B", "Utrecht", "Utrecht", 280000, 2, 90, "B", "FOR_SALE");
 

@@ -169,7 +169,7 @@ public class ListingService {
                 .findFirstByListingIdAndStatusOrderByTimestampDesc(l.getId(), "asking_price")
                 .map(PriceHistoryEntryEntity::getPrice)
                 .orElse(null);
-        return mapper.toDto(l, currentPrice);
+        return mapper.toDto(l, currentPrice, null);
     }
 
 

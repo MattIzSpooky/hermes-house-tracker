@@ -10,7 +10,7 @@ import org.mapstruct.Mapper;
 interface ListingMapper {
 
     @BeanMapping(ignoreUnmappedSourceProperties = {"lastUpdatedAt", "deletedAt"})
-    ListingDto toDto(ListingEntity listing, Integer currentPrice);
+    ListingDto toDto(ListingEntity listing, Integer currentPrice, GeoLocation location);
 
     @BeanMapping(ignoreUnmappedSourceProperties = {"listingId"})
     PriceHistoryEntryDto toDto(PriceHistoryEntryEntity entry);

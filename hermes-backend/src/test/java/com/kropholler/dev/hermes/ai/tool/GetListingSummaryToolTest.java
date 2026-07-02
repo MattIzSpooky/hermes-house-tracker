@@ -32,7 +32,7 @@ class GetListingSummaryToolTest {
     private ListingDto dto(UUID id, String description) {
         return new ListingDto(id, "f", "u", "Hoofdstraat", "7", null, "5000AB",
             "Tilburg", "Noord-Brabant", Instant.now(), Instant.now(),
-            250000, ListingStatus.FOR_SALE, description, 75, 4, 2, "C", null);
+            250000, ListingStatus.FOR_SALE, description, 75, 4, 2, "C", null, null);
     }
 
     @Test
