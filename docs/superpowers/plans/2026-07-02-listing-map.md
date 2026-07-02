@@ -33,7 +33,7 @@
 | Task 5: Frontend — add Leaflet dependency | ⬜ Pending | — |
 | Task 6: Frontend — `api.types.ts` geo fields | ⬜ Pending | — |
 | Task 7: Frontend — `ListingMapComponent` | ✅ Complete | 803de4d |
-| Task 8: Frontend — listings page list/map toggle | ⬜ Pending | — |
+| Task 8: Frontend — listings page list/map toggle | ✅ Complete | 8b7bef1 |
 | Task 9: Frontend — listing detail page map | ⬜ Pending | — |
 | Task 10: Frontend — admin backfill trigger | ⬜ Pending | — |
 
