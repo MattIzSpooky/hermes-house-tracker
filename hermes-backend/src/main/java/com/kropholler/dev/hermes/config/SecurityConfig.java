@@ -3,7 +3,6 @@ package com.kropholler.dev.hermes.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@Import(JacksonConfig.class)
 public class SecurityConfig {
 
     @Bean
@@ -42,8 +40,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    AccessDeniedHandler accessDeniedHandler(ObjectMapper objectMapper) {
-        return new ProblemDetailAccessDeniedHandler(objectMapper);
+    AccessDeniedHandler accessDeniedHandler() {
+        return new ProblemDetailAccessDeniedHandler(new ObjectMapper());
     }
 
     @Bean
