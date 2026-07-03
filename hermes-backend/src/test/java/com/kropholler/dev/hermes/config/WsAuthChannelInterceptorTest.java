@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -47,6 +48,11 @@ class WsAuthChannelInterceptorTest {
         if (headerValue != null) {
             accessor.addNativeHeader("Authorization", headerValue);
         }
+        // Real STOMP frames stay mutable when decoded (StompDecoder calls setLeaveMutable(true)
+        // before building the message), which is what lets our interceptor mutate the same
+        // accessor instance StompSubProtocolHandler attaches its userChangeCallback to. Without
+        // this, getMessageHeaders() would freeze the message, which no real CONNECT frame does.
+        accessor.setLeaveMutable(true);
         return MessageBuilder.createMessage(new byte[0], accessor.getMessageHeaders());
     }
 
@@ -60,9 +66,11 @@ class WsAuthChannelInterceptorTest {
         UUID subject = UUID.randomUUID();
         when(jwtDecoder.decode("valid-token")).thenReturn(validJwt(subject));
 
-        Message<?> result = interceptor.preSend(connectFrameWithAuthHeader("Bearer valid-token"), channel);
+        Message<byte[]> connectFrame = connectFrameWithAuthHeader("Bearer valid-token");
+        Message<?> result = interceptor.preSend(connectFrame, channel);
 
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(result);
+        assertThat(result).isSameAs(connectFrame);
+        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(result, StompHeaderAccessor.class);
         JwtAuthenticationToken principal = (JwtAuthenticationToken) accessor.getUser();
         assertThat(principal).isNotNull();
         assertThat(principal.getName()).isEqualTo(subject.toString());
