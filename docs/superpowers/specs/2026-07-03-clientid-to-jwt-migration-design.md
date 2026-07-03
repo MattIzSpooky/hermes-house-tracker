@@ -24,11 +24,13 @@ On the frontend, every service (`favorites.service.ts`, `notifications.service.t
 
 ## Database
 
-Two Flyway migrations:
+Pre-launch data isn't worth preserving here — every existing row's identity column holds a meaningless anonymous browser UUID anyway. Both migrations truncate first, so `user_id` can be declared `NOT NULL` everywhere rather than nullable-with-orphaned-data.
 
 ### `V12__rename_client_id_to_user_id.sql`
 
 ```sql
+TRUNCATE TABLE notifications, agent_tasks, favorites CASCADE;
+
 ALTER TABLE favorites RENAME COLUMN client_id TO user_id;
 ALTER INDEX idx_favorites_client_id RENAME TO idx_favorites_user_id;
 ALTER TABLE favorites RENAME CONSTRAINT uq_favorites_client_listing TO uq_favorites_user_listing;
@@ -39,16 +41,18 @@ ALTER INDEX idx_notifications_client_id_created RENAME TO idx_notifications_user
 ALTER TABLE agent_tasks RENAME COLUMN client_id TO user_id;
 ```
 
-No data migration beyond the rename — pre-launch rows keep whatever UUID they had; old anonymous `client_id` values become orphaned-but-harmless once identity is JWT-based, not worth a cleanup step.
+`notifications.task_id` has an `ON DELETE CASCADE` FK to `agent_tasks(id)`, so `agent_tasks` must be truncated together with (or `CASCADE`d into) `notifications` — listing `notifications` first and using `CASCADE` handles this in one statement regardless of ordering. `user_id` stays `NOT NULL` on all three tables (it already was before the rename).
 
 ### `V13__add_user_id_to_chat_messages.sql`
 
 ```sql
-ALTER TABLE chat_messages ADD COLUMN user_id UUID;
+TRUNCATE TABLE chat_messages;
+
+ALTER TABLE chat_messages ADD COLUMN user_id UUID NOT NULL;
 CREATE INDEX idx_chat_messages_user_id ON chat_messages(user_id);
 ```
 
-Nullable, since existing rows have no owner. `session_id` is untouched.
+Truncating first lets `user_id` be `NOT NULL` from the start rather than nullable — every message from this point on has a real owner. `session_id` is untouched.
 
 ---
 
@@ -69,7 +73,7 @@ Nullable, since existing rows have no owner. `session_id` is untouched.
 
 ### Chat
 
-- `ChatMessageEntity` gains `userId` (nullable `UUID`).
+- `ChatMessageEntity` gains `userId` (`UUID`, non-null — the table is truncated in `V13` specifically so this can be a hard requirement from day one).
 - `ChatMessageRequest` drops its `clientId` field entirely.
 - `AiChatService.startStream(UUID sessionId, String userMessage, UUID userId)` — drops the `clientId` parameter and the `effectiveClientId` fallback (`clientId != null ? clientId : sessionId`) entirely; identity always comes from the STOMP principal now, never from the request.
 - `AiChatService.saveUserMessage`/`saveAssistantMessage` gain a `userId` parameter to stamp onto each saved message.
