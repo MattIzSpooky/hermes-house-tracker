@@ -20,8 +20,15 @@
         routerLinkActive="bg-slate-700/60 text-white"
         class="text-slate-300 hover:text-white hover:bg-slate-700/40 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
       >Watches</a>
-      <div class="ml-auto">
+      <div class="ml-auto flex items-center gap-3">
         <app-notification-bell />
+        @if (username) {
+          <span class="text-slate-300 text-sm">{{ username }}</span>
+          <button
+            (click)="logout()"
+            class="text-slate-300 hover:text-white hover:bg-slate-700/40 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
+          >Log out</button>
+        }
       </div>
     </div>
   </div>
