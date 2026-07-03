@@ -2,13 +2,14 @@ import { Injectable, signal, computed, inject, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { catchError, of } from 'rxjs';
+import Keycloak from 'keycloak-js';
 import { NotificationResponse } from './api.types';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService implements OnDestroy {
   private readonly http = inject(HttpClient);
+  private readonly keycloak = inject(Keycloak);
 
-  private readonly clientId: string;
   private readonly stompClient: Client;
   private subscription?: StompSubscription;
 
@@ -17,11 +18,13 @@ export class NotificationsService implements OnDestroy {
   readonly unreadCount = computed(() => this._notifications().filter(n => !n.read).length);
 
   constructor() {
-    this.clientId = localStorage.getItem('hermes-chat-session') ?? crypto.randomUUID();
-
     this.stompClient = new Client({
       brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
       reconnectDelay: 5000,
+      beforeConnect: async () => {
+        await this.keycloak.updateToken(30);
+        this.stompClient.connectHeaders = { Authorization: `Bearer ${this.keycloak.token}` };
+      },
       onConnect: () => this.subscribeAndLoad(),
     });
     this.stompClient.activate();
@@ -35,7 +38,7 @@ export class NotificationsService implements OnDestroy {
     this.loadNotifications();
     this.subscription?.unsubscribe();
     this.subscription = this.stompClient.subscribe(
-      `/topic/notifications/${this.clientId}`,
+      '/user/queue/notifications',
       (msg: IMessage) => {
         const incoming = JSON.parse(msg.body) as NotificationResponse;
         this._notifications.update(prev => [incoming, ...prev]);
@@ -44,7 +47,7 @@ export class NotificationsService implements OnDestroy {
   }
 
   private loadNotifications(): void {
-    this.http.get<NotificationResponse[]>(`/api/notifications?clientId=${this.clientId}`)
+    this.http.get<NotificationResponse[]>('/api/notifications')
       .pipe(
         catchError(() => of([]))
       )

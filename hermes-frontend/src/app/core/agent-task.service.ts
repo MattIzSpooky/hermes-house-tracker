@@ -6,10 +6,9 @@ import { AgentTaskResponse } from './api.types';
 @Injectable({ providedIn: 'root' })
 export class AgentTaskService {
   private readonly http = inject(HttpClient);
-  private readonly clientId = localStorage.getItem('hermes-chat-session') ?? crypto.randomUUID();
 
   getTasks(): Observable<AgentTaskResponse[]> {
-    return this.http.get<AgentTaskResponse[]>(`/api/agent-tasks?clientId=${this.clientId}`);
+    return this.http.get<AgentTaskResponse[]>('/api/agent-tasks');
   }
 
   deleteTask(id: string): Observable<void> {

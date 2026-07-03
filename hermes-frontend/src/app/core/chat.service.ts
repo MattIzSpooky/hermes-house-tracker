@@ -1,5 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import Keycloak from 'keycloak-js';
 import { ChatListingCard, ResultFrame, TokenFrame } from './api.types';
 
 export interface ChatMessage {
@@ -10,6 +11,8 @@ export interface ChatMessage {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
+  private readonly keycloak = inject(Keycloak);
+
   readonly sessionId: string;
 
   private readonly client: Client;
@@ -28,6 +31,10 @@ export class ChatService {
     this.client = new Client({
       brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
       reconnectDelay: 5000,
+      beforeConnect: async () => {
+        await this.keycloak.updateToken(30);
+        this.client.connectHeaders = { Authorization: `Bearer ${this.keycloak.token}` };
+      },
       onConnect: () => this.subscribe(),
     });
 
@@ -84,7 +91,7 @@ export class ChatService {
     this._isStreaming.set(true);
     this.client.publish({
       destination: '/app/chat',
-      body: JSON.stringify({ sessionId: this.sessionId, clientId: this.sessionId, message: text }),
+      body: JSON.stringify({ sessionId: this.sessionId, message: text }),
     });
   }
 

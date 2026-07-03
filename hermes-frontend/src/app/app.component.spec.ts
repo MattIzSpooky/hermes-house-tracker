@@ -5,12 +5,19 @@ import Keycloak from 'keycloak-js';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  let keycloakStub: { tokenParsed: Record<string, unknown> | undefined; logout: jasmine.Spy };
+  let keycloakStub: {
+    tokenParsed: Record<string, unknown> | undefined;
+    token: string | undefined;
+    logout: jasmine.Spy;
+    updateToken: jasmine.Spy;
+  };
 
   beforeEach(async () => {
     keycloakStub = {
       tokenParsed: undefined,
+      token: 'fake-token',
       logout: jasmine.createSpy('logout'),
+      updateToken: jasmine.createSpy('updateToken').and.resolveTo(false),
     };
 
     await TestBed.configureTestingModule({
