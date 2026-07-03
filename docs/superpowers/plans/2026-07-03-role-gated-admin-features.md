@@ -628,7 +628,7 @@ git commit -m "feat(backend): restrict scraping-related endpoints to the admin r
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/notification/NotificationControllerTest.java`
 
 **Interfaces:**
-- Produces: `AgentTaskService.delete(UUID taskId, UUID userId)` (signature changed — was `delete(UUID taskId)`), throwing `ResponseStatusException(HttpStatus.NOT_FOUND, ...)` if the task doesn't exist or isn't owned by `userId`. `NotificationService.markRead(UUID notificationId, UUID userId)` (signature changed — was `markRead(UUID notificationId)`), same 404 behavior.
+- Produces: `AgentTaskService.delete(UUID taskId, UUID userId)` (signature changed — was `delete(UUID taskId)`), throwing `ResponseStatusException(HttpStatus.NOT_FOUND, ...)` if the task doesn't exist, or `org.springframework.security.access.AccessDeniedException` if it exists but isn't owned by `userId`. `NotificationService.markRead(UUID notificationId, UUID userId)` (signature changed — was `markRead(UUID notificationId)`), same 404-if-missing/`AccessDeniedException`-if-not-owned split. Both `AccessDeniedException`s are caught by the same `ProblemDetailAccessDeniedHandler` from Task 1, since Spring Security's `ExceptionTranslationFilter` intercepts any `AccessDeniedException` propagating up through the filter chain regardless of whether it came from `@PreAuthorize` or was thrown manually in application code.
 
 - [ ] **Step 1: Write the failing tests for `AgentTaskService.delete`**
 
@@ -662,7 +662,7 @@ In `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTa
     }
 
     @Test
-    void delete_throws404WhenNotOwnedByCaller() {
+    void delete_throws403WhenNotOwnedByCaller() {
         UUID ownerId = UUID.randomUUID();
         UUID callerId = UUID.randomUUID();
         UUID taskId = UUID.randomUUID();
@@ -671,8 +671,7 @@ In `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTa
         when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
 
         assertThatThrownBy(() -> service.delete(taskId, callerId))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-            .hasMessageContaining("Agent task " + taskId + " not found");
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(repo, org.mockito.Mockito.never()).delete(any());
     }
@@ -685,7 +684,7 @@ Expected: FAIL — compilation error, `service.delete(taskId, userId)` doesn't m
 
 - [ ] **Step 3: Update `AgentTaskService.delete`**
 
-In `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskService.java`, add imports `import org.springframework.http.HttpStatus;` and `import org.springframework.web.server.ResponseStatusException;`, then replace:
+In `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskService.java`, add imports `import org.springframework.http.HttpStatus;`, `import org.springframework.security.access.AccessDeniedException;`, and `import org.springframework.web.server.ResponseStatusException;`, then replace:
 
 ```java
     @Transactional
@@ -700,9 +699,11 @@ with:
     @Transactional
     public void delete(UUID taskId, UUID userId) {
         AgentTaskEntity task = agentTaskRepository.findById(taskId)
-            .filter(t -> t.getUserId().equals(userId))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Agent task " + taskId + " not found"));
+        if (!task.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not authorized to delete this agent task");
+        }
         agentTaskRepository.delete(task);
     }
 ```
@@ -710,7 +711,7 @@ with:
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `mvn test -Dtest=AgentTaskServiceTest -f hermes-backend/pom.xml`
-Expected: PASS, 9 tests, 0 failures.
+Expected: PASS, 11 tests, 0 failures.
 
 - [ ] **Step 5: Update `AgentTaskController.deleteAgentTask`**
 
@@ -864,7 +865,7 @@ In `hermes-backend/src/test/java/com/kropholler/dev/hermes/notification/Notifica
     }
 
     @Test
-    void markRead_throws404WhenNotOwnedByCaller() {
+    void markRead_throws403WhenNotOwnedByCaller() {
         UUID ownerId = UUID.randomUUID();
         UUID callerId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
@@ -874,8 +875,7 @@ In `hermes-backend/src/test/java/com/kropholler/dev/hermes/notification/Notifica
         when(repo.findById(notificationId)).thenReturn(Optional.of(entity));
 
         assertThatThrownBy(() -> service.markRead(notificationId, callerId))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
-            .hasMessageContaining("Notification " + notificationId + " not found");
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(repo, never()).save(any());
     }
@@ -885,7 +885,7 @@ Add `import static org.assertj.core.api.Assertions.assertThatThrownBy;` to this 
 
 - [ ] **Step 11: Update `NotificationService.markRead`**
 
-In `hermes-backend/src/main/java/com/kropholler/dev/hermes/notification/NotificationService.java`, add imports `import org.springframework.http.HttpStatus;` and `import org.springframework.web.server.ResponseStatusException;`, then replace:
+In `hermes-backend/src/main/java/com/kropholler/dev/hermes/notification/NotificationService.java`, add imports `import org.springframework.http.HttpStatus;`, `import org.springframework.security.access.AccessDeniedException;`, and `import org.springframework.web.server.ResponseStatusException;`, then replace:
 
 ```java
     @Transactional
@@ -903,9 +903,11 @@ with:
     @Transactional
     public void markRead(UUID notificationId, UUID userId) {
         NotificationEntity notification = notificationRepository.findById(notificationId)
-            .filter(n -> n.getUserId().equals(userId))
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Notification " + notificationId + " not found"));
+        if (!notification.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not authorized to mark this notification read");
+        }
         notification.setRead(true);
         notificationRepository.save(notification);
     }
@@ -1218,4 +1220,4 @@ curl -s -o /dev/null -w "%{http_code}\n" -X DELETE http://localhost:8080/api/age
   -H "Authorization: Bearer <testadmin-token>"
 ```
 
-Expected: `404`. Confirm the watch still appears when `testuser` lists their watches afterward (untouched). Repeat the same check for a notification: as `testuser`, trigger a notification, note its id, then as `testadmin` attempt `PATCH /api/notifications/{id}/read` — expect `404`, and confirm the notification is still unread for `testuser`.
+Expected: `403` (the watch genuinely exists, `testadmin` just isn't its owner — not a 404). Confirm the watch still appears when `testuser` lists their watches afterward (untouched). Repeat the same check for a notification: as `testuser`, trigger a notification, note its id, then as `testadmin` attempt `PATCH /api/notifications/{id}/read` — expect `403`, and confirm the notification is still unread for `testuser`. Finally, confirm a request against a genuinely nonexistent id (e.g. `DELETE /api/agent-tasks/{random-uuid}`) still returns `404`, proving the two failure modes are actually distinguished.
