@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,5 +87,19 @@ class AgentTaskControllerTest {
             .andExpect(status().isNoContent());
 
         verify(agentTaskService).delete(eq(taskId), eq(callerId));
+    }
+
+    @Test
+    void deleteAgentTask_ownershipDenied_returns403ProblemDetail() throws Exception {
+        UUID taskId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
+
+        doThrow(new AccessDeniedException("Not authorized to delete this agent task"))
+            .when(agentTaskService).delete(any(), any());
+
+        mockMvc.perform(delete("/api/agent-tasks/{id}", taskId)
+                .with(jwt().jwt(builder -> builder.subject(callerId.toString()))))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.status").value(403));
     }
 }
