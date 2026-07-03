@@ -18,6 +18,11 @@ export class AppComponent {
     return this.keycloak.tokenParsed?.['preferred_username'];
   }
 
+  get isAdmin(): boolean {
+    const roles = this.keycloak.tokenParsed?.['realm_access'] as { roles?: string[] } | undefined;
+    return roles?.roles?.includes('admin') ?? false;
+  }
+
   logout(): void {
     // The chat session id lives in localStorage, so it survives across different users
     // logging into the same browser. Clear it so the next login starts a fresh conversation

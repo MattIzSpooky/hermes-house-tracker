@@ -60,4 +60,16 @@ describe('AppComponent', () => {
 
     expect(localStorage.getItem('hermes-chat-session')).toBeNull();
   });
+
+  it('should report isAdmin false when tokenParsed has no admin realm role', () => {
+    keycloakStub.tokenParsed = { realm_access: { roles: ['user'] } };
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.isAdmin).toBeFalse();
+  });
+
+  it('should report isAdmin true when tokenParsed has the admin realm role', () => {
+    keycloakStub.tokenParsed = { realm_access: { roles: ['admin'] } };
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.isAdmin).toBeTrue();
+  });
 });

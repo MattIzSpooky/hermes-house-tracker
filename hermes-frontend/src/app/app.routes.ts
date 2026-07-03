@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
+import { adminGuard } from './core/admin.guard';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/listings', pathMatch: 'full' },
@@ -21,7 +22,7 @@ export const routes: Routes = [
   },
   {
     path: 'scraping',
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./pages/scraping/scraping-page.component').then(
         m => m.ScrapingPageComponent
