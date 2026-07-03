@@ -4,13 +4,13 @@
 
 **Goal:** Restrict scraping-related endpoints to the `admin` realm role, and close the object-level ownership gap on `deleteAgentTask`/`markNotificationRead` flagged during phase 3's review.
 
-**Architecture:** `SecurityConfig` gains `@EnableMethodSecurity` and a custom `AccessDeniedHandler` (so `@PreAuthorize` denials return the same `ProblemDetail` JSON shape as every other error). `ScrapingSessionController` and `ListingController`'s scraping-related methods get `@PreAuthorize("hasRole('ADMIN')")`. `AgentTaskService.delete`/`NotificationService.markRead` gain a `userId` parameter and 404 if the resource isn't found or isn't owned by that user. Frontend gets an `adminGuard` for the `/scraping` route and hides the Scraping nav link for non-admins (UX only — the backend is the real boundary).
+**Architecture:** `SecurityConfig` gains `@EnableMethodSecurity` and a custom `AccessDeniedHandler` (so `@PreAuthorize` denials return the same `ProblemDetail` JSON shape as every other error). `ScrapingSessionController` and `ListingController`'s scraping-related methods get `@PreAuthorize("hasRole('ADMIN')")`. `AgentTaskService.delete`/`NotificationService.markRead` gain a `userId` parameter, throwing 404 if the resource isn't found and 403 (`AccessDeniedException`) if it exists but isn't owned by that user. Frontend gets an `adminGuard` for the `/scraping` route and hides the Scraping nav link for non-admins (UX only — the backend is the real boundary).
 
 **Tech Stack:** Spring Security method security (`@PreAuthorize`), Spring Boot 4.0.6, Angular 22, `keycloak-angular`.
 
 ## Global Constraints
 
-- A denied ownership check returns 404, not 403 — consistent with this codebase's existing pattern of not confirming another resource's existence to a caller not entitled to see it.
+- A denied ownership check returns 403 (via `AccessDeniedException`), not 404 — a genuinely-missing id still returns 404, but an id that exists and simply isn't owned by the caller is a distinct failure mode and must not be conflated with "not found."
 - `@PreAuthorize` denials must return the same `ProblemDetail` JSON shape (403) as every other error in this API, not Spring Security's default plain-text page.
 - No admin "see all users" screen or Keycloak Admin API integration — explicitly out of scope, dropped from the original phase 4 plan.
 - Search-related endpoints (`getListings`, `getListing`, `getListingSummary`, `requestListingSummaryGeneration`) stay open to every authenticated user — only scraping-triggering/status endpoints are admin-gated.
