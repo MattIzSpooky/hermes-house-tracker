@@ -16,6 +16,8 @@ services:
       SPRING_ARTEMIS_BROKER_URL: tcp://activemq:61616
       SPRING_ARTEMIS_USER: artemis
       SPRING_ARTEMIS_PASSWORD: artemis
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/hermes/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/hermes
     depends_on:
       postgres:
         condition: service_healthy
@@ -25,6 +27,25 @@ services:
         condition: service_started
       activemq:
         condition: service_healthy
+      keycloak:
+        condition: service_healthy
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev", "--import-realm"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: http://localhost:8081
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/hermes HTTP/1.1\\r\\nhost: localhost\\r\\n\\r\\n' >&3 && grep -q 'hermes' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
   activemq:
     image: apache/activemq-artemis:2.40.0
     ports:
