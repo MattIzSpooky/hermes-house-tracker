@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
     ResponseEntity<ProblemDetail> handleResponseStatus(ResponseStatusException ex) {
         ProblemDetail body = ProblemDetail.forStatus(ex.getStatusCode());
         body.setTitle(ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString());
-        body.setDetail(ex.getMessage());
+        body.setDetail(ex.getReason() != null ? ex.getReason() : ex.getMessage());
         return ResponseEntity.status(ex.getStatusCode()).body(body);
     }
 
