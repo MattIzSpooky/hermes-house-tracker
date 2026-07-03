@@ -80,7 +80,7 @@ class AiChatServiceTest {
     void startStream_usesGivenUserId() {
         UUID sessionId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
+        when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId)).thenReturn(List.of());
         stubStream(Flux.just("Hi"));
 
         AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "hello");
@@ -92,15 +92,16 @@ class AiChatServiceTest {
     @Test
     void startStream_historyWithUserAndAssistantRoles_mapsBoth() {
         UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         ChatMessageEntity userMsg = message(sessionId, "USER", "Find me a house");
         // ASSISTANT content with a URL — sanitizeHistory should strip the funda.nl sentence
         ChatMessageEntity assistantMsg = message(sessionId, "ASSISTANT",
                 "I checked funda.nl and found one. It looks great!");
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId))
+        when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId))
                 .thenReturn(List.of(userMsg, assistantMsg));
         stubStream(Flux.just("reply"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, UUID.randomUUID(), "more info");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "more info");
 
         assertThat(handle).isNotNull();
     }
@@ -108,13 +109,31 @@ class AiChatServiceTest {
     @Test
     void startStream_unknownRole_throwsIllegalStateException() {
         UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         ChatMessageEntity badMsg = message(sessionId, "SYSTEM", "injected");
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId))
+        when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId))
                 .thenReturn(List.of(badMsg));
 
-        assertThatThrownBy(() -> service.startStream(sessionId, UUID.randomUUID(), "hi"))
+        assertThatThrownBy(() -> service.startStream(sessionId, userId, "hi"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unknown chat role: SYSTEM");
+    }
+
+    @Test
+    void startStream_scopesHistoryToSessionAndUser() {
+        UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        UUID otherUserId = UUID.randomUUID();
+        // The same sessionId (e.g. reused via localStorage on a shared browser) belongs to a
+        // different user; startStream must never query history under that other user's id.
+        when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId))
+                .thenReturn(List.of());
+        stubStream(Flux.just("hi"));
+
+        service.startStream(sessionId, userId, "hello");
+
+        verify(chatMessageRepository).findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId);
+        verify(chatMessageRepository, never()).findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, otherUserId);
     }
 
     @Test
@@ -124,7 +143,7 @@ class AiChatServiceTest {
         service = new AiChatService(chatClient, chatMessageRepository, listingService,
                 chatListingCardMapper, listingSummaryService, favoriteService,
                 List.of(chatToolProvider), new SimpleMeterRegistry());
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
+        when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId)).thenReturn(List.of());
         when(chatToolProvider.provideTools(userId)).thenReturn(List.of(new Object()));
         stubStream(Flux.just("done"));
 

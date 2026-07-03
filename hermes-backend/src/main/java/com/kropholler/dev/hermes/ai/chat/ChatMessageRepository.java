@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, UUID> {
-    List<ChatMessageEntity> findBySessionIdOrderByCreatedAtAsc(UUID sessionId);
+    List<ChatMessageEntity> findBySessionIdAndUserIdOrderByCreatedAtAsc(UUID sessionId, UUID userId);
 }

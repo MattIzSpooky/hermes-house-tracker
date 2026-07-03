@@ -25,9 +25,12 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Orchestrates AI chat for a single session.
  *
- * <p>Session IDs are client-generated UUIDs. There is no server-side authentication:
- * any client that knows a session ID can subscribe to its messages. This is acceptable
- * for a personal/local deployment but must be addressed before any shared deployment.
+ * <p>Session IDs are client-generated UUIDs identifying one conversation thread; they are
+ * not an identity mechanism. The STOMP connection is authenticated (see
+ * {@code WsAuthChannelInterceptor}), and conversation history is always scoped to the
+ * authenticated {@code userId} in addition to the session ID, so a session ID reused
+ * across different logged-in users (e.g. the same browser) never surfaces another
+ * user's messages.
  */
 @Slf4j
 @Service
@@ -105,7 +108,7 @@ public class AiChatService {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
-        List<ChatMessageEntity> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+        List<ChatMessageEntity> allMessages = chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId);
         int fromIndex = Math.max(0, allMessages.size() - 20);
         List<Message> history = allMessages.subList(fromIndex, allMessages.size())
                 .stream()
