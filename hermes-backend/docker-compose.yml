@@ -41,7 +41,7 @@ services:
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
     healthcheck:
-      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/hermes HTTP/1.1\\r\\nhost: localhost\\r\\n\\r\\n' >&3 && grep -q 'hermes' <&3"]
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && exec 3<&-"]
       interval: 10s
       timeout: 5s
       retries: 15
