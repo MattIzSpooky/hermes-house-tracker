@@ -130,12 +130,44 @@ class AgentTaskServiceTest {
     }
 
     @Test
-    void delete_invokesRepositoryDeleteById() {
+    void delete_ownerDeletesSuccessfully() {
+        UUID userId = UUID.randomUUID();
         UUID taskId = UUID.randomUUID();
+        AgentTaskEntity task = new AgentTaskEntity();
+        task.setUserId(userId);
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
 
-        service.delete(taskId);
+        service.delete(taskId, userId);
 
-        verify(repo).deleteById(taskId);
+        verify(repo).delete(task);
+    }
+
+    @Test
+    void delete_throws404WhenNotFound() {
+        UUID userId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.empty());
+
+        assertThatThrownBy(() -> service.delete(taskId, userId))
+            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .hasMessageContaining("Agent task " + taskId + " not found");
+
+        verify(repo, org.mockito.Mockito.never()).delete(any());
+    }
+
+    @Test
+    void delete_throws403WhenNotOwnedByCaller() {
+        UUID ownerId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        AgentTaskEntity task = new AgentTaskEntity();
+        task.setUserId(ownerId);
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
+
+        assertThatThrownBy(() -> service.delete(taskId, callerId))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+
+        verify(repo, org.mockito.Mockito.never()).delete(any());
     }
 
     @Test

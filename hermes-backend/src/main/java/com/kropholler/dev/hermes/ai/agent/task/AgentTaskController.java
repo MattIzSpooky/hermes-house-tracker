@@ -26,7 +26,7 @@ public class AgentTaskController implements AgentTasksApi {
 
     @Override
     public ResponseEntity<Void> deleteAgentTask(UUID id) {
-        agentTaskService.delete(id);
+        agentTaskService.delete(id, CurrentUser.current().id());
         return ResponseEntity.noContent().build();
     }
 }

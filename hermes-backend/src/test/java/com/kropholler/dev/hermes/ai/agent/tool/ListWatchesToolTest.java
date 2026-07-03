@@ -57,7 +57,7 @@ class ListWatchesToolTest {
         ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
         String result = tool.listWatches(cancelId);
 
-        verify(agentTaskService).delete(cancelId);
+        verify(agentTaskService).delete(cancelId, clientId);
         assertThat(result).contains("cancelled");
         assertThat(result).contains(cancelId.toString());
     }

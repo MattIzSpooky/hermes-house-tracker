@@ -21,7 +21,7 @@ class ListWatchesTool extends TaskTool {
         @ToolParam(required = false, description = "ID of the watch to cancel. Omit to just list watches.") UUID cancelId
     ) {
         if (cancelId != null) {
-            agentTaskService.delete(cancelId);
+            agentTaskService.delete(cancelId, userId);
             return "Watch " + cancelId + " cancelled.";
         }
 

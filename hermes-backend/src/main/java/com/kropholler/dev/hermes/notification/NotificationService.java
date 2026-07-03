@@ -5,9 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -50,11 +53,15 @@ public class NotificationService {
     }
 
     @Transactional
-    public void markRead(UUID notificationId) {
-        notificationRepository.findById(notificationId).ifPresent(n -> {
-            n.setRead(true);
-            notificationRepository.save(n);
-        });
+    public void markRead(UUID notificationId, UUID userId) {
+        NotificationEntity notification = notificationRepository.findById(notificationId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Notification " + notificationId + " not found"));
+        if (!notification.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not authorized to mark this notification read");
+        }
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 
     private String serializeIds(List<UUID> ids) {

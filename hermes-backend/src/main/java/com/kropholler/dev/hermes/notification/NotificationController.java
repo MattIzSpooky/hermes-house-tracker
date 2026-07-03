@@ -34,7 +34,7 @@ public class NotificationController implements NotificationsApi {
 
     @Override
     public ResponseEntity<Void> markNotificationRead(UUID id) {
-        notificationService.markRead(id);
+        notificationService.markRead(id, CurrentUser.current().id());
         return ResponseEntity.noContent().build();
     }
 }

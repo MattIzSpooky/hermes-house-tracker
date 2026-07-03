@@ -83,13 +83,14 @@ class NotificationControllerTest {
     }
 
     @Test
-    void markNotificationRead_callsServiceAndReturns204() throws Exception {
+    void markNotificationRead_usesSubjectFromJwt() throws Exception {
         UUID notifId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
 
         mockMvc.perform(patch("/api/notifications/{id}/read", notifId)
-                .with(jwt()))
+                .with(jwt().jwt(builder -> builder.subject(callerId.toString()))))
             .andExpect(status().isNoContent());
 
-        verify(notificationService).markRead(notifId);
+        verify(notificationService).markRead(eq(notifId), eq(callerId));
     }
 }

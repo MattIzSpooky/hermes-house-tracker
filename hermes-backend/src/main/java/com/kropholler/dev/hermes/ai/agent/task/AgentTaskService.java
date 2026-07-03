@@ -7,9 +7,12 @@ import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.support.CronExpression;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -68,8 +71,14 @@ public class AgentTaskService {
     }
 
     @Transactional
-    public void delete(UUID taskId) {
-        agentTaskRepository.deleteById(taskId);
+    public void delete(UUID taskId, UUID userId) {
+        AgentTaskEntity task = agentTaskRepository.findById(taskId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Agent task " + taskId + " not found"));
+        if (!task.getUserId().equals(userId)) {
+            throw new AccessDeniedException("Not authorized to delete this agent task");
+        }
+        agentTaskRepository.delete(task);
     }
 
     @Transactional

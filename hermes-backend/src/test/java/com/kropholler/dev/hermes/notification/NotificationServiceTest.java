@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -145,24 +146,45 @@ class NotificationServiceTest {
     }
 
     @Test
-    void markRead_whenFound_setsReadAndSaves() {
+    void markRead_ownerMarksReadSuccessfully() {
+        UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
         NotificationEntity entity = new NotificationEntity();
         entity.setId(notificationId);
+        entity.setUserId(userId);
         when(repo.findById(notificationId)).thenReturn(Optional.of(entity));
 
-        service.markRead(notificationId);
+        service.markRead(notificationId, userId);
 
         assertThat(entity.isRead()).isTrue();
         verify(repo).save(entity);
     }
 
     @Test
-    void markRead_whenNotFound_doesNothing() {
+    void markRead_throws404WhenNotFound() {
+        UUID userId = UUID.randomUUID();
         UUID notificationId = UUID.randomUUID();
         when(repo.findById(notificationId)).thenReturn(Optional.empty());
 
-        service.markRead(notificationId);
+        assertThatThrownBy(() -> service.markRead(notificationId, userId))
+            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .hasMessageContaining("Notification " + notificationId + " not found");
+
+        verify(repo, never()).save(any());
+    }
+
+    @Test
+    void markRead_throws403WhenNotOwnedByCaller() {
+        UUID ownerId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
+        UUID notificationId = UUID.randomUUID();
+        NotificationEntity entity = new NotificationEntity();
+        entity.setId(notificationId);
+        entity.setUserId(ownerId);
+        when(repo.findById(notificationId)).thenReturn(Optional.of(entity));
+
+        assertThatThrownBy(() -> service.markRead(notificationId, callerId))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
 
         verify(repo, never()).save(any());
     }

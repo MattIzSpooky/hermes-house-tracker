@@ -76,13 +76,14 @@ class AgentTaskControllerTest {
     }
 
     @Test
-    void deleteAgentTask_callsServiceAndReturns204() throws Exception {
+    void deleteAgentTask_usesSubjectFromJwt() throws Exception {
         UUID taskId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/agent-tasks/{id}", taskId)
-                .with(jwt()))
+                .with(jwt().jwt(builder -> builder.subject(callerId.toString()))))
             .andExpect(status().isNoContent());
 
-        verify(agentTaskService).delete(taskId);
+        verify(agentTaskService).delete(eq(taskId), eq(callerId));
     }
 }
