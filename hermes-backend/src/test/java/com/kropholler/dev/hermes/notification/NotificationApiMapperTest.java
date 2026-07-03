@@ -20,12 +20,12 @@ class NotificationApiMapperTest {
     void toResponse_mapsAllFields() {
         UUID id = UUID.randomUUID();
         UUID taskId = UUID.randomUUID();
-        UUID clientId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         UUID listingId = UUID.randomUUID();
         Instant createdAt = Instant.parse("2026-06-01T10:00:00Z");
 
         NotificationDto dto = new NotificationDto(
-            id, taskId, clientId, "Price drop", "Amsterdam dropped 8%",
+            id, taskId, userId, "Price drop", "Amsterdam dropped 8%",
             List.of(listingId), false, createdAt, null
         );
 
@@ -33,7 +33,7 @@ class NotificationApiMapperTest {
 
         assertThat(response.getId()).isEqualTo(id);
         assertThat(response.getTaskId()).isEqualTo(taskId);
-        assertThat(response.getClientId()).isEqualTo(clientId);
+        assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getTitle()).isEqualTo("Price drop");
         assertThat(response.getBody()).isEqualTo("Amsterdam dropped 8%");
         assertThat(response.getListingIds()).containsExactly(listingId);

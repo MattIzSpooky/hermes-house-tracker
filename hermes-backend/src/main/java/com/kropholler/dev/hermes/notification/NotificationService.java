@@ -23,30 +23,30 @@ public class NotificationService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public NotificationDto save(UUID taskId, UUID clientId, NotificationContent content) {
+    public NotificationDto save(UUID taskId, UUID userId, NotificationContent content) {
         NotificationEntity notification = new NotificationEntity();
         notification.setTaskId(taskId);
-        notification.setClientId(clientId);
+        notification.setUserId(userId);
         notification.setTitle(content.title());
         notification.setBody(content.body());
         notification.setListingIds(serializeIds(content.listingIds()));
         NotificationEntity saved = notificationRepository.save(notification);
 
         NotificationDto dto = toDto(saved, content.listingIds());
-        messaging.convertAndSend("/topic/notifications/" + clientId, dto);
+        messaging.convertAndSendToUser(userId.toString(), "/queue/notifications", dto);
         emailSender.sendAsync(dto);
         return dto;
     }
 
     @Transactional(readOnly = true)
-    public List<NotificationDto> findByClientId(UUID clientId) {
-        return notificationRepository.findTop50ByClientIdOrderByCreatedAtDesc(clientId)
+    public List<NotificationDto> findByUserId(UUID userId) {
+        return notificationRepository.findTop50ByUserIdOrderByCreatedAtDesc(userId)
             .stream().map(n -> toDto(n, deserializeIds(n.getListingIds()))).toList();
     }
 
     @Transactional(readOnly = true)
-    public long countUnread(UUID clientId) {
-        return notificationRepository.countByClientIdAndReadFalse(clientId);
+    public long countUnread(UUID userId) {
+        return notificationRepository.countByUserIdAndReadFalse(userId);
     }
 
     @Transactional
@@ -75,7 +75,7 @@ public class NotificationService {
     }
 
     private NotificationDto toDto(NotificationEntity n, List<UUID> listingIds) {
-        return new NotificationDto(n.getId(), n.getTaskId(), n.getClientId(),
+        return new NotificationDto(n.getId(), n.getTaskId(), n.getUserId(),
             n.getTitle(), n.getBody(), listingIds, n.isRead(),
             n.getCreatedAt(), n.getEmailSentAt());
     }

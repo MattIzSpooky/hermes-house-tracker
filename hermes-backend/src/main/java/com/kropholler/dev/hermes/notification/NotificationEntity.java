@@ -21,7 +21,7 @@ class NotificationEntity {
     private UUID taskId;
 
     @Column(nullable = false)
-    private UUID clientId;
+    private UUID userId;
 
     @Column(nullable = false, length = 500)
     private String title;

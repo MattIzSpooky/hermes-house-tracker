@@ -8,13 +8,6 @@ paths:
     get:
       tags: [Notifications]
       operationId: getNotifications
-      parameters:
-        - name: clientId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         '200':
           description: Recent notifications
@@ -29,13 +22,6 @@ paths:
     get:
       tags: [Notifications]
       operationId: getUnreadCount
-      parameters:
-        - name: clientId
-          in: query
-          required: true
-          schema:
-            type: string
-            format: uuid
       responses:
         '200':
           description: Unread notification count
@@ -70,7 +56,7 @@ components:
         taskId:
           type: string
           format: uuid
-        clientId:
+        userId:
           type: string
           format: uuid
         title:

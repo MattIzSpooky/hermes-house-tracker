@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.notification;
 import com.kropholler.dev.hermes.notification.openapi.NotificationResponse;
 import com.kropholler.dev.hermes.notification.openapi.NotificationsApi;
 import com.kropholler.dev.hermes.notification.openapi.UnreadCountResponse;
+import com.kropholler.dev.hermes.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,16 +19,16 @@ public class NotificationController implements NotificationsApi {
     private final NotificationApiMapper notificationApiMapper;
 
     @Override
-    public ResponseEntity<List<NotificationResponse>> getNotifications(UUID clientId) {
-        List<NotificationResponse> responses = notificationService.findByClientId(clientId)
+    public ResponseEntity<List<NotificationResponse>> getNotifications() {
+        List<NotificationResponse> responses = notificationService.findByUserId(CurrentUser.current().id())
             .stream().map(notificationApiMapper::toResponse).toList();
         return ResponseEntity.ok(responses);
     }
 
     @Override
-    public ResponseEntity<UnreadCountResponse> getUnreadCount(UUID clientId) {
+    public ResponseEntity<UnreadCountResponse> getUnreadCount() {
         UnreadCountResponse r = new UnreadCountResponse();
-        r.setCount(notificationService.countUnread(clientId));
+        r.setCount(notificationService.countUnread(CurrentUser.current().id()));
         return ResponseEntity.ok(r);
     }
 
