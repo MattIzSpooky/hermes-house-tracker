@@ -6,6 +6,7 @@ import com.kropholler.dev.hermes.scraping.openapi.ScrapingSessionsApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,6 +20,7 @@ public class ScrapingSessionController implements ScrapingSessionsApi {
     private final ScrapingSessionApiMapper scrapingSessionApiMapper;
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScrapingSessionResponse> createScrapingSession(
             CreateScrapingSessionRequest request) {
         ScrapingSessionDto dto = queueService.enqueueSearch(
@@ -33,6 +35,7 @@ public class ScrapingSessionController implements ScrapingSessionsApi {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScrapingSessionResponse> getScrapingSession(UUID id) {
         return queueService.findById(id)
             .map(dto -> ResponseEntity.ok(scrapingSessionApiMapper.toResponse(dto)))

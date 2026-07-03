@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -54,6 +55,7 @@ public class ListingController implements ListingsApi {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScrapingSessionResponse> rescrapeListing(UUID id) {
         ListingDto listing = listingService.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -83,6 +85,7 @@ public class ListingController implements ListingsApi {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<GeocodingBackfillResponse> backfillListingGeocoding() {
         int queuedCount = backfillService.queueMissingGeocoding();
         return ResponseEntity.status(HttpStatus.ACCEPTED)
