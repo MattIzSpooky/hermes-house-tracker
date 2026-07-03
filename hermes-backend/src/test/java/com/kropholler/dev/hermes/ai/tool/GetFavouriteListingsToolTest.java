@@ -44,7 +44,7 @@ class GetFavouriteListingsToolTest {
 
     @Test
     void getFavouriteListings_noFavourites_returnsNoneSavedMessage() {
-        when(favoriteService.findByClientId(clientId)).thenReturn(List.of());
+        when(favoriteService.findByUserId(clientId)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         String result = tool(holder).getFavouriteListings();
@@ -59,7 +59,7 @@ class GetFavouriteListingsToolTest {
         ListingDto listingDto = dto(listingId);
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", null, "Rotterdam", "Zuid-Holland", 400000, 3, 100, "A", "FOR_SALE");
 
-        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 
@@ -76,7 +76,7 @@ class GetFavouriteListingsToolTest {
         UUID listingId = UUID.randomUUID();
         FavoriteDto fav = new FavoriteDto(listingId, Instant.now());
 
-        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.empty());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -93,7 +93,7 @@ class GetFavouriteListingsToolTest {
         ListingDto listingDto = dto(listingId);
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", "C", "Rotterdam", "Zuid-Holland", null, 3, 100, "A", "FOR_SALE");
 
-        when(favoriteService.findByClientId(clientId)).thenReturn(List.of(fav));
+        when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
         when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 

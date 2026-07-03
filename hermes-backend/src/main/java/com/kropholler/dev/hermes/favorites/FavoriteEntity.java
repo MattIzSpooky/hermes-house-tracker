@@ -20,7 +20,7 @@ public class FavoriteEntity {
     private UUID id;
 
     @Column(nullable = false)
-    private UUID clientId;
+    private UUID userId;
 
     @Column(nullable = false)
     private UUID listingId;

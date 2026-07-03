@@ -44,7 +44,7 @@ public class GetFavouriteListingsTool {
         log.info("getFavouriteListings called: clientId={}", clientId);
         callCounter.increment();
 
-        List<FavoriteDto> favourites = favoriteService.findByClientId(clientId);
+        List<FavoriteDto> favourites = favoriteService.findByUserId(clientId);
         if (favourites.isEmpty()) {
             return "You have no saved listings yet. You can save a listing by clicking the heart icon on its detail page.";
         }

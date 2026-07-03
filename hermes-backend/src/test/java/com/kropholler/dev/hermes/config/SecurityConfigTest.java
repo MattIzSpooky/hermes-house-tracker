@@ -36,18 +36,16 @@ class SecurityConfigTest {
 
     @Test
     void unauthenticatedRequest_isRejectedWith401() throws Exception {
-        UUID clientId = UUID.randomUUID();
-
-        mockMvc.perform(get("/api/favorites/{clientId}", clientId))
+        mockMvc.perform(get("/api/favorites"))
             .andExpect(status().isUnauthorized());
     }
 
     @Test
     void authenticatedRequest_isAllowedThrough() throws Exception {
-        UUID clientId = UUID.randomUUID();
-        when(favoriteService.findByClientId(clientId)).thenReturn(List.of());
+        UUID userId = UUID.randomUUID();
+        when(favoriteService.findByUserId(userId)).thenReturn(List.of());
 
-        mockMvc.perform(get("/api/favorites/{clientId}", clientId).with(jwt()))
+        mockMvc.perform(get("/api/favorites").with(jwt().jwt(builder -> builder.subject(userId.toString()))))
             .andExpect(status().isOk());
     }
 

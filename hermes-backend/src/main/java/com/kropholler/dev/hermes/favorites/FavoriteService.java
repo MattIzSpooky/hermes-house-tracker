@@ -14,29 +14,29 @@ public class FavoriteService {
     private final FavoriteRepository repository;
 
     @Transactional(readOnly = true)
-    public List<FavoriteDto> findByClientId(UUID clientId) {
-        return repository.findByClientId(clientId).stream()
+    public List<FavoriteDto> findByUserId(UUID userId) {
+        return repository.findByUserId(userId).stream()
                 .map(f -> new FavoriteDto(f.getListingId(), f.getSavedAt()))
                 .toList();
     }
 
     @Transactional
-    public void addFavorite(UUID clientId, UUID listingId) {
-        if (!repository.existsByClientIdAndListingId(clientId, listingId)) {
+    public void addFavorite(UUID userId, UUID listingId) {
+        if (!repository.existsByUserIdAndListingId(userId, listingId)) {
             FavoriteEntity f = new FavoriteEntity();
-            f.setClientId(clientId);
+            f.setUserId(userId);
             f.setListingId(listingId);
             repository.save(f);
         }
     }
 
     @Transactional
-    public void removeFavorite(UUID clientId, UUID listingId) {
-        repository.deleteByClientIdAndListingId(clientId, listingId);
+    public void removeFavorite(UUID userId, UUID listingId) {
+        repository.deleteByUserIdAndListingId(userId, listingId);
     }
 
     @Transactional(readOnly = true)
-    public boolean isFavorite(UUID clientId, UUID listingId) {
-        return repository.existsByClientIdAndListingId(clientId, listingId);
+    public boolean isFavorite(UUID userId, UUID listingId) {
+        return repository.existsByUserIdAndListingId(userId, listingId);
     }
 }

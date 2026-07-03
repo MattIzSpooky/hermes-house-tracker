@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.favorites;
 
-
 import com.kropholler.dev.hermes.favorites.openapi.FavoriteResponse;
 import com.kropholler.dev.hermes.favorites.openapi.FavoritesApi;
+import com.kropholler.dev.hermes.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,21 +18,22 @@ public class FavoriteController implements FavoritesApi {
     private final FavoriteApiMapper favoriteApiMapper;
 
     @Override
-    public ResponseEntity<List<FavoriteResponse>> getFavorites(UUID clientId) {
-        List<FavoriteResponse> responses = favoriteService.findByClientId(clientId)
+    public ResponseEntity<List<FavoriteResponse>> getFavorites() {
+        UUID userId = CurrentUser.current().id();
+        List<FavoriteResponse> responses = favoriteService.findByUserId(userId)
             .stream().map(favoriteApiMapper::toResponse).toList();
         return ResponseEntity.ok(responses);
     }
 
     @Override
-    public ResponseEntity<Void> addFavorite(UUID clientId, UUID listingId) {
-        favoriteService.addFavorite(clientId, listingId);
+    public ResponseEntity<Void> addFavorite(UUID listingId) {
+        favoriteService.addFavorite(CurrentUser.current().id(), listingId);
         return ResponseEntity.noContent().build();
     }
 
     @Override
-    public ResponseEntity<Void> removeFavorite(UUID clientId, UUID listingId) {
-        favoriteService.removeFavorite(clientId, listingId);
+    public ResponseEntity<Void> removeFavorite(UUID listingId) {
+        favoriteService.removeFavorite(CurrentUser.current().id(), listingId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -7,8 +7,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface FavoriteRepository extends JpaRepository<FavoriteEntity, UUID> {
-    List<FavoriteEntity> findByClientId(UUID clientId);
-    Optional<FavoriteEntity> findByClientIdAndListingId(UUID clientId, UUID listingId);
-    void deleteByClientIdAndListingId(UUID clientId, UUID listingId);
-    boolean existsByClientIdAndListingId(UUID clientId, UUID listingId);
+    List<FavoriteEntity> findByUserId(UUID userId);
+    Optional<FavoriteEntity> findByUserIdAndListingId(UUID userId, UUID listingId);
+    void deleteByUserIdAndListingId(UUID userId, UUID listingId);
+    boolean existsByUserIdAndListingId(UUID userId, UUID listingId);
 }
