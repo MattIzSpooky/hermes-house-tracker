@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: Hermes Profile API
+  version: 1.0.0
+
+paths:
+  /api/profile:
+    get:
+      operationId: getProfile
+      tags: [Profile]
+      responses:
+        '200':
+          description: The caller's saved address (all fields null if none saved yet)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+
+  /api/profile/address:
+    put:
+      operationId: updateAddress
+      tags: [Profile]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAddressRequest'
+      responses:
+        '200':
+          description: Address saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '422':
+          description: Address could not be geocoded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
+components:
+  schemas:
+    AddressResponse:
+      type: object
+      properties:
+        street:
+          type: string
+          nullable: true
+        houseNumber:
+          type: string
+          nullable: true
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        province:
+          type: string
+          nullable: true
+        latitude:
+          type: number
+          format: double
+          nullable: true
+        longitude:
+          type: number
+          format: double
+          nullable: true
+
+    UpdateAddressRequest:
+      type: object
+      required: [street, houseNumber, city]
+      properties:
+        street:
+          type: string
+          example: Dorpstraat
+        houseNumber:
+          type: string
+          example: "10"
+        houseNumberAddition:
+          type: string
+          nullable: true
+        zipCode:
+          type: string
+          nullable: true
+        city:
+          type: string
+          example: Utrecht
+        province:
+          type: string
+          nullable: true
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri

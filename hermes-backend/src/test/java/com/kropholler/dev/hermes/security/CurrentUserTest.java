@@ -45,4 +45,28 @@ class CurrentUserTest {
 
         assertThat(currentUser.roles()).isEmpty();
     }
+
+    @Test
+    void current_readsJwtFromSecurityContext() {
+        UUID subject = UUID.randomUUID();
+        Jwt jwt = Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject(subject.toString())
+            .claim("preferred_username", "testuser")
+            .claim("realm_access", Map.of("roles", List.of("user")))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(60))
+            .build();
+        var authentication = new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken(jwt);
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        try {
+            CurrentUser currentUser = CurrentUser.current();
+
+            assertThat(currentUser.id()).isEqualTo(subject);
+            assertThat(currentUser.username()).isEqualTo("testuser");
+        } finally {
+            org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        }
+    }
 }

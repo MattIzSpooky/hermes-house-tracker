@@ -444,6 +444,25 @@
                             </configOptions>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate-profile</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/openapi/profile.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <apiPackage>com.kropholler.dev.hermes.profile.openapi</apiPackage>
+                            <modelPackage>com.kropholler.dev.hermes.profile.openapi</modelPackage>
+                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
+                            <configOptions>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useTags>true</useTags>
+                                <openApiNullable>false</openApiNullable>
+                                <documentationProvider>none</documentationProvider>
+                                <useJakartaEe>true</useJakartaEe>
+                            </configOptions>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

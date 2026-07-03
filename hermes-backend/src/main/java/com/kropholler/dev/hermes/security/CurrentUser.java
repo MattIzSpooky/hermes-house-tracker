@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.security;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
@@ -14,6 +15,11 @@ public record CurrentUser(UUID id, String username, Set<String> roles) {
         UUID id = UUID.fromString(jwt.getSubject());
         String username = jwt.getClaimAsString("preferred_username");
         return new CurrentUser(id, username, extractRoles(jwt));
+    }
+
+    public static CurrentUser current() {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return from(jwt);
     }
 
     @SuppressWarnings("unchecked")
