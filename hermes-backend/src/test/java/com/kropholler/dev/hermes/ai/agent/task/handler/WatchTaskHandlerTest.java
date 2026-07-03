@@ -175,7 +175,7 @@ class WatchTaskHandlerTest {
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.WATCH);
         task.setStatus(AgentTaskStatus.ACTIVE);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("Utrecht 3-bed");
         task.setPayload(new ObjectMapper().writeValueAsString(payload));
         task.setLastRunAt(lastRunAt);

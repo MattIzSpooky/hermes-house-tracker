@@ -17,20 +17,20 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 public class GetFavouriteListingsTool {
 
-    private final UUID clientId;
+    private final UUID userId;
     private final FavoriteService favoriteService;
     private final ListingService listingService;
     private final ChatListingCardMapper mapper;
     private final AtomicReference<List<ChatListingCard>> resultHolder;
     private final Counter callCounter;
 
-    public GetFavouriteListingsTool(UUID clientId,
+    public GetFavouriteListingsTool(UUID userId,
                                      FavoriteService favoriteService,
                                      ListingService listingService,
                                      ChatListingCardMapper mapper,
                                      AtomicReference<List<ChatListingCard>> resultHolder,
                                      MeterRegistry meterRegistry) {
-        this.clientId = clientId;
+        this.userId = userId;
         this.favoriteService = favoriteService;
         this.listingService = listingService;
         this.mapper = mapper;
@@ -41,10 +41,10 @@ public class GetFavouriteListingsTool {
     @Tool(description = "Get the user's saved (favourited) listings. "
             + "Call this when the user asks to see their saved properties, favourites, or wishlist.")
     public String getFavouriteListings() {
-        log.info("getFavouriteListings called: clientId={}", clientId);
+        log.info("getFavouriteListings called: userId={}", userId);
         callCounter.increment();
 
-        List<FavoriteDto> favourites = favoriteService.findByUserId(clientId);
+        List<FavoriteDto> favourites = favoriteService.findByUserId(userId);
         if (favourites.isEmpty()) {
             return "You have no saved listings yet. You can save a listing by clicking the heart icon on its detail page.";
         }

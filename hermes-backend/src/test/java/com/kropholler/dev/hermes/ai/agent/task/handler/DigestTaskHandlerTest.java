@@ -107,7 +107,7 @@ class DigestTaskHandlerTest {
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.DIGEST);
         task.setStatus(AgentTaskStatus.ACTIVE);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("Weekly digest");
         task.setPayload(objectMapper.writeValueAsString(new DigestPayload(cities)));
         task.setSchedule("0 0 8 * * MON");

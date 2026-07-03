@@ -27,7 +27,7 @@ public class AgentTaskEntity {
     private AgentTaskStatus status = AgentTaskStatus.ACTIVE;
 
     @Column(nullable = false)
-    private UUID clientId;
+    private UUID userId;
 
     @Column(nullable = false)
     private String name;

@@ -15,12 +15,12 @@ public class AgentChatToolProvider implements ChatToolProvider {
     private final AgentTaskService agentTaskService;
 
     @Override
-    public List<Object> provideTools(UUID clientId) {
+    public List<Object> provideTools(UUID userId) {
         return List.of(
-            new SaveWatchTool(clientId, agentTaskService),
-            new TriggerResearchTool(clientId, agentTaskService),
-            new TriggerDigestTool(clientId, agentTaskService),
-            new ListWatchesTool(clientId, agentTaskService)
+            new SaveWatchTool(userId, agentTaskService),
+            new TriggerResearchTool(userId, agentTaskService),
+            new TriggerDigestTool(userId, agentTaskService),
+            new ListWatchesTool(userId, agentTaskService)
         );
     }
 }

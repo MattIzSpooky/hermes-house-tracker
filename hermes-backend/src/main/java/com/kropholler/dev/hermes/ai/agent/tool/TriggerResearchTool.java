@@ -8,8 +8,8 @@ import java.util.UUID;
 
 class TriggerResearchTool extends TaskTool {
 
-    protected TriggerResearchTool(UUID clientId, AgentTaskService agentTaskService) {
-        super(clientId, agentTaskService);
+    protected TriggerResearchTool(UUID userId, AgentTaskService agentTaskService) {
+        super(userId, agentTaskService);
     }
 
     @Tool(description = "Queue a background research task. "
@@ -19,7 +19,7 @@ class TriggerResearchTool extends TaskTool {
     public String triggerResearch(
         @ToolParam(description = "The research question or task to investigate in detail") String prompt
     ) {
-        agentTaskService.createResearch(clientId, prompt);
+        agentTaskService.createResearch(userId, prompt);
         return "Research queued — results will appear as a notification shortly.";
     }
 }

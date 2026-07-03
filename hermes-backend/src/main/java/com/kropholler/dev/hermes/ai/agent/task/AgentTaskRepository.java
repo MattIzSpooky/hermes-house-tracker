@@ -8,5 +8,5 @@ import java.util.UUID;
 
 interface AgentTaskRepository extends JpaRepository<AgentTaskEntity, UUID> {
     List<AgentTaskEntity> findAllByStatusAndNextRunAtLessThanEqual(AgentTaskStatus status, Instant cutoff);
-    List<AgentTaskEntity> findAllByClientIdAndStatusOrderByCreatedAtDesc(UUID clientId, AgentTaskStatus status);
+    List<AgentTaskEntity> findAllByUserIdAndStatusOrderByCreatedAtDesc(UUID userId, AgentTaskStatus status);
 }

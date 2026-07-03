@@ -7,7 +7,7 @@ public record AgentTaskDto(
     UUID id,
     AgentTaskType type,
     AgentTaskStatus status,
-    UUID clientId,
+    UUID userId,
     String name,
     String schedule,
     Instant lastRunAt,

@@ -34,7 +34,7 @@ class AgentTaskExecutor {
         }
         try {
             handler.handle(task).ifPresent(content ->
-                notificationService.save(task.getId(), task.getClientId(), content));
+                notificationService.save(task.getId(), task.getUserId(), content));
         } catch (Exception e) {
             log.error("Error executing task {}: {}", task.getId(), e.getMessage(), e);
         } finally {

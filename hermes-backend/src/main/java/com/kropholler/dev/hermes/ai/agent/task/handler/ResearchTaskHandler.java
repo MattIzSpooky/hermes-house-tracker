@@ -65,14 +65,14 @@ class ResearchTaskHandler implements AgentTaskHandler {
         }
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
-        UUID clientId = task.getClientId();
+        UUID userId = task.getUserId();
 
         var searchTool    = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         var summaryTool   = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
         var historyTool   = new GetPriceHistoryTool(listingService, meterRegistry);
         var compareTool   = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         var priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
-        var favTool       = new GetFavouriteListingsTool(clientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+        var favTool       = new GetFavouriteListingsTool(userId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         String result = chatClient.prompt()
             .user(payload.prompt())

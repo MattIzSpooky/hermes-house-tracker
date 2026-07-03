@@ -18,19 +18,19 @@ class AgentTaskApiMapperTest {
     @Test
     void toResponse_mapsAllFields() {
         UUID id = UUID.randomUUID();
-        UUID clientId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         Instant createdAt = Instant.parse("2026-05-10T08:00:00Z");
         Instant lastRunAt = Instant.parse("2026-05-11T08:00:00Z");
 
         AgentTaskDto dto = new AgentTaskDto(
             id, AgentTaskType.WATCH, AgentTaskStatus.ACTIVE,
-            clientId, "My watch", "0 8 * * MON", lastRunAt, null, createdAt
+            userId, "My watch", "0 8 * * MON", lastRunAt, null, createdAt
         );
 
         AgentTaskResponse response = mapper.toResponse(dto);
 
         assertThat(response.getId()).isEqualTo(id);
-        assertThat(response.getClientId()).isEqualTo(clientId);
+        assertThat(response.getUserId()).isEqualTo(userId);
         assertThat(response.getName()).isEqualTo("My watch");
         assertThat(response.getSchedule()).isEqualTo("0 8 * * MON");
         assertThat(response.getCreatedAt())

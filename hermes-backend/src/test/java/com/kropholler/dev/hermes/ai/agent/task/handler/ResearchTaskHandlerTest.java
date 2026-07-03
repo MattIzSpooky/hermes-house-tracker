@@ -108,7 +108,7 @@ class ResearchTaskHandlerTest {
         task.setId(UUID.randomUUID());
         task.setType(AgentTaskType.RESEARCH);
         task.setStatus(AgentTaskStatus.ACTIVE);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("Research: " + prompt);
         task.setPayload(objectMapper.writeValueAsString(new ResearchPayload(prompt)));
         task.setNextRunAt(Instant.now());

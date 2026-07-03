@@ -11,8 +11,8 @@ import java.util.UUID;
 
 class TriggerDigestTool extends TaskTool {
 
-    protected TriggerDigestTool(UUID clientId, AgentTaskService agentTaskService) {
-        super(clientId, agentTaskService);
+    protected TriggerDigestTool(UUID userId, AgentTaskService agentTaskService) {
+        super(userId, agentTaskService);
     }
 
     @Tool(description = "Schedule a weekly market digest for one or more cities. "
@@ -26,7 +26,7 @@ class TriggerDigestTool extends TaskTool {
             .map(String::strip)
             .filter(s -> !s.isBlank())
             .toList();
-        agentTaskService.createDigest(clientId, name, cityList);
+        agentTaskService.createDigest(userId, name, cityList);
         return "Weekly digest scheduled for " + cities + " — I'll send you a market summary every Monday morning.";
     }
 }

@@ -26,7 +26,7 @@ class AgentTaskRepositoryTest {
     void findsDueActiveTasks() {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.WATCH);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("test watch");
         task.setPayload("{}");
         task.setNextRunAt(Instant.now().minusSeconds(60));
@@ -43,7 +43,7 @@ class AgentTaskRepositoryTest {
     void doesNotReturnFutureTasks() {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.RESEARCH);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("future task");
         task.setPayload("{}");
         task.setNextRunAt(Instant.now().plusSeconds(3600));

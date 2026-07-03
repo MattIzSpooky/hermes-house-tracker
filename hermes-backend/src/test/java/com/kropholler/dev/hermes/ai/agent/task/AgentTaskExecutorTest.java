@@ -45,7 +45,7 @@ class AgentTaskExecutorTest {
 
         executor.execute(task);
 
-        verify(notificationService).save(task.getId(), task.getClientId(), content);
+        verify(notificationService).save(task.getId(), task.getUserId(), content);
         verify(agentTaskService).markRan(task);
     }
 
@@ -85,7 +85,7 @@ class AgentTaskExecutorTest {
         t.setId(UUID.randomUUID());
         t.setType(type);
         t.setStatus(AgentTaskStatus.ACTIVE);
-        t.setClientId(UUID.randomUUID());
+        t.setUserId(UUID.randomUUID());
         t.setName("test");
         t.setNextRunAt(Instant.now());
         return t;

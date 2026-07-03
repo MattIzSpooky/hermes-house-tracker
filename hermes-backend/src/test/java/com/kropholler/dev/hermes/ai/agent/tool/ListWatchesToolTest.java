@@ -26,12 +26,12 @@ class ListWatchesToolTest {
         UUID watchId = UUID.randomUUID();
         AgentTaskDto dto = new AgentTaskDto(watchId, AgentTaskType.WATCH,
             AgentTaskStatus.ACTIVE, clientId, "Utrecht 3-bed", "0 0 8 * * *", null, Instant.now(), Instant.now());
-        when(agentTaskService.findByClientId(clientId)).thenReturn(List.of(dto));
+        when(agentTaskService.findByUserId(clientId)).thenReturn(List.of(dto));
 
         ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
         String result = tool.listWatches(null);
 
-        verify(agentTaskService).findByClientId(clientId);
+        verify(agentTaskService).findByUserId(clientId);
         assertThat(result).contains("Utrecht 3-bed");
         assertThat(result).contains(watchId.toString());
     }
@@ -40,7 +40,7 @@ class ListWatchesToolTest {
     void returnsEmptyMessageWhenNoWatches() {
         AgentTaskService agentTaskService = mock(AgentTaskService.class);
         UUID clientId = UUID.randomUUID();
-        when(agentTaskService.findByClientId(clientId)).thenReturn(List.of());
+        when(agentTaskService.findByUserId(clientId)).thenReturn(List.of());
 
         ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
         String result = tool.listWatches(null);
@@ -71,7 +71,7 @@ class ListWatchesToolTest {
         Instant lastRun = Instant.parse("2026-06-01T08:00:00Z");
         AgentTaskDto dto = new AgentTaskDto(watchId, AgentTaskType.WATCH,
             AgentTaskStatus.ACTIVE, clientId, "One-off watch", null, lastRun, Instant.now(), Instant.now());
-        when(agentTaskService.findByClientId(clientId)).thenReturn(List.of(dto));
+        when(agentTaskService.findByUserId(clientId)).thenReturn(List.of(dto));
 
         ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
         String result = tool.listWatches(null);

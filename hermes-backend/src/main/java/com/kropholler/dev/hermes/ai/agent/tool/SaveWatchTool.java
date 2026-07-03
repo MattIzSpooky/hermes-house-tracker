@@ -10,8 +10,8 @@ import java.util.UUID;
 
 class SaveWatchTool extends TaskTool {
 
-    protected SaveWatchTool(UUID clientId, AgentTaskService agentTaskService) {
-        super(clientId, agentTaskService);
+    protected SaveWatchTool(UUID userId, AgentTaskService agentTaskService) {
+        super(userId, agentTaskService);
     }
 
     @Tool(description = "Save a listing watch that runs daily and sends a notification when new properties matching your criteria appear. "
@@ -36,7 +36,7 @@ class SaveWatchTool extends TaskTool {
             minBedrooms, minRooms, minLivingAreaM2, blankToNull(keywords),
             blankToNull(nearCity), radiusKm
         );
-        agentTaskService.createWatch(clientId, watchName, payload);
+        agentTaskService.createWatch(userId, watchName, payload);
         return "Watch '" + watchName + "' saved — I'll alert you daily when matching listings appear.";
     }
 

@@ -75,7 +75,7 @@ class AgentTaskServiceTest {
         task.setSchedule(null);
         task.setStatus(AgentTaskStatus.ACTIVE);
         task.setType(AgentTaskType.RESEARCH);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("test");
         task.setNextRunAt(Instant.now());
 
@@ -92,7 +92,7 @@ class AgentTaskServiceTest {
         task.setSchedule("0 0 8 * * *");
         task.setStatus(AgentTaskStatus.ACTIVE);
         task.setType(AgentTaskType.WATCH);
-        task.setClientId(UUID.randomUUID());
+        task.setUserId(UUID.randomUUID());
         task.setName("test");
         task.setNextRunAt(Instant.now().minusSeconds(60));
 
@@ -118,15 +118,15 @@ class AgentTaskServiceTest {
     }
 
     @Test
-    void findByClientId_delegatesToRepository() {
-        UUID clientId = UUID.randomUUID();
-        when(repo.findAllByClientIdAndStatusOrderByCreatedAtDesc(clientId, AgentTaskStatus.ACTIVE))
+    void findByUserId_delegatesToRepository() {
+        UUID userId = UUID.randomUUID();
+        when(repo.findAllByUserIdAndStatusOrderByCreatedAtDesc(userId, AgentTaskStatus.ACTIVE))
             .thenReturn(List.of());
 
-        List<AgentTaskDto> result = service.findByClientId(clientId);
+        List<AgentTaskDto> result = service.findByUserId(userId);
 
         assertThat(result).isEmpty();
-        verify(repo).findAllByClientIdAndStatusOrderByCreatedAtDesc(clientId, AgentTaskStatus.ACTIVE);
+        verify(repo).findAllByUserIdAndStatusOrderByCreatedAtDesc(userId, AgentTaskStatus.ACTIVE);
     }
 
     @Test

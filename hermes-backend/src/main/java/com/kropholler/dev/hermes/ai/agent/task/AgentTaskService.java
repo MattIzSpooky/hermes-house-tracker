@@ -26,10 +26,10 @@ public class AgentTaskService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public AgentTaskDto createWatch(UUID clientId, String name, WatchPayload payload) {
+    public AgentTaskDto createWatch(UUID userId, String name, WatchPayload payload) {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.WATCH);
-        task.setClientId(clientId);
+        task.setUserId(userId);
         task.setName(name);
         task.setPayload(serialize(payload));
         task.setSchedule("0 0 8 * * *");
@@ -38,10 +38,10 @@ public class AgentTaskService {
     }
 
     @Transactional
-    public AgentTaskDto createResearch(UUID clientId, String prompt) {
+    public AgentTaskDto createResearch(UUID userId, String prompt) {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.RESEARCH);
-        task.setClientId(clientId);
+        task.setUserId(userId);
         task.setName("Research: " + prompt.substring(0, Math.min(60, prompt.length())));
         task.setPayload(serialize(new ResearchPayload(prompt)));
         task.setNextRunAt(Instant.now());
@@ -49,10 +49,10 @@ public class AgentTaskService {
     }
 
     @Transactional
-    public AgentTaskDto createDigest(UUID clientId, String name, List<String> cities) {
+    public AgentTaskDto createDigest(UUID userId, String name, List<String> cities) {
         AgentTaskEntity task = new AgentTaskEntity();
         task.setType(AgentTaskType.DIGEST);
-        task.setClientId(clientId);
+        task.setUserId(userId);
         task.setName(name);
         task.setPayload(serialize(new DigestPayload(cities)));
         task.setSchedule("0 0 8 * * MON");
@@ -61,9 +61,9 @@ public class AgentTaskService {
     }
 
     @Transactional(readOnly = true)
-    public List<AgentTaskDto> findByClientId(UUID clientId) {
+    public List<AgentTaskDto> findByUserId(UUID userId) {
         return agentTaskRepository
-            .findAllByClientIdAndStatusOrderByCreatedAtDesc(clientId, AgentTaskStatus.ACTIVE)
+            .findAllByUserIdAndStatusOrderByCreatedAtDesc(userId, AgentTaskStatus.ACTIVE)
             .stream().map(this::toDto).toList();
     }
 
@@ -104,7 +104,7 @@ public class AgentTaskService {
     }
 
     public AgentTaskDto toDto(AgentTaskEntity t) {
-        return new AgentTaskDto(t.getId(), t.getType(), t.getStatus(), t.getClientId(),
+        return new AgentTaskDto(t.getId(), t.getType(), t.getStatus(), t.getUserId(),
             t.getName(), t.getSchedule(), t.getLastRunAt(), t.getNextRunAt(), t.getCreatedAt());
     }
 }

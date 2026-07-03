@@ -10,8 +10,8 @@ import java.util.UUID;
 
 class ListWatchesTool extends TaskTool {
 
-    protected ListWatchesTool(UUID clientId, AgentTaskService agentTaskService) {
-        super(clientId, agentTaskService);
+    protected ListWatchesTool(UUID userId, AgentTaskService agentTaskService) {
+        super(userId, agentTaskService);
     }
 
     @Tool(description = "List the user's active watches (listing alerts). "
@@ -25,7 +25,7 @@ class ListWatchesTool extends TaskTool {
             return "Watch " + cancelId + " cancelled.";
         }
 
-        List<AgentTaskDto> tasks = agentTaskService.findByClientId(clientId);
+        List<AgentTaskDto> tasks = agentTaskService.findByUserId(userId);
         if (tasks.isEmpty()) {
             return "You have no active watches. Ask me to set one up — for example: 'Alert me when a 3-bed house in Utrecht appears under €400,000.'";
         }
