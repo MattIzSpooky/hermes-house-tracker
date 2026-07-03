@@ -1,15 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import Keycloak from 'keycloak-js';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
+  let keycloakStub: { tokenParsed: Record<string, unknown> | undefined; logout: jasmine.Spy };
+
   beforeEach(async () => {
+    keycloakStub = {
+      tokenParsed: undefined,
+      logout: jasmine.createSpy('logout'),
+    };
+
     await TestBed.configureTestingModule({
       imports: [AppComponent],
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
+        { provide: Keycloak, useValue: keycloakStub },
       ],
     }).compileComponents();
   });
@@ -17,5 +26,22 @@ describe('AppComponent', () => {
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     expect(fixture.componentInstance).toBeTruthy();
+  });
+
+  it('should have an undefined username when tokenParsed has no preferred_username', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.username).toBeUndefined();
+  });
+
+  it('should reflect the preferred_username from the parsed token', () => {
+    keycloakStub.tokenParsed = { preferred_username: 'jane.doe' };
+    const fixture = TestBed.createComponent(AppComponent);
+    expect(fixture.componentInstance.username).toBe('jane.doe');
+  });
+
+  it('should call keycloak.logout on logout()', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.componentInstance.logout();
+    expect(keycloakStub.logout).toHaveBeenCalledWith({ redirectUri: window.location.origin });
   });
 });

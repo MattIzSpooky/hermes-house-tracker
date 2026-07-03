@@ -10,6 +10,8 @@ import {
 } from 'keycloak-angular';
 import { routes } from './app.routes';
 
+export const API_URL_PATTERN = /^\/api(\/.*)?$/;
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
@@ -30,7 +32,7 @@ export const appConfig: ApplicationConfig = {
       provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
       useValue: [
         {
-          urlPattern: /^\/api(\/.*)?$/,
+          urlPattern: API_URL_PATTERN,
           bearerPrefix: 'Bearer',
         },
       ],
