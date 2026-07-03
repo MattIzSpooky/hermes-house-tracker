@@ -1,0 +1,72 @@
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-slate-900">Your profile</h1>
+  <p class="text-sm text-slate-500 mt-0.5">Manage your saved address</p>
+</div>
+
+@if (svc.error()) {
+  <app-error-alert [message]="svc.error()!" />
+}
+
+<app-section-card padding="p-6" extraClass="max-w-lg">
+  <form (ngSubmit)="submit()" class="space-y-5">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1.5">
+        Street <span class="text-cyan-500">*</span>
+      </label>
+      <input type="text" [(ngModel)]="street" name="street" required
+        class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+               focus:border-cyan-500 focus:ring-cyan-500" />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">
+          House number <span class="text-cyan-500">*</span>
+        </label>
+        <input type="text" [(ngModel)]="houseNumber" name="houseNumber" required
+          class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                 focus:border-cyan-500 focus:ring-cyan-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Addition</label>
+        <input type="text" [(ngModel)]="houseNumberAddition" name="houseNumberAddition"
+          class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                 focus:border-cyan-500 focus:ring-cyan-500" />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">Zip code</label>
+        <input type="text" [(ngModel)]="zipCode" name="zipCode"
+          class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                 focus:border-cyan-500 focus:ring-cyan-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">
+          City <span class="text-cyan-500">*</span>
+        </label>
+        <input type="text" [(ngModel)]="city" name="city" required
+          class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+                 focus:border-cyan-500 focus:ring-cyan-500" />
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1.5">Province</label>
+      <input type="text" [(ngModel)]="province" name="province"
+        class="block w-full rounded-lg border-slate-200 shadow-sm text-sm
+               focus:border-cyan-500 focus:ring-cyan-500" />
+    </div>
+
+    <button type="submit" [disabled]="!street || !houseNumber || !city || svc.loading()"
+      class="w-full rounded-lg bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-white
+             hover:bg-cyan-400 disabled:opacity-50 transition-colors">
+      @if (svc.loading()) {
+        <app-spinner color="white" label="Saving..." />
+      } @else {
+        Save address
+      }
+    </button>
+  </form>
+</app-section-card>

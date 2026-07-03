@@ -35,4 +35,12 @@ export const routes: Routes = [
         m => m.WatchesPageComponent
       ),
   },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/profile/profile-page.component').then(
+        m => m.ProfilePageComponent
+      ),
+  },
 ];
