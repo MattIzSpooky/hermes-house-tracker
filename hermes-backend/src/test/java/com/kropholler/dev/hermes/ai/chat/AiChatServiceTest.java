@@ -48,52 +48,45 @@ class AiChatServiceTest {
     @Test
     void saveUserMessage_savesEntityWithUserRole() {
         UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        service.saveUserMessage(sessionId, "Hello");
+        service.saveUserMessage(sessionId, userId, "Hello");
 
         ArgumentCaptor<ChatMessageEntity> captor = ArgumentCaptor.forClass(ChatMessageEntity.class);
         verify(chatMessageRepository).save(captor.capture());
         assertThat(captor.getValue().getRole()).isEqualTo("USER");
         assertThat(captor.getValue().getContent()).isEqualTo("Hello");
         assertThat(captor.getValue().getSessionId()).isEqualTo(sessionId);
+        assertThat(captor.getValue().getUserId()).isEqualTo(userId);
     }
 
     @Test
     void saveAssistantMessage_savesEntityWithAssistantRole() {
         UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         when(chatMessageRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        service.saveAssistantMessage(sessionId, "I found 3 houses.");
+        service.saveAssistantMessage(sessionId, userId, "I found 3 houses.");
 
         ArgumentCaptor<ChatMessageEntity> captor = ArgumentCaptor.forClass(ChatMessageEntity.class);
         verify(chatMessageRepository).save(captor.capture());
         assertThat(captor.getValue().getRole()).isEqualTo("ASSISTANT");
         assertThat(captor.getValue().getContent()).isEqualTo("I found 3 houses.");
+        assertThat(captor.getValue().getUserId()).isEqualTo(userId);
     }
 
     @Test
-    void startStream_nullClientId_fallsBackToSessionId() {
+    void startStream_usesGivenUserId() {
         UUID sessionId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
         stubStream(Flux.just("Hi"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, null, "hello");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "hello");
 
         assertThat(handle).isNotNull();
         assertThat(handle.resultHolder().get()).isEmpty();
-    }
-
-    @Test
-    void startStream_withExplicitClientId_usesClientId() {
-        UUID sessionId = UUID.randomUUID();
-        UUID clientId = UUID.randomUUID();
-        when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
-        stubStream(Flux.just("OK"));
-
-        AiChatService.StreamHandle handle = service.startStream(sessionId, clientId, "hello");
-
-        assertThat(handle).isNotNull();
     }
 
     @Test
@@ -107,7 +100,7 @@ class AiChatServiceTest {
                 .thenReturn(List.of(userMsg, assistantMsg));
         stubStream(Flux.just("reply"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, null, "more info");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, UUID.randomUUID(), "more info");
 
         assertThat(handle).isNotNull();
     }
@@ -119,7 +112,7 @@ class AiChatServiceTest {
         when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId))
                 .thenReturn(List.of(badMsg));
 
-        assertThatThrownBy(() -> service.startStream(sessionId, null, "hi"))
+        assertThatThrownBy(() -> service.startStream(sessionId, UUID.randomUUID(), "hi"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unknown chat role: SYSTEM");
     }
@@ -127,17 +120,17 @@ class AiChatServiceTest {
     @Test
     void startStream_withChatToolProvider_addsProviderTools() {
         UUID sessionId = UUID.randomUUID();
-        UUID clientId = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
         service = new AiChatService(chatClient, chatMessageRepository, listingService,
                 chatListingCardMapper, listingSummaryService, favoriteService,
                 List.of(chatToolProvider), new SimpleMeterRegistry());
         when(chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId)).thenReturn(List.of());
-        when(chatToolProvider.provideTools(clientId)).thenReturn(List.of(new Object()));
+        when(chatToolProvider.provideTools(userId)).thenReturn(List.of(new Object()));
         stubStream(Flux.just("done"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, clientId, "hi");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "hi");
 
-        verify(chatToolProvider).provideTools(clientId);
+        verify(chatToolProvider).provideTools(userId);
         assertThat(handle).isNotNull();
     }
 

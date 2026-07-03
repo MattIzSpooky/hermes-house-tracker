@@ -14,11 +14,11 @@ import java.util.UUID;
 public interface ChatToolProvider {
 
     /**
-     * Return tool instances scoped to the given client.
+     * Return tool instances scoped to the given user.
      * Called once per chat request — implementations may create new instances each time.
      *
-     * @param clientId the effective client UUID for this chat session
+     * @param userId the authenticated user's UUID for this chat session
      * @return a list of Spring AI tool objects (annotated with {@code @Tool})
      */
-    List<Object> provideTools(UUID clientId);
+    List<Object> provideTools(UUID userId);
 }

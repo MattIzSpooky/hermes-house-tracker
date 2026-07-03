@@ -71,22 +71,26 @@ public class AiChatService {
     }
 
     @Transactional
-    public void saveUserMessage(UUID sessionId, String content) {
+    public void saveUserMessage(UUID sessionId, UUID userId, String content) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(content, "content must not be null");
         ChatMessageEntity msg = new ChatMessageEntity();
         msg.setSessionId(sessionId);
+        msg.setUserId(userId);
         msg.setRole("USER");
         msg.setContent(content);
         chatMessageRepository.save(msg);
     }
 
     @Transactional
-    public void saveAssistantMessage(UUID sessionId, String content) {
+    public void saveAssistantMessage(UUID sessionId, UUID userId, String content) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(content, "content must not be null");
         ChatMessageEntity msg = new ChatMessageEntity();
         msg.setSessionId(sessionId);
+        msg.setUserId(userId);
         msg.setRole("ASSISTANT");
         msg.setContent(content);
         chatMessageRepository.save(msg);
@@ -97,8 +101,9 @@ public class AiChatService {
      * History is loaded from the DB before the current user message is saved,
      * so the caller must save both user and assistant messages after streaming completes.
      */
-    public StreamHandle startStream(UUID sessionId, UUID clientId, String userMessage) {
+    public StreamHandle startStream(UUID sessionId, UUID userId, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
+        Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
         List<ChatMessageEntity> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
         int fromIndex = Math.max(0, allMessages.size() - 20);
@@ -113,22 +118,18 @@ public class AiChatService {
 
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
 
-        // clientId falls back to sessionId so favourites work even if the frontend
-        // hasn't been updated to send a separate clientId yet.
-        UUID effectiveClientId = clientId != null ? clientId : sessionId;
-
         ListingSearchTool searchTool = new ListingSearchTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         GetListingSummaryTool summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
         GetPriceHistoryTool historyTool = new GetPriceHistoryTool(listingService, meterRegistry);
         CompareListingsTool compareTool = new CompareListingsTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         FindPriceDropTool priceDropTool = new FindPriceDropTool(listingService, chatListingCardMapper, resultHolder, meterRegistry);
         GetFavouriteListingsTool favouritesTool = new GetFavouriteListingsTool(
-                effectiveClientId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
+                userId, favoriteService, listingService, chatListingCardMapper, resultHolder, meterRegistry);
 
         List<Object> allTools = new ArrayList<>(List.of(
                 searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool));
         for (ChatToolProvider provider : chatToolProviders) {
-            allTools.addAll(provider.provideTools(effectiveClientId));
+            allTools.addAll(provider.provideTools(userId));
         }
 
         log.info("startStream: registering {} tools for session={}", allTools.size(), sessionId);

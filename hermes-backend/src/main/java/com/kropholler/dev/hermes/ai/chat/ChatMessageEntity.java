@@ -22,6 +22,9 @@ public class ChatMessageEntity {
     @Column(nullable = false)
     private UUID sessionId;
 
+    @Column(nullable = false)
+    private UUID userId;
+
     @Column(nullable = false, length = 16)
     private String role;
 

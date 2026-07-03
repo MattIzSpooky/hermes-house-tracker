@@ -1,13 +1,18 @@
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.security.CurrentUser;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,11 +26,13 @@ public class ChatController {
     private final MeterRegistry meterRegistry;
 
     @MessageMapping("/chat")
-    public void handleMessage(ChatMessageRequest request) {
+    public void handleMessage(ChatMessageRequest request, @Header("simpUser") Principal principal) {
         if (request == null || request.sessionId() == null || request.message() == null || request.message().isBlank()) {
             log.warn("Received invalid chat request: {}", request);
             return;
         }
+
+        UUID userId = CurrentUser.from((Jwt) ((JwtAuthenticationToken) principal).getPrincipal()).id();
 
         String destination = "/topic/chat/" + request.sessionId();
         Timer.Sample requestTimer = Timer.start(meterRegistry);
@@ -37,13 +44,13 @@ public class ChatController {
 
         try {
             AiChatService.StreamHandle handle = aiChatService.startStream(
-                    request.sessionId(), request.clientId(), request.message());
+                    request.sessionId(), userId, request.message());
 
             String response = streamTokens(handle, destination, request.sessionId(), ttftTimer, startNanos);
 
-            aiChatService.saveUserMessage(request.sessionId(), request.message());
+            aiChatService.saveUserMessage(request.sessionId(), userId, request.message());
             if (!response.isBlank()) {
-                aiChatService.saveAssistantMessage(request.sessionId(), response);
+                aiChatService.saveAssistantMessage(request.sessionId(), userId, response);
             }
             messaging.convertAndSend(destination, new ResultFrame("RESULT", handle.resultHolder().get()));
 
