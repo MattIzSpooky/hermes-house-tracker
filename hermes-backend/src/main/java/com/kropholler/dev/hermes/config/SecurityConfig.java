@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity
+@EnableMethodSecurity(proxyTargetClass = true)
 public class SecurityConfig {
 
     @Bean
