@@ -51,4 +51,13 @@ describe('AppComponent', () => {
     fixture.componentInstance.logout();
     expect(keycloakStub.logout).toHaveBeenCalledWith({ redirectUri: window.location.origin });
   });
+
+  it('should clear the chat session id on logout', () => {
+    localStorage.setItem('hermes-chat-session', 'some-old-session-id');
+    const fixture = TestBed.createComponent(AppComponent);
+
+    fixture.componentInstance.logout();
+
+    expect(localStorage.getItem('hermes-chat-session')).toBeNull();
+  });
 });

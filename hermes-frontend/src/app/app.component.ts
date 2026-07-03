@@ -19,6 +19,10 @@ export class AppComponent {
   }
 
   logout(): void {
+    // The chat session id lives in localStorage, so it survives across different users
+    // logging into the same browser. Clear it so the next login starts a fresh conversation
+    // instead of resuming a thread that (semantically) belonged to whoever was here before.
+    localStorage.removeItem('hermes-chat-session');
     this.keycloak.logout({ redirectUri: window.location.origin });
   }
 }
