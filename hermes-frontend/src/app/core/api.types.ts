@@ -164,7 +164,6 @@ export interface FavoriteDto {
 export interface ChatMessageRequest {
   sessionId: string;
   message: string;
-  clientId?: string;
 }
 
 export interface TokenFrame {
@@ -181,7 +180,7 @@ export interface AgentTaskResponse {
   id: string;
   type: string;
   status: string;
-  clientId: string;
+  userId: string;
   name: string;
   schedule?: string;
   lastRunAt?: string;
@@ -192,7 +191,7 @@ export interface AgentTaskResponse {
 export interface NotificationResponse {
   id: string;
   taskId?: string;
-  clientId: string;
+  userId: string;
   title: string;
   body: string;
   listingIds: string[];
