@@ -37,6 +37,26 @@ export interface GeocodingBackfillResponse {
   queuedCount: number;
 }
 
+export interface AddressResponse {
+  street?: string | null;
+  houseNumber?: string | null;
+  houseNumberAddition?: string | null;
+  zipCode?: string | null;
+  city?: string | null;
+  province?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface UpdateAddressRequest {
+  street: string;
+  houseNumber: string;
+  houseNumberAddition?: string;
+  zipCode?: string;
+  city: string;
+  province?: string;
+}
+
 export interface GeoLocation {
   latitude: number;
   longitude: number;
