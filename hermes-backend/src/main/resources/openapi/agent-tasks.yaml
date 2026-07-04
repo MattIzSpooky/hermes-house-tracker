@@ -32,6 +32,18 @@ paths:
       responses:
         '204':
           description: Deleted
+        '404':
+          description: Agent task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Agent task exists but does not belong to the caller
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   schemas:

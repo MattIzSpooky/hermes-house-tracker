@@ -134,6 +134,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Caller does not have the admin role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
   /api/listings/{id}/summary:
     get:
@@ -192,6 +198,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GeocodingBackfillResponse'
+        '403':
+          description: Caller does not have the admin role
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
 
 components:
   schemas:
