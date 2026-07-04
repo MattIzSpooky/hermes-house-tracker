@@ -203,3 +203,15 @@ export interface NotificationResponse {
 export interface UnreadCountResponse {
   count: number;
 }
+
+export interface ChatSessionSummaryResponse {
+  sessionId: string;
+  title: string;
+  lastMessageAt: string;
+}
+
+export interface ChatMessageResponse {
+  role: string;
+  content: string;
+  createdAt: string;
+}

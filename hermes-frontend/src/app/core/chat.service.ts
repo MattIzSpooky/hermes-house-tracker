@@ -1,7 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, effect } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
+import { catchError, of } from 'rxjs';
 import Keycloak from 'keycloak-js';
-import { ChatListingCard, ResultFrame, TokenFrame } from './api.types';
+import { ChatListingCard, ChatMessageResponse, ChatSessionSummaryResponse, ResultFrame, TokenFrame } from './api.types';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -12,21 +14,28 @@ export interface ChatMessage {
 @Injectable({ providedIn: 'root' })
 export class ChatService {
   private readonly keycloak = inject(Keycloak);
+  private readonly http = inject(HttpClient);
 
-  readonly sessionId: string;
+  private _sessionId: string;
+  get sessionId(): string {
+    return this._sessionId;
+  }
 
   private readonly client: Client;
   private subscription?: StompSubscription;
   private readonly _messages = signal<ChatMessage[]>([]);
   private readonly _isStreaming = signal(false);
   private readonly _isOpen = signal(false);
+  private readonly _sessions = signal<ChatSessionSummaryResponse[]>([]);
+  private isFreshConversation = true;
 
   readonly messages = this._messages.asReadonly();
   readonly isStreaming = this._isStreaming.asReadonly();
   readonly isOpen = this._isOpen.asReadonly();
+  readonly sessions = this._sessions.asReadonly();
 
   constructor() {
-    this.sessionId = localStorage.getItem('hermes-chat-session') ?? this.initSession();
+    this._sessionId = localStorage.getItem('hermes-chat-session') ?? this.generateSessionId();
 
     this.client = new Client({
       brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
@@ -39,9 +48,17 @@ export class ChatService {
     });
 
     this.client.activate();
+
+    effect(() => {
+      const streaming = this._isStreaming();
+      if (!streaming && this.isFreshConversation && this._messages().length > 0) {
+        this.isFreshConversation = false;
+        this.loadSessions();
+      }
+    });
   }
 
-  private initSession(): string {
+  private generateSessionId(): string {
     const id = crypto.randomUUID();
     localStorage.setItem('hermes-chat-session', id);
     return id;
@@ -49,7 +66,7 @@ export class ChatService {
 
   private subscribe(): void {
     this.subscription?.unsubscribe();
-    this.subscription = this.client.subscribe(`/topic/chat/${this.sessionId}`, (msg: IMessage) => {
+    this.subscription = this.client.subscribe(`/topic/chat/${this._sessionId}`, (msg: IMessage) => {
       const frame = JSON.parse(msg.body) as TokenFrame | ResultFrame;
 
       if (frame.type === 'TOKEN') {
@@ -91,7 +108,7 @@ export class ChatService {
     this._isStreaming.set(true);
     this.client.publish({
       destination: '/app/chat',
-      body: JSON.stringify({ sessionId: this.sessionId, message: text }),
+      body: JSON.stringify({ sessionId: this._sessionId, message: text }),
     });
   }
 
@@ -102,5 +119,48 @@ export class ChatService {
   seedAndOpen(assistantContent: string): void {
     this._messages.update(msgs => [...msgs, { role: 'assistant', content: assistantContent }]);
     this._isOpen.set(true);
+  }
+
+  loadSessions(): void {
+    this.http.get<ChatSessionSummaryResponse[]>('/api/chat/sessions')
+      .pipe(catchError(() => of([])))
+      .subscribe(items => this._sessions.set(items));
+  }
+
+  switchSession(sessionId: string): void {
+    if (sessionId === this._sessionId) return;
+    this.subscription?.unsubscribe();
+    this._sessionId = sessionId;
+    localStorage.setItem('hermes-chat-session', sessionId);
+    this.isFreshConversation = false;
+    this._messages.set([]);
+    this.http.get<ChatMessageResponse[]>(`/api/chat/sessions/${sessionId}/messages`)
+      .pipe(catchError(() => of([])))
+      .subscribe(items => {
+        this._messages.set(items.map(m => ({
+          role: m.role.toUpperCase() === 'USER' ? 'user' as const : 'assistant' as const,
+          content: m.content,
+        })));
+      });
+    if (this.client.connected) this.subscribe();
+  }
+
+  startNewChat(): void {
+    this.subscription?.unsubscribe();
+    this._sessionId = this.generateSessionId();
+    this.isFreshConversation = true;
+    this._messages.set([]);
+    if (this.client.connected) this.subscribe();
+  }
+
+  deleteSession(sessionId: string): void {
+    this.http.delete(`/api/chat/sessions/${sessionId}`)
+      .pipe(catchError(() => of(null)))
+      .subscribe(() => {
+        this._sessions.update(list => list.filter(s => s.sessionId !== sessionId));
+        if (sessionId === this._sessionId) {
+          this.startNewChat();
+        }
+      });
   }
 }
