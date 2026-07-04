@@ -471,7 +471,6 @@
                             <generatorName>spring</generatorName>
                             <apiPackage>com.kropholler.dev.hermes.ai.chat.openapi</apiPackage>
                             <modelPackage>com.kropholler.dev.hermes.ai.chat.openapi</modelPackage>
-                            <schemaMappings><schemaMapping>ProblemDetail=org.springframework.http.ProblemDetail</schemaMapping></schemaMappings>
                             <configOptions>
                                 <interfaceOnly>true</interfaceOnly>
                                 <useSpringBoot3>true</useSpringBoot3>
