@@ -84,6 +84,16 @@ describe('ChatHistoryPanelComponent', () => {
     expect(chatSvc.switchSession).not.toHaveBeenCalled();
   });
 
+  it('pressing Space on delete calls deleteSession but does not also switch', async () => {
+    await setup([{ sessionId: 'target', title: 'Delete me', lastMessageAt: '2026-06-01T08:00:00Z' }]);
+
+    el.querySelector<HTMLButtonElement>('[data-delete-session-id="target"]')!
+      .dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+
+    expect(chatSvc.deleteSession).toHaveBeenCalledWith('target');
+    expect(chatSvc.switchSession).not.toHaveBeenCalled();
+  });
+
   it('pressing Space on a conversation row calls switchSession with its sessionId', async () => {
     await setup([{ sessionId: 'target', title: 'Press me', lastMessageAt: '2026-06-01T08:00:00Z' }]);
 

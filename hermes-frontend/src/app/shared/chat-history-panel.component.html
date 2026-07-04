@@ -25,6 +25,7 @@
         [attr.data-delete-session-id]="session.sessionId"
         (click)="deleteConversation(session.sessionId, $event)"
         (keydown.enter)="deleteConversation(session.sessionId, $event)"
+        (keydown.space)="deleteConversation(session.sessionId, $event)"
         aria-label="Delete conversation"
         class="text-slate-500 hover:text-red-400 shrink-0 leading-none"
       >
