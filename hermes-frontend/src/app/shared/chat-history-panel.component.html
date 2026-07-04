@@ -8,22 +8,26 @@
   </button>
 
   @for (session of svc.sessions(); track session.sessionId) {
-    <button
+    <div
       [attr.data-session-id]="session.sessionId"
+      role="button"
+      tabindex="0"
       (click)="switchTo(session.sessionId)"
+      (keydown.enter)="switchTo(session.sessionId)"
       [class]="session.sessionId === svc.sessionId
         ? 'flex items-center justify-between gap-2 text-left text-sm px-2 py-1.5 rounded-md bg-slate-700 text-white'
         : 'flex items-center justify-between gap-2 text-left text-sm px-2 py-1.5 rounded-md text-slate-300 hover:bg-slate-800 transition-colors'"
     >
       <span class="truncate">{{ session.title }}</span>
-      <span
+      <button
+        type="button"
         [attr.data-delete-session-id]="session.sessionId"
         (click)="deleteConversation(session.sessionId, $event)"
         aria-label="Delete conversation"
         class="text-slate-500 hover:text-red-400 shrink-0 leading-none"
       >
         &times;
-      </span>
-    </button>
+      </button>
+    </div>
   }
 </div>
