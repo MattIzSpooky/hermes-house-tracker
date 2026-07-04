@@ -49,7 +49,7 @@ describe('ChatPanelComponent', () => {
     input.dispatchEvent(new Event('input'));
     await fixture.whenStable();
 
-    el.querySelector<HTMLButtonElement>('button')!.click();
+    el.querySelector<HTMLButtonElement>('button[aria-label="Send message"]')!.click();
     expect(chatSvc.sendMessage).toHaveBeenCalledWith('I want a big house');
 
     // After send, input should be cleared
@@ -60,7 +60,7 @@ describe('ChatPanelComponent', () => {
   it('disables input and button while streaming', async () => {
     await setup([], true);
     expect(el.querySelector<HTMLInputElement>('input')!.disabled).toBeTrue();
-    expect(el.querySelector<HTMLButtonElement>('button')!.disabled).toBeTrue();
+    expect(el.querySelector<HTMLButtonElement>('button[aria-label="Send message"]')!.disabled).toBeTrue();
   });
 
   it('sends a message on Enter keydown', async () => {
@@ -93,7 +93,8 @@ describe('ChatPanelComponent', () => {
       }
     ];
     await setup(msgs as any);
-    expect(el.querySelector('app-stat-card')).toBeTruthy();
-    expect(el.querySelector('a[href]') || el.querySelector('[routerLink]') || el.querySelector('a')).toBeTruthy();
+    const card = el.querySelector('a');
+    expect(card).toBeTruthy();
+    expect(card!.textContent).toContain('Keizersgracht');
   });
 });
