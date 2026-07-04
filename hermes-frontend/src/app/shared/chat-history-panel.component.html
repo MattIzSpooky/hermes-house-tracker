@@ -1,0 +1,29 @@
+<div class="flex flex-col gap-1 p-2 max-h-64 overflow-y-auto bg-slate-900 border-b border-slate-800">
+  <button
+    data-new-chat
+    (click)="newChat()"
+    class="text-left text-sm font-semibold text-cyan-400 hover:text-cyan-300 px-2 py-1.5 rounded-md hover:bg-slate-800 transition-colors"
+  >
+    + New chat
+  </button>
+
+  @for (session of svc.sessions(); track session.sessionId) {
+    <button
+      [attr.data-session-id]="session.sessionId"
+      (click)="switchTo(session.sessionId)"
+      [class]="session.sessionId === svc.sessionId
+        ? 'flex items-center justify-between gap-2 text-left text-sm px-2 py-1.5 rounded-md bg-slate-700 text-white'
+        : 'flex items-center justify-between gap-2 text-left text-sm px-2 py-1.5 rounded-md text-slate-300 hover:bg-slate-800 transition-colors'"
+    >
+      <span class="truncate">{{ session.title }}</span>
+      <span
+        [attr.data-delete-session-id]="session.sessionId"
+        (click)="deleteConversation(session.sessionId, $event)"
+        aria-label="Delete conversation"
+        class="text-slate-500 hover:text-red-400 shrink-0 leading-none"
+      >
+        &times;
+      </span>
+    </button>
+  }
+</div>
