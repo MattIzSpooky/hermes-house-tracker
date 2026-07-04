@@ -134,9 +134,11 @@ export class ChatService {
     localStorage.setItem('hermes-chat-session', sessionId);
     this.isFreshConversation = false;
     this._messages.set([]);
+    this._isStreaming.set(false);
     this.http.get<ChatMessageResponse[]>(`/api/chat/sessions/${sessionId}/messages`)
       .pipe(catchError(() => of([])))
       .subscribe(items => {
+        if (this._sessionId !== sessionId) return;
         this._messages.set(items.map(m => ({
           role: m.role.toUpperCase() === 'USER' ? 'user' as const : 'assistant' as const,
           content: m.content,
@@ -150,6 +152,7 @@ export class ChatService {
     this._sessionId = this.generateSessionId();
     this.isFreshConversation = true;
     this._messages.set([]);
+    this._isStreaming.set(false);
     if (this.client.connected) this.subscribe();
   }
 

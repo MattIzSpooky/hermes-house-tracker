@@ -122,4 +122,45 @@ describe('ChatService', () => {
     expect(service.sessionId).not.toBe(activeSessionId);
     expect(service.messages()).toEqual([]);
   });
+
+  it('switchSession resets isStreaming to false even if a stream was in progress', () => {
+    // Drive the private streaming signal directly: sendMessage() requires a connected
+    // STOMP client, which never connects in this unit-test environment.
+    (service as any)._isStreaming.set(true);
+    expect(service.isStreaming()).toBe(true);
+
+    service.switchSession('another-session');
+
+    expect(service.isStreaming()).toBe(false);
+
+    httpMock.expectOne('/api/chat/sessions/another-session/messages').flush([]);
+  });
+
+  it('startNewChat resets isStreaming to false even if a stream was in progress', () => {
+    (service as any)._isStreaming.set(true);
+    expect(service.isStreaming()).toBe(true);
+
+    service.startNewChat();
+
+    expect(service.isStreaming()).toBe(false);
+  });
+
+  it('discards a stale switchSession transcript response that resolves out of order', () => {
+    service.switchSession('session-b');
+    const reqB = httpMock.expectOne('/api/chat/sessions/session-b/messages');
+
+    // A newer switch supersedes B before B's HTTP response arrives.
+    service.switchSession('session-c');
+    const reqC = httpMock.expectOne('/api/chat/sessions/session-c/messages');
+
+    reqB.flush([{ role: 'USER', content: 'stale from B', createdAt: '2026-06-01T08:00:00Z' }]);
+
+    // B's stale response must not overwrite the transcript; we're on session-c now.
+    expect(service.sessionId).toBe('session-c');
+    expect(service.messages()).toEqual([]);
+
+    reqC.flush([{ role: 'ASSISTANT', content: 'hello from C', createdAt: '2026-06-01T08:00:01Z' }]);
+
+    expect(service.messages()).toEqual([{ role: 'assistant', content: 'hello from C' }]);
+  });
 });
