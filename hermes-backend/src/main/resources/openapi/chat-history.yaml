@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: Hermes Chat History API
+  version: 1.0.0
+
+paths:
+  /api/chat/sessions:
+    get:
+      tags: [ChatHistory]
+      operationId: getChatSessions
+      responses:
+        '200':
+          description: The caller's conversations, most recent first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatSessionSummaryResponse'
+
+  /api/chat/sessions/{sessionId}/messages:
+    get:
+      tags: [ChatHistory]
+      operationId: getChatSessionMessages
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Full transcript for one conversation, oldest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatMessageResponse'
+
+  /api/chat/sessions/{sessionId}:
+    delete:
+      tags: [ChatHistory]
+      operationId: deleteChatSession
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted (or a no-op if the session didn't belong to the caller)
+
+components:
+  schemas:
+    ChatSessionSummaryResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        lastMessageAt:
+          type: string
+          format: date-time
+
+    ChatMessageResponse:
+      type: object
+      properties:
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
