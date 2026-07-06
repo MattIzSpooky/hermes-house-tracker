@@ -3,7 +3,6 @@ package com.kropholler.dev.hermes.listing;
 import com.kropholler.dev.hermes.config.SecurityConfig;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
-import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;
 import com.kropholler.dev.hermes.security.SecuredMockMvcTestSupport;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,7 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ListingController.class)
-@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class, NoOpUserProfileSyncFilterTestConfig.class})
+@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class})
 class ListingControllerSearchTest {
 
     @Autowired MockMvc mockMvc;

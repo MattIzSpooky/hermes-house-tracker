@@ -2,7 +2,6 @@ package com.kropholler.dev.hermes.ai.agent.task;
 
 import com.kropholler.dev.hermes.ai.agent.task.openapi.AgentTaskResponse;
 import com.kropholler.dev.hermes.config.SecurityConfig;
-import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -28,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AgentTaskController.class)
-@Import({SecurityConfig.class, NoOpUserProfileSyncFilterTestConfig.class})
+@Import(SecurityConfig.class)
 class AgentTaskControllerTest {
 
     @Autowired MockMvc mockMvc;

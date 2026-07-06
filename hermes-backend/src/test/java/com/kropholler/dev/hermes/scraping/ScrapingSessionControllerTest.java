@@ -2,7 +2,6 @@ package com.kropholler.dev.hermes.scraping;
 
 import com.kropholler.dev.hermes.config.SecurityConfig;
 import com.kropholler.dev.hermes.scraping.openapi.ScrapingSessionResponse;
-import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -26,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ScrapingSessionController.class)
-@Import({SecurityConfig.class, NoOpUserProfileSyncFilterTestConfig.class})
+@Import(SecurityConfig.class)
 class ScrapingSessionControllerTest {
 
     @Autowired MockMvc mockMvc;

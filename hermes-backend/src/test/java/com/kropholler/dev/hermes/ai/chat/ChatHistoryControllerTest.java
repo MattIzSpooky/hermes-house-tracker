@@ -3,7 +3,6 @@ package com.kropholler.dev.hermes.ai.chat;
 import com.kropholler.dev.hermes.ai.chat.openapi.ChatMessageResponse;
 import com.kropholler.dev.hermes.ai.chat.openapi.ChatSessionSummaryResponse;
 import com.kropholler.dev.hermes.config.SecurityConfig;
-import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -29,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ChatHistoryController.class)
-@Import({SecurityConfig.class, NoOpUserProfileSyncFilterTestConfig.class})
+@Import(SecurityConfig.class)
 class ChatHistoryControllerTest {
 
     @Autowired MockMvc mockMvc;
