@@ -43,19 +43,42 @@ Explicitly NOT encrypted: `NotificationEntity.listingIds`, `AgentTaskEntity.type
 
 ## 3. Special-case fixes for native-SQL bypasses
 
-Two existing native queries bypass `AttributeConverter`s entirely (converters only apply during normal entity hydration) and must be fixed alongside the schema change:
+One existing native query bypasses `AttributeConverter`s entirely (converters only apply during normal entity hydration) and must be fixed alongside the schema change:
 
 **`ChatMessageRepository.findSessionSummariesByUserId`** currently runs one native SQL projection that reads `content` directly — after encryption this would return ciphertext into `ChatSessionProjection.titleSource`. Replace it with an entity-hydrating approach: a derived-query method fetching each session's message rows via real `ChatMessageEntity` (going through the converter, so `content` decrypts normally), with the existing `ChatHistoryService.truncateTitle(...)` logic unchanged — it just now receives plaintext instead of ciphertext-tainted input. This is a service-layer reshuffle, not a query-semantics change: same 50-session limit, same "first USER message as title source" rule, same ordering.
 
-**`UserProfileRepository.upsertEmail`** is a native blind `INSERT ... ON CONFLICT DO UPDATE`, which writes `:email` straight to the column with no converter involved. Since `email` becomes an encrypted `TEXT` column, `UserProfileService.syncEmail` must encrypt the value itself — via the same `FieldEncryptor` bean — before passing it into the native query's bind parameter:
+`UserProfileRepository.upsertEmail`, previously a native blind `INSERT ... ON CONFLICT DO UPDATE`, is replaced entirely rather than patched — this removes the second native-SQL bypass instead of working around it. JPQL (unlike native SQL) applies `AttributeConverter`s during translation, so a JPQL bulk update encrypts `email` transparently, with no manual `FieldEncryptor` call in the service:
+
+```java
+@Modifying
+@Query("UPDATE UserProfileEntity u SET u.email = :email WHERE u.userId = :userId")
+int updateEmail(@Param("userId") UUID userId, @Param("email") String email);
+```
+
+`UserProfileService.syncEmail` tries the update first; if no row existed yet (0 rows affected), it inserts a new profile row via a normal JPA `save`:
+
 ```java
 @Transactional
 public void syncEmail(UUID userId, String email) {
     if (email == null || email.isBlank()) return;
-    userProfileRepository.upsertEmail(userId, fieldEncryptor.encrypt(email));
+    int updated = userProfileRepository.updateEmail(userId, email);
+    if (updated == 0) {
+        UserProfileEntity entity = new UserProfileEntity();
+        entity.setUserId(userId);
+        entity.setEmail(email);
+        entity.setUpdatedAt(Instant.now());
+        try {
+            userProfileRepository.save(entity);
+        } catch (DataIntegrityViolationException e) {
+            // Lost a race with a concurrent syncEmail call for the same new user — the row
+            // now exists, so retry as an update instead of failing the request.
+            userProfileRepository.updateEmail(userId, email);
+        }
+    }
 }
 ```
-This preserves the no-read-then-write design from the [email sync redesign](2026-07-06-email-sync-redesign-design.md) — one extra in-process encrypt call, no new DB round trip.
+
+The update-then-maybe-insert sequence isn't atomic the way `ON CONFLICT` was, so two concurrent `syncEmail` calls for a brand-new user (e.g. the same user open in two tabs) could both see 0 rows updated and both attempt an insert; the second insert hits the `user_profiles` primary key constraint. The catch block treats that specific case as "someone else just created the row" and retries as an update, so the caller never sees a failure. This is a rare race (same user, first-ever sync, near-simultaneous requests) and the guard is a plain retry, not a new dependency or query.
 
 No other native queries in the codebase touch an encrypted column (confirmed by inspection of `NotificationRepository` and `AgentTaskRepository`).
 
@@ -66,7 +89,7 @@ A single new Flyway migration, `V15__encrypt_sensitive_columns.sql`:
 - `ALTER COLUMN ... TYPE TEXT` for every column listed in the table above.
 - Drop the `JSONB` typing on `agent_tasks.payload` (column becomes plain `TEXT`; `AgentTaskEntity.payload`'s `@JdbcTypeCode(SqlTypes.JSON)` annotation is removed to match).
 
-`src/test/resources/application.properties` gets fixed test values for `hermes.encryption.key`/`hermes.encryption.salt` so encrypt/decrypt round-trips work in unit and Testcontainers-based tests. Because converters are transparent at the entity level, existing tests that assert on these fields' values (`ChatMessageRepositoryTest`, `UserProfileServiceTest`, `AgentTaskServiceTest`, etc.) need no changes. The only tests that assert on **raw SQL/JDBC** results for an affected column are the chat-session-title query (being reworked in this same design, Section 3) and `UserProfileRepositoryUpsertEmailTest` (needs its assertions updated to expect/pass ciphertext through the native upsert path, and to decrypt via `FieldEncryptor` when checking the stored value).
+`src/test/resources/application.properties` gets fixed test values for `hermes.encryption.key`/`hermes.encryption.salt` so encrypt/decrypt round-trips work in unit and Testcontainers-based tests. Because converters are transparent at the entity level, existing tests that assert on these fields' values (`ChatMessageRepositoryTest`, `UserProfileServiceTest`, `AgentTaskServiceTest`, etc.) need no changes. `UserProfileRepositoryUpsertEmailTest` is renamed/rewritten to exercise `updateEmail` + the insert fallback (no more native-upsert-specific assertions, since the new path is plain JPQL/JPA); it can drop its Testcontainers/Postgres dependency and run against the default H2 `@DataJpaTest` setup, since JPQL bulk updates and JPA saves are portable across databases — unlike the old `ON CONFLICT` syntax, which was Postgres-only. The only remaining test that asserts on **raw SQL/JDBC** results for an affected column is the chat-session-title query (being reworked in this same design, Section 3).
 
 ## Out of scope
 
