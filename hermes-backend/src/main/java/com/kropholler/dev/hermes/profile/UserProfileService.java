@@ -50,6 +50,12 @@ public class UserProfileService {
         return toDto(repository.save(entity));
     }
 
+    @Transactional
+    public void syncEmail(UUID userId, String email) {
+        if (email == null || email.isBlank()) return;
+        repository.upsertEmail(userId, email);
+    }
+
     private static AddressDto toDto(UserProfileEntity entity) {
         return new AddressDto(
             entity.getStreet(),

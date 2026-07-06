@@ -127,4 +127,27 @@ class UserProfileServiceTest {
         verify(repository, never()).findById(any());
         verify(repository, never()).save(any());
     }
+
+    @Test
+    void syncEmail_delegatesToRepositoryUpsert() {
+        UUID userId = UUID.randomUUID();
+
+        service.syncEmail(userId, "user@hermes.local");
+
+        verify(repository).upsertEmail(userId, "user@hermes.local");
+    }
+
+    @Test
+    void syncEmail_nullEmail_doesNothing() {
+        service.syncEmail(UUID.randomUUID(), null);
+
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void syncEmail_blankEmail_doesNothing() {
+        service.syncEmail(UUID.randomUUID(), "   ");
+
+        verifyNoInteractions(repository);
+    }
 }
