@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.profile.UserProfileEntity;
+import com.kropholler.dev.hermes.profile.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -17,6 +20,7 @@ class EmailNotificationSender {
 
     private final JavaMailSender mailSender;
     private final NotificationRepository notificationRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Value("${hermes.notifications.from-email}")
     private String fromEmail;
@@ -29,7 +33,7 @@ class EmailNotificationSender {
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(fromEmail);
-            msg.setTo(toEmail);
+            msg.setTo(resolveRecipient(dto.userId()));
             msg.setSubject("[Hermes] " + dto.title());
             msg.setText(dto.body());
             mailSender.send(msg);
@@ -40,5 +44,12 @@ class EmailNotificationSender {
         } catch (Exception e) {
             log.error("Failed to send notification email for {}", dto.id(), e);
         }
+    }
+
+    private String resolveRecipient(UUID userId) {
+        return userProfileRepository.findById(userId)
+            .map(UserProfileEntity::getEmail)
+            .filter(email -> email != null && !email.isBlank())
+            .orElse(toEmail);
     }
 }

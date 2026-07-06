@@ -1,5 +1,7 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.profile.UserProfileEntity;
+import com.kropholler.dev.hermes.profile.UserProfileRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +25,7 @@ class EmailNotificationSenderTest {
 
     @Mock JavaMailSender mailSender;
     @Mock NotificationRepository notificationRepository;
+    @Mock UserProfileRepository userProfileRepository;
     @InjectMocks EmailNotificationSender sender;
 
     private void setEmails(String from, String to) {
@@ -40,6 +43,7 @@ class EmailNotificationSenderTest {
         UUID id = UUID.randomUUID();
         NotificationEntity entity = new NotificationEntity();
         setEmails("from@hermes.nl", "to@user.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
         sender.sendAsync(dto(id));
@@ -58,6 +62,7 @@ class EmailNotificationSenderTest {
         UUID id = UUID.randomUUID();
         NotificationEntity entity = new NotificationEntity();
         setEmails("from@hermes.nl", "to@user.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
         sender.sendAsync(dto(id));
@@ -71,10 +76,48 @@ class EmailNotificationSenderTest {
     void sendAsync_swallowsMailException() {
         UUID id = UUID.randomUUID();
         setEmails("from@hermes.nl", "to@user.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
         doThrow(new RuntimeException("SMTP down")).when(mailSender).send(any(SimpleMailMessage.class));
 
         sender.sendAsync(dto(id));
 
         verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
+    void sendAsync_userHasProfileEmail_sendsToProfileEmail() {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        NotificationDto dto = new NotificationDto(id, null, userId,
+            "Price alert", "Dropped 10%", List.of(), false, null, null);
+        setEmails("from@hermes.nl", "fallback@hermes.nl");
+        UserProfileEntity profile = new UserProfileEntity();
+        profile.setUserId(userId);
+        profile.setEmail("actualuser@hermes.local");
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.of(profile));
+        when(notificationRepository.findById(id)).thenReturn(Optional.of(new NotificationEntity()));
+
+        sender.sendAsync(dto);
+
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mailSender).send(captor.capture());
+        assertThat(captor.getValue().getTo()).containsExactly("actualuser@hermes.local");
+    }
+
+    @Test
+    void sendAsync_userHasNoProfileEmail_fallsBackToConfigValue() {
+        UUID id = UUID.randomUUID();
+        UUID userId = UUID.randomUUID();
+        NotificationDto dto = new NotificationDto(id, null, userId,
+            "Price alert", "Dropped 10%", List.of(), false, null, null);
+        setEmails("from@hermes.nl", "fallback@hermes.nl");
+        when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
+        when(notificationRepository.findById(id)).thenReturn(Optional.of(new NotificationEntity()));
+
+        sender.sendAsync(dto);
+
+        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
+        verify(mailSender).send(captor.capture());
+        assertThat(captor.getValue().getTo()).containsExactly("fallback@hermes.nl");
     }
 }
