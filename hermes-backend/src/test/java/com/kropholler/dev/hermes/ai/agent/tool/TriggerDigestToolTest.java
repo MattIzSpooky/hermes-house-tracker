@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,5 +51,17 @@ class TriggerDigestToolTest {
         tool.triggerDigest("Amsterdam, ,Utrecht", "Digest");
 
         verify(agentTaskService).createDigest(clientId, "Digest", List.of("Amsterdam", "Utrecht"));
+    }
+
+    @Test
+    void triggerDigest_noEmail_rejectsWithoutSchedulingTask() {
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+
+        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService, null);
+        String result = tool.triggerDigest("Amsterdam,Utrecht", "Weekly digest");
+
+        assertThat(result).contains("email address");
+        verify(agentTaskService, never()).createDigest(any(), anyString(), anyList());
     }
 }

@@ -41,6 +41,10 @@ class SaveAreaResearchTool extends TaskTool {
         @ToolParam(required = false, description = "Address to search near instead of the user's home address, format: 'houseNumber, street, city'") String nearAddress,
         @ToolParam(required = false, description = "City to search near instead of the user's home address") String nearCity
     ) {
+        if (!hasEmail()) {
+            return "Please make sure your account has an email address before setting up notifications.";
+        }
+
         Double overrideLon = null;
         Double overrideLat = null;
 

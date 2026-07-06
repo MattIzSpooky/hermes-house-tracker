@@ -88,4 +88,16 @@ class SaveWatchToolTest {
         assertThat(cap.getValue().city()).isNull();
         assertThat(cap.getValue().province()).isNull();
     }
+
+    @Test
+    void saveWatch_noEmail_rejectsWithoutCreatingTask() {
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+
+        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, null);
+        String result = tool.saveWatch("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null);
+
+        assertThat(result).contains("email address");
+        verify(agentTaskService, never()).createWatch(any(), anyString(), any());
+    }
 }

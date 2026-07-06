@@ -19,6 +19,9 @@ class TriggerResearchTool extends TaskTool {
     public String triggerResearch(
         @ToolParam(description = "The research question or task to investigate in detail") String prompt
     ) {
+        if (!hasEmail()) {
+            return "Please make sure your account has an email address before setting up notifications.";
+        }
         agentTaskService.createResearch(userId, prompt);
         return "Research queued — results will appear as a notification shortly.";
     }

@@ -30,6 +30,9 @@ class SaveWatchTool extends TaskTool {
         @ToolParam(required = false, description = "City to search near") String nearCity,
         @ToolParam(required = false, description = "Radius in km when nearCity is set") Integer radiusKm
     ) {
+        if (!hasEmail()) {
+            return "Please make sure your account has an email address before setting up notifications.";
+        }
         String watchName = (name != null && !name.isBlank()) ? name : buildName(city, minBedrooms, maxPrice);
         WatchPayload payload = new WatchPayload(
             blankToNull(city), blankToNull(province), minPrice, maxPrice,

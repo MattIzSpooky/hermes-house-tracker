@@ -171,4 +171,16 @@ class SaveAreaResearchToolTest {
         verify(agentTaskService).createAreaResearch(eq(userId), eq("My search"), cap.capture());
         assertThat(cap.getValue().keywords()).isNull();
     }
+
+    @Test
+    void saveAreaResearch_noEmail_rejectsBeforeAnyOtherValidation() {
+        UUID userId = UUID.randomUUID();
+        SaveAreaResearchTool tool = new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService, null);
+
+        String result = tool.saveAreaResearch(null, 15, null, null, null, null, null, null, null, null, null);
+
+        assertThat(result).contains("email address");
+        verify(agentTaskService, never()).createAreaResearch(any(), anyString(), any());
+        verifyNoInteractions(userProfileRepository, geocodingService);
+    }
 }

@@ -22,6 +22,9 @@ class TriggerDigestTool extends TaskTool {
         @ToolParam(description = "Comma-separated list of cities to include in the digest, e.g. 'Amsterdam,Utrecht'") String cities,
         @ToolParam(description = "A short name for this digest, e.g. 'Weekly Amsterdam & Utrecht digest'") String name
     ) {
+        if (!hasEmail()) {
+            return "Please make sure your account has an email address before setting up notifications.";
+        }
         List<String> cityList = Arrays.stream(cities.split(","))
             .map(String::strip)
             .filter(s -> !s.isBlank())

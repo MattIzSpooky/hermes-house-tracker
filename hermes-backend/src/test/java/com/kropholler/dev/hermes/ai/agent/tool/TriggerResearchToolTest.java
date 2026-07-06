@@ -34,4 +34,16 @@ class TriggerResearchToolTest {
         verify(agentTaskService).createResearch(clientId, "What are the current market trends in Amsterdam?");
         assertThat(result).contains("queued");
     }
+
+    @Test
+    void triggerResearch_noEmail_rejectsWithoutQueuingTask() {
+        AgentTaskService agentTaskService = mock(AgentTaskService.class);
+        UUID clientId = UUID.randomUUID();
+
+        TriggerResearchTool tool = new TriggerResearchTool(clientId, agentTaskService, null);
+        String result = tool.triggerResearch("What are the current market trends in Amsterdam?");
+
+        assertThat(result).contains("email address");
+        verify(agentTaskService, never()).createResearch(any(), anyString());
+    }
 }
