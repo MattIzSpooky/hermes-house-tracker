@@ -39,7 +39,8 @@ public class ListingSearchTool {
     @Tool(description = "Search for property listings matching the user's criteria. "
             + "ALWAYS call this tool before describing any listings — never invent property details. "
             + "Use priceSort='desc' for 'most expensive'/'highest price'/'luxury'; use priceSort='asc' or omit for 'cheapest'/'lowest price' or no sort preference. "
-            + "For radius searches: set nearAddress (format: 'houseNumber, street, city') or nearCity and radiusKm.")
+            + "For radius searches: set nearAddress (format: 'houseNumber, street, city') or nearCity and radiusKm. "
+            + "Use limit to control how many results come back (default 5, max 15) — e.g. set limit=10 if the user asks for 10 listings.")
     public List<ChatListingCard> searchListings(
             @ToolParam(required = false, description = "City to filter by, omit if not specified") String city,
             @ToolParam(required = false, description = "Province to filter by, omit if not specified") String province,
@@ -52,18 +53,19 @@ public class ListingSearchTool {
             @ToolParam(required = false, description = "Price sort: use 'desc' for most expensive first, 'asc' or omit for cheapest first or no preference") String priceSort,
             @ToolParam(required = false, description = "Address to search near, format: 'houseNumber, street, city'. Use when user asks about listings near a specific address.") String nearAddress,
             @ToolParam(required = false, description = "City name to search near. Use when user asks about listings near a city.") String nearCity,
-            @ToolParam(required = false, description = "Search radius in kilometres. Required when nearAddress or nearCity is set.") Integer radiusKm
+            @ToolParam(required = false, description = "Search radius in kilometres. Required when nearAddress or nearCity is set.") Integer radiusKm,
+            @ToolParam(required = false, description = "Number of listings to return, default 5, max 15") Integer limit
     ) {
         boolean sortDesc = "desc".equalsIgnoreCase(priceSort);
-        log.info("searchListings called: city={}, province={}, minBedrooms={}, minPrice={}, maxPrice={}, priceSort={}, nearAddress={}, nearCity={}, radiusKm={}",
-                city, province, minBedrooms, minPrice, maxPrice, priceSort, nearAddress, nearCity, radiusKm);
+        log.info("searchListings called: city={}, province={}, minBedrooms={}, minPrice={}, maxPrice={}, priceSort={}, nearAddress={}, nearCity={}, radiusKm={}, limit={}",
+                city, province, minBedrooms, minPrice, maxPrice, priceSort, nearAddress, nearCity, radiusKm, limit);
         callCounter.increment();
         List<ChatListingCard> cards = listingService.findForChat(
                 minPrice, maxPrice,
                 minBedrooms, minRooms, minLivingAreaM2,
                 blankToNull(province), blankToNull(city), blankToNull(keywords),
                 sortDesc,
-                blankToNull(nearAddress), blankToNull(nearCity), radiusKm, null
+                blankToNull(nearAddress), blankToNull(nearCity), radiusKm, limit
         ).stream().map(mapper::toChatListingCard).toList();
         log.info("searchListings returned {} results", cards.size());
         resultHolder.set(cards);
