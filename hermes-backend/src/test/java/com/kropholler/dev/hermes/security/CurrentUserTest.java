@@ -69,4 +69,35 @@ class CurrentUserTest {
             org.springframework.security.core.context.SecurityContextHolder.clearContext();
         }
     }
+
+    @Test
+    void from_extractsEmailClaim() {
+        Jwt jwt = Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject(UUID.randomUUID().toString())
+            .claim("preferred_username", "testuser")
+            .claim("email", "testuser@hermes.local")
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(60))
+            .build();
+
+        CurrentUser currentUser = CurrentUser.from(jwt);
+
+        assertThat(currentUser.email()).isEqualTo("testuser@hermes.local");
+    }
+
+    @Test
+    void from_missingEmailClaim_returnsNull() {
+        Jwt jwt = Jwt.withTokenValue("token")
+            .header("alg", "none")
+            .subject(UUID.randomUUID().toString())
+            .claim("preferred_username", "testuser")
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(60))
+            .build();
+
+        CurrentUser currentUser = CurrentUser.from(jwt);
+
+        assertThat(currentUser.email()).isNull();
+    }
 }

@@ -9,12 +9,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public record CurrentUser(UUID id, String username, Set<String> roles) {
+public record CurrentUser(UUID id, String username, String email, Set<String> roles) {
 
     public static CurrentUser from(Jwt jwt) {
         UUID id = UUID.fromString(jwt.getSubject());
         String username = jwt.getClaimAsString("preferred_username");
-        return new CurrentUser(id, username, extractRoles(jwt));
+        String email = jwt.getClaimAsString("email");
+        return new CurrentUser(id, username, email, extractRoles(jwt));
     }
 
     public static CurrentUser current() {
