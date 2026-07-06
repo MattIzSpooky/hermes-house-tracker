@@ -9,6 +9,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -116,6 +117,24 @@ class AgentTaskServiceTest {
         assertThat(saved.getType()).isEqualTo(AgentTaskType.DIGEST);
         assertThat(saved.getSchedule()).isEqualTo("0 0 8 * * MON");
         assertThat(saved.getNextRunAt()).isNotNull();
+    }
+
+    @Test
+    void createAreaResearch_persistsTaskWithDailySchedule() {
+        when(repo.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        AreaResearchPayload payload = new AreaResearchPayload(15, 10, 3, null, 80, null, 500000, null, null, null);
+        service.createAreaResearch(UUID.randomUUID(), "Best nearby homes", payload);
+
+        ArgumentCaptor<AgentTaskEntity> captor = ArgumentCaptor.forClass(AgentTaskEntity.class);
+        verify(repo).save(captor.capture());
+        AgentTaskEntity saved = captor.getValue();
+
+        assertThat(saved.getType()).isEqualTo(AgentTaskType.AREA_RESEARCH);
+        assertThat(saved.getSchedule()).isEqualTo("0 0 8 * * *");
+        assertThat(saved.getNextRunAt()).isAfter(Instant.now().minusSeconds(5));
+        assertThat(saved.getStatus()).isEqualTo(AgentTaskStatus.ACTIVE);
+        assertThat(saved.getName()).isEqualTo("Best nearby homes");
     }
 
     @Test

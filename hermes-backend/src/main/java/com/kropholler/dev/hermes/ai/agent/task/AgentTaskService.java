@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.ai.agent.task;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
+import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
@@ -60,6 +61,18 @@ public class AgentTaskService {
         task.setPayload(serialize(new DigestPayload(cities)));
         task.setSchedule("0 0 8 * * MON");
         task.setNextRunAt(computeNext("0 0 8 * * MON"));
+        return toDto(agentTaskRepository.save(task));
+    }
+
+    @Transactional
+    public AgentTaskDto createAreaResearch(UUID userId, String name, AreaResearchPayload payload) {
+        AgentTaskEntity task = new AgentTaskEntity();
+        task.setType(AgentTaskType.AREA_RESEARCH);
+        task.setUserId(userId);
+        task.setName(name);
+        task.setPayload(serialize(payload));
+        task.setSchedule("0 0 8 * * *");
+        task.setNextRunAt(computeNext("0 0 8 * * *"));
         return toDto(agentTaskRepository.save(task));
     }
 
