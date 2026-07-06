@@ -19,13 +19,13 @@ public class AgentChatToolProvider implements ChatToolProvider {
     private final GeocodingService geocodingService;
 
     @Override
-    public List<Object> provideTools(UUID userId) {
+    public List<Object> provideTools(UUID userId, String email) {
         return List.of(
-            new SaveWatchTool(userId, agentTaskService),
-            new TriggerResearchTool(userId, agentTaskService),
-            new TriggerDigestTool(userId, agentTaskService),
-            new ListWatchesTool(userId, agentTaskService),
-            new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService)
+            new SaveWatchTool(userId, agentTaskService, email),
+            new TriggerResearchTool(userId, agentTaskService, email),
+            new TriggerDigestTool(userId, agentTaskService, email),
+            new ListWatchesTool(userId, agentTaskService, email),
+            new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService, email)
         );
     }
 }

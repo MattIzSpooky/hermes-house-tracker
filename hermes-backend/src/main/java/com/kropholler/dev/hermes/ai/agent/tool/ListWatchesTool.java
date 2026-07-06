@@ -10,8 +10,8 @@ import java.util.UUID;
 
 class ListWatchesTool extends TaskTool {
 
-    protected ListWatchesTool(UUID userId, AgentTaskService agentTaskService) {
-        super(userId, agentTaskService);
+    protected ListWatchesTool(UUID userId, AgentTaskService agentTaskService, String email) {
+        super(userId, agentTaskService, email);
     }
 
     @Tool(description = "List the user's active watches (listing alerts). "

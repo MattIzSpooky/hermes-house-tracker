@@ -18,7 +18,9 @@ public interface ChatToolProvider {
      * Called once per chat request — implementations may create new instances each time.
      *
      * @param userId the authenticated user's UUID for this chat session
+     * @param email the authenticated user's email from their JWT, or {@code null} if the
+     *              token carried none — the live value for this request, never a cached read
      * @return a list of Spring AI tool objects (annotated with {@code @Tool})
      */
-    List<Object> provideTools(UUID userId);
+    List<Object> provideTools(UUID userId, String email);
 }

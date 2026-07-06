@@ -17,8 +17,8 @@ class SaveAreaResearchTool extends TaskTool {
 
     protected SaveAreaResearchTool(UUID userId, AgentTaskService agentTaskService,
                                     UserProfileRepository userProfileRepository,
-                                    GeocodingService geocodingService) {
-        super(userId, agentTaskService);
+                                    GeocodingService geocodingService, String email) {
+        super(userId, agentTaskService, email);
         this.userProfileRepository = userProfileRepository;
         this.geocodingService = geocodingService;
     }

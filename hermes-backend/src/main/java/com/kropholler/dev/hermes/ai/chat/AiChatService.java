@@ -104,7 +104,7 @@ public class AiChatService {
      * History is loaded from the DB before the current user message is saved,
      * so the caller must save both user and assistant messages after streaming completes.
      */
-    public StreamHandle startStream(UUID sessionId, UUID userId, String userMessage) {
+    public StreamHandle startStream(UUID sessionId, UUID userId, String email, String userMessage) {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
@@ -132,7 +132,7 @@ public class AiChatService {
         List<Object> allTools = new ArrayList<>(List.of(
                 searchTool, summaryTool, historyTool, compareTool, priceDropTool, favouritesTool));
         for (ChatToolProvider provider : chatToolProviders) {
-            allTools.addAll(provider.provideTools(userId));
+            allTools.addAll(provider.provideTools(userId, email));
         }
 
         log.info("startStream: registering {} tools for session={}", allTools.size(), sessionId);

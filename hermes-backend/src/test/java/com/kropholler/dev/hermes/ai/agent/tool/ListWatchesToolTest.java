@@ -28,7 +28,7 @@ class ListWatchesToolTest {
             AgentTaskStatus.ACTIVE, clientId, "Utrecht 3-bed", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.findByUserId(clientId)).thenReturn(List.of(dto));
 
-        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.listWatches(null);
 
         verify(agentTaskService).findByUserId(clientId);
@@ -42,7 +42,7 @@ class ListWatchesToolTest {
         UUID clientId = UUID.randomUUID();
         when(agentTaskService.findByUserId(clientId)).thenReturn(List.of());
 
-        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.listWatches(null);
 
         assertThat(result).contains("no active watches");
@@ -54,7 +54,7 @@ class ListWatchesToolTest {
         UUID clientId = UUID.randomUUID();
         UUID cancelId = UUID.randomUUID();
 
-        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.listWatches(cancelId);
 
         verify(agentTaskService).delete(cancelId, clientId);
@@ -73,7 +73,7 @@ class ListWatchesToolTest {
             AgentTaskStatus.ACTIVE, clientId, "One-off watch", null, lastRun, Instant.now(), Instant.now());
         when(agentTaskService.findByUserId(clientId)).thenReturn(List.of(dto));
 
-        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService);
+        ListWatchesTool tool = new ListWatchesTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.listWatches(null);
 
         assertThat(result).contains("once");

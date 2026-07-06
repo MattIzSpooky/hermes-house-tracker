@@ -10,8 +10,8 @@ import java.util.UUID;
 
 class SaveWatchTool extends TaskTool {
 
-    protected SaveWatchTool(UUID userId, AgentTaskService agentTaskService) {
-        super(userId, agentTaskService);
+    protected SaveWatchTool(UUID userId, AgentTaskService agentTaskService, String email) {
+        super(userId, agentTaskService, email);
     }
 
     @Tool(description = "Save a listing watch that runs daily and sends a notification when new properties matching your criteria appear. "

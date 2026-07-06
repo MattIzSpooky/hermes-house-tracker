@@ -11,8 +11,8 @@ import java.util.UUID;
 
 class TriggerDigestTool extends TaskTool {
 
-    protected TriggerDigestTool(UUID userId, AgentTaskService agentTaskService) {
-        super(userId, agentTaskService);
+    protected TriggerDigestTool(UUID userId, AgentTaskService agentTaskService, String email) {
+        super(userId, agentTaskService, email);
     }
 
     @Tool(description = "Schedule a weekly market digest for one or more cities. "

@@ -28,7 +28,7 @@ class TriggerResearchToolTest {
             AgentTaskStatus.ACTIVE, clientId, "Research: market trends", null, null, Instant.now(), Instant.now());
         when(agentTaskService.createResearch(any(), anyString())).thenReturn(dto);
 
-        TriggerResearchTool tool = new TriggerResearchTool(clientId, agentTaskService);
+        TriggerResearchTool tool = new TriggerResearchTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.triggerResearch("What are the current market trends in Amsterdam?");
 
         verify(agentTaskService).createResearch(clientId, "What are the current market trends in Amsterdam?");

@@ -31,7 +31,7 @@ class SaveWatchToolTest {
             AgentTaskStatus.ACTIVE, clientId, "Utrecht 3-bed", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(dto);
 
-        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService);
+        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.saveWatch("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null);
 
         ArgumentCaptor<WatchPayload> cap = ArgumentCaptor.forClass(WatchPayload.class);
@@ -48,7 +48,7 @@ class SaveWatchToolTest {
         UUID clientId = UUID.randomUUID();
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
-        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService);
+        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.saveWatch(null, "Amsterdam", null, null, 300000, 3, null, null, null, null, null);
 
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
@@ -64,7 +64,7 @@ class SaveWatchToolTest {
         UUID clientId = UUID.randomUUID();
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
-        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService);
+        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.saveWatch("  ", null, null, null, null, null, null, null, null, null, null);
 
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
@@ -80,7 +80,7 @@ class SaveWatchToolTest {
         UUID clientId = UUID.randomUUID();
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
-        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService);
+        SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
         tool.saveWatch("My watch", "  ", "  ", null, null, null, null, null, "  ", "  ", null);
 
         ArgumentCaptor<WatchPayload> cap = ArgumentCaptor.forClass(WatchPayload.class);

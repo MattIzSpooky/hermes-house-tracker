@@ -24,7 +24,7 @@ class AgentChatToolProviderTest {
 
     @Test
     void provideTools_returnsListOfFiveTools() {
-        List<Object> tools = provider.provideTools(UUID.randomUUID());
+        List<Object> tools = provider.provideTools(UUID.randomUUID(), "user@hermes.local");
 
         assertThat(tools).hasSize(5);
         assertThat(tools).hasExactlyElementsOfTypes(

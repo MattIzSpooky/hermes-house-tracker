@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.profile.UserProfileService;
 import com.kropholler.dev.hermes.security.CurrentUser;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChatController {
 
     private final AiChatService aiChatService;
+    private final UserProfileService userProfileService;
     private final SimpMessagingTemplate messaging;
     private final MeterRegistry meterRegistry;
 
@@ -32,7 +34,15 @@ public class ChatController {
             return;
         }
 
-        UUID userId = CurrentUser.from((Jwt) ((JwtAuthenticationToken) principal).getPrincipal()).id();
+        CurrentUser currentUser = CurrentUser.from((Jwt) ((JwtAuthenticationToken) principal).getPrincipal());
+        UUID userId = currentUser.id();
+        String email = currentUser.email();
+
+        try {
+            userProfileService.syncEmail(userId, email);
+        } catch (Exception e) {
+            log.warn("Failed to sync email onto profile for user {}; continuing chat request", userId, e);
+        }
 
         String destination = "/topic/chat/" + request.sessionId();
         Timer.Sample requestTimer = Timer.start(meterRegistry);
@@ -44,7 +54,7 @@ public class ChatController {
 
         try {
             AiChatService.StreamHandle handle = aiChatService.startStream(
-                    request.sessionId(), userId, request.message());
+                    request.sessionId(), userId, email, request.message());
 
             String response = streamTokens(handle, destination, request.sessionId(), ttftTimer, startNanos);
 

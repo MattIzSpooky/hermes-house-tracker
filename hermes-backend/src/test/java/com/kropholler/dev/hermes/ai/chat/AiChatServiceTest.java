@@ -83,7 +83,7 @@ class AiChatServiceTest {
         when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId)).thenReturn(List.of());
         stubStream(Flux.just("Hi"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "hello");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "user@hermes.local", "hello");
 
         assertThat(handle).isNotNull();
         assertThat(handle.resultHolder().get()).isEmpty();
@@ -101,7 +101,7 @@ class AiChatServiceTest {
                 .thenReturn(List.of(userMsg, assistantMsg));
         stubStream(Flux.just("reply"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "more info");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "user@hermes.local", "more info");
 
         assertThat(handle).isNotNull();
     }
@@ -114,7 +114,7 @@ class AiChatServiceTest {
         when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId))
                 .thenReturn(List.of(badMsg));
 
-        assertThatThrownBy(() -> service.startStream(sessionId, userId, "hi"))
+        assertThatThrownBy(() -> service.startStream(sessionId, userId, "user@hermes.local", "hi"))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Unknown chat role: SYSTEM");
     }
@@ -130,7 +130,7 @@ class AiChatServiceTest {
                 .thenReturn(List.of());
         stubStream(Flux.just("hi"));
 
-        service.startStream(sessionId, userId, "hello");
+        service.startStream(sessionId, userId, "user@hermes.local", "hello");
 
         verify(chatMessageRepository).findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId);
         verify(chatMessageRepository, never()).findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, otherUserId);
@@ -144,12 +144,12 @@ class AiChatServiceTest {
                 chatListingCardMapper, listingSummaryService, favoriteService,
                 List.of(chatToolProvider), new SimpleMeterRegistry());
         when(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId)).thenReturn(List.of());
-        when(chatToolProvider.provideTools(userId)).thenReturn(List.of(new Object()));
+        when(chatToolProvider.provideTools(userId, "user@hermes.local")).thenReturn(List.of(new Object()));
         stubStream(Flux.just("done"));
 
-        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "hi");
+        AiChatService.StreamHandle handle = service.startStream(sessionId, userId, "user@hermes.local", "hi");
 
-        verify(chatToolProvider).provideTools(userId);
+        verify(chatToolProvider).provideTools(userId, "user@hermes.local");
         assertThat(handle).isNotNull();
     }
 

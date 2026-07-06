@@ -31,7 +31,7 @@ class TriggerDigestToolTest {
             AgentTaskStatus.ACTIVE, clientId, "Weekly digest", "0 8 * * MON", null, Instant.now(), Instant.now());
         when(agentTaskService.createDigest(any(), anyString(), anyList())).thenReturn(dto);
 
-        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService);
+        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService, "user@hermes.local");
         String result = tool.triggerDigest("Amsterdam,Utrecht", "Weekly digest");
 
         verify(agentTaskService).createDigest(clientId, "Weekly digest", List.of("Amsterdam", "Utrecht"));
@@ -46,7 +46,7 @@ class TriggerDigestToolTest {
         UUID clientId = UUID.randomUUID();
         when(agentTaskService.createDigest(any(), anyString(), anyList())).thenReturn(null);
 
-        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService);
+        TriggerDigestTool tool = new TriggerDigestTool(clientId, agentTaskService, "user@hermes.local");
         tool.triggerDigest("Amsterdam, ,Utrecht", "Digest");
 
         verify(agentTaskService).createDigest(clientId, "Digest", List.of("Amsterdam", "Utrecht"));

@@ -36,7 +36,7 @@ class SaveAreaResearchToolTest {
     @Mock GeocodingService geocodingService;
 
     private SaveAreaResearchTool tool(UUID userId) {
-        return new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService);
+        return new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService, "user@hermes.local");
     }
 
     @Test

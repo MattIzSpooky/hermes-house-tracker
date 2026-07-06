@@ -8,8 +8,8 @@ import java.util.UUID;
 
 class TriggerResearchTool extends TaskTool {
 
-    protected TriggerResearchTool(UUID userId, AgentTaskService agentTaskService) {
-        super(userId, agentTaskService);
+    protected TriggerResearchTool(UUID userId, AgentTaskService agentTaskService, String email) {
+        super(userId, agentTaskService, email);
     }
 
     @Tool(description = "Queue a background research task. "
