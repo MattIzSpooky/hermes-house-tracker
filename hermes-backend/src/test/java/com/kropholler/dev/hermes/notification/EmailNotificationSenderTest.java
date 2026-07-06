@@ -28,9 +28,8 @@ class EmailNotificationSenderTest {
     @Mock UserProfileRepository userProfileRepository;
     @InjectMocks EmailNotificationSender sender;
 
-    private void setEmails(String from, String to) {
+    private void setEmail(String from) {
         ReflectionTestUtils.setField(sender, "fromEmail", from);
-        ReflectionTestUtils.setField(sender, "toEmail", to);
     }
 
     private NotificationDto dto(UUID id) {
@@ -38,12 +37,19 @@ class EmailNotificationSenderTest {
             "Price alert", "Dropped 10%", List.of(), false, null, null);
     }
 
+    private UserProfileEntity profileWithEmail(String email) {
+        UserProfileEntity profile = new UserProfileEntity();
+        profile.setUserId(UUID.randomUUID());
+        profile.setEmail(email);
+        return profile;
+    }
+
     @Test
     void sendAsync_sendsMailWithCorrectFields() {
         UUID id = UUID.randomUUID();
         NotificationEntity entity = new NotificationEntity();
-        setEmails("from@hermes.nl", "to@user.nl");
-        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
+        setEmail("from@hermes.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.of(profileWithEmail("to@user.nl")));
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
         sender.sendAsync(dto(id));
@@ -61,8 +67,8 @@ class EmailNotificationSenderTest {
     void sendAsync_updatesEmailSentAt() {
         UUID id = UUID.randomUUID();
         NotificationEntity entity = new NotificationEntity();
-        setEmails("from@hermes.nl", "to@user.nl");
-        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
+        setEmail("from@hermes.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.of(profileWithEmail("to@user.nl")));
         when(notificationRepository.findById(id)).thenReturn(Optional.of(entity));
 
         sender.sendAsync(dto(id));
@@ -75,8 +81,8 @@ class EmailNotificationSenderTest {
     @Test
     void sendAsync_swallowsMailException() {
         UUID id = UUID.randomUUID();
-        setEmails("from@hermes.nl", "to@user.nl");
-        when(userProfileRepository.findById(any())).thenReturn(Optional.empty());
+        setEmail("from@hermes.nl");
+        when(userProfileRepository.findById(any())).thenReturn(Optional.of(profileWithEmail("to@user.nl")));
         doThrow(new RuntimeException("SMTP down")).when(mailSender).send(any(SimpleMailMessage.class));
 
         sender.sendAsync(dto(id));
@@ -90,7 +96,7 @@ class EmailNotificationSenderTest {
         UUID userId = UUID.randomUUID();
         NotificationDto dto = new NotificationDto(id, null, userId,
             "Price alert", "Dropped 10%", List.of(), false, null, null);
-        setEmails("from@hermes.nl", "fallback@hermes.nl");
+        setEmail("from@hermes.nl");
         UserProfileEntity profile = new UserProfileEntity();
         profile.setUserId(userId);
         profile.setEmail("actualuser@hermes.local");
@@ -105,19 +111,16 @@ class EmailNotificationSenderTest {
     }
 
     @Test
-    void sendAsync_userHasNoProfileEmail_fallsBackToConfigValue() {
+    void sendAsync_userHasNoProfileEmail_skipsSendingAndDoesNotThrow() {
         UUID id = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         NotificationDto dto = new NotificationDto(id, null, userId,
             "Price alert", "Dropped 10%", List.of(), false, null, null);
-        setEmails("from@hermes.nl", "fallback@hermes.nl");
         when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
-        when(notificationRepository.findById(id)).thenReturn(Optional.of(new NotificationEntity()));
 
         sender.sendAsync(dto);
 
-        ArgumentCaptor<SimpleMailMessage> captor = ArgumentCaptor.forClass(SimpleMailMessage.class);
-        verify(mailSender).send(captor.capture());
-        assertThat(captor.getValue().getTo()).containsExactly("fallback@hermes.nl");
+        verifyNoInteractions(mailSender);
+        verify(notificationRepository, never()).save(any());
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -25,15 +26,17 @@ class EmailNotificationSender {
     @Value("${hermes.notifications.from-email}")
     private String fromEmail;
 
-    @Value("${hermes.notifications.to-email}")
-    private String toEmail;
-
     @Async
     public void sendAsync(NotificationDto dto) {
+        Optional<String> recipient = resolveRecipient(dto.userId());
+        if (recipient.isEmpty()) {
+            log.warn("Skipping notification email for {}: no email on file for user {}", dto.id(), dto.userId());
+            return;
+        }
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(fromEmail);
-            msg.setTo(resolveRecipient(dto.userId()));
+            msg.setTo(recipient.get());
             msg.setSubject("[Hermes] " + dto.title());
             msg.setText(dto.body());
             mailSender.send(msg);
@@ -46,10 +49,9 @@ class EmailNotificationSender {
         }
     }
 
-    private String resolveRecipient(UUID userId) {
+    private Optional<String> resolveRecipient(UUID userId) {
         return userProfileRepository.findById(userId)
             .map(UserProfileEntity::getEmail)
-            .filter(email -> email != null && !email.isBlank())
-            .orElse(toEmail);
+            .filter(email -> email != null && !email.isBlank());
     }
 }
