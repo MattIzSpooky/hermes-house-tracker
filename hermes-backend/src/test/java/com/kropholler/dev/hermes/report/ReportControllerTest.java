@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.report;
 import com.kropholler.dev.hermes.report.openapi.ListingReportResponse;
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.config.SecurityConfig;
+import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;
 import com.kropholler.dev.hermes.security.SecuredMockMvcTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ReportController.class)
-@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class})
+@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class, NoOpUserProfileSyncFilterTestConfig.class})
 class ReportControllerTest {
 
     @Autowired MockMvc mockMvc;

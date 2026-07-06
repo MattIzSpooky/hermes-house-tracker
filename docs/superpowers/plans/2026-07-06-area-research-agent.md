@@ -692,8 +692,11 @@ git commit -m "feat(profile): add email column to user_profiles"
 
 **The fix:** put the filter in the `profile` package instead (so its own `UserProfileRepository`/`UserProfileEntity` usage becomes same-package, not cross-module), and have `SecurityConfig` depend on it only through the external, qualified `OncePerRequestFilter` type — never the concrete class. Spring Modulith's dependency analysis only tracks references between the application's own `com.kropholler.dev.hermes.*` packages; a parameter typed as `org.springframework.web.filter.OncePerRequestFilter` (a framework type) with a `@Qualifier` string creates no such reference. This also fixes the 9-slice-test problem: instead of a `@MockitoBean` (which would still need the concrete type or a lot of duplicated qualifier/stub wiring in every file), one small shared `@TestConfiguration` provides a real, trivial pass-through `OncePerRequestFilter` bean, and every affected test's `@Import` list gains one entry.
 
+**⚠️ Second design note (found while implementing the above):** Making `UserProfileSyncFilter` a `@Component` (as this note's first fix still specified) causes a *different* failure: Spring Boot's `@WebMvcTest` slices auto-detect any `@Component` implementing `jakarta.servlet.Filter` via classpath scanning, regardless of which package it lives in. Every one of the 9 slice tests then ends up with the real filter bean AND the shared no-op `@TestConfiguration`'s bean both registered under the same default name `userProfileSyncFilter`, and Spring rejects the collision (`BeanDefinitionOverrideException`) since bean-definition overriding is disabled by default. The fix: don't annotate `UserProfileSyncFilter` with `@Component` at all. Register it explicitly via a `@Bean` factory method on a small `UserProfileSyncFilterConfig` `@Configuration` class, also in the `profile` package. A `@Configuration` class with a `@Bean` factory method is not itself a `Controller`/`Filter`/etc., so `@WebMvcTest`'s web-layer auto-detection filter excludes it like any other plain configuration class — it's only loaded where explicitly needed (the real app's full context, which scans everything). Verified: `verifyModuleStructure`, all 9 slice tests, and the full suite all pass with this combination.
+
 **Files:**
-- Create: `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java`
+- Create: `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java` (plain class, no `@Component`)
+- Create: `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterConfig.java` (`@Configuration`, registers the filter as a qualified `@Bean`)
 - Create: `hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterTest.java`
 - Create: `hermes-backend/src/test/java/com/kropholler/dev/hermes/security/NoOpUserProfileSyncFilterTestConfig.java`
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/config/SecurityConfig.java`
@@ -710,7 +713,7 @@ git commit -m "feat(profile): add email column to user_profiles"
 
 **Interfaces:**
 - Consumes: `CurrentUser.from(Jwt)` (Task 4), `UserProfileRepository` (existing), `UserProfileEntity.getEmail()/setEmail()` (Task 5).
-- Produces: `UserProfileSyncFilter` (package-private, lives in `profile`) — a `@Component` implementing `OncePerRequestFilter`, registered via `http.addFilterAfter(userProfileSyncFilter, BearerTokenAuthenticationFilter.class)` in `SecurityConfig.filterChain(...)`, injected there only as `@Qualifier("userProfileSyncFilter") OncePerRequestFilter`. Also produces `NoOpUserProfileSyncFilterTestConfig`, a shared `@TestConfiguration` supplying a real pass-through `OncePerRequestFilter` bean qualified `"userProfileSyncFilter"`, for use by any `@WebMvcTest` that imports `SecurityConfig`.
+- Produces: `UserProfileSyncFilter` (package-private, lives in `profile`, plain class — no `@Component`) implementing `OncePerRequestFilter`, registered as a bean by `UserProfileSyncFilterConfig` (`@Configuration`, also in `profile`), and used via `http.addFilterAfter(userProfileSyncFilter, BearerTokenAuthenticationFilter.class)` in `SecurityConfig.filterChain(...)`, injected there only as `@Qualifier("userProfileSyncFilter") OncePerRequestFilter`. Also produces `NoOpUserProfileSyncFilterTestConfig`, a shared `@TestConfiguration` supplying a real pass-through `OncePerRequestFilter` bean qualified `"userProfileSyncFilter"`, for use by any `@WebMvcTest` that imports `SecurityConfig`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -893,7 +896,6 @@ import java.time.Instant;
  * {@code config -> profile} Spring Modulith edge that would close a cycle with the
  * existing {@code profile -> listing -> scraping -> funda -> config} chain.
  */
-@Component
 @RequiredArgsConstructor
 class UserProfileSyncFilter extends OncePerRequestFilter {
 
@@ -920,6 +922,37 @@ class UserProfileSyncFilter extends OncePerRequestFilter {
         if (user.email().equals(entity.getEmail())) return;
         entity.setEmail(user.email());
         userProfileRepository.save(entity);
+    }
+}
+```
+
+No `@Component` on this class — it's deliberately excluded from classpath scanning (see the design note above) and registered instead via the `@Bean` factory method below.
+
+- [ ] **Step 3b: Register the filter as an explicit `@Bean`, not via component scanning**
+
+Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterConfig.java`:
+
+```java
+package com.kropholler.dev.hermes.profile;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * Registers {@link UserProfileSyncFilter} as a bean explicitly, rather than via
+ * {@code @Component}, so that plain classpath component scanning (including
+ * {@code @WebMvcTest}'s web-layer auto-detection, which would otherwise sweep up any
+ * {@code @Component} implementing {@code Filter} regardless of package) never
+ * auto-includes it. {@code SecurityConfig} picks it up only via the qualifier below.
+ */
+@Configuration
+class UserProfileSyncFilterConfig {
+
+    @Bean
+    @Qualifier("userProfileSyncFilter")
+    UserProfileSyncFilter userProfileSyncFilter(UserProfileRepository userProfileRepository) {
+        return new UserProfileSyncFilter(userProfileRepository);
     }
 }
 ```
@@ -1068,6 +1101,7 @@ Expected: PASS, full suite.
 
 ```bash
 git add hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java \
+        hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterConfig.java \
         hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterTest.java \
         hermes-backend/src/test/java/com/kropholler/dev/hermes/security/NoOpUserProfileSyncFilterTestConfig.java \
         hermes-backend/src/main/java/com/kropholler/dev/hermes/config/SecurityConfig.java \
