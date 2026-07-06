@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
@@ -60,7 +60,7 @@ class DigestTaskHandler implements AgentTaskHandler {
         DigestPayload payload;
         try {
             payload = objectMapper.readValue(task.getPayload(), DigestPayload.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to deserialize DigestPayload for task {}", task.getId(), e);
             return Optional.empty();
         }

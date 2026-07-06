@@ -1,8 +1,8 @@
 package com.kropholler.dev.hermes.notification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -67,7 +67,7 @@ public class NotificationService {
     private String serializeIds(List<UUID> ids) {
         try {
             return objectMapper.writeValueAsString(ids);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return "[]";
         }
     }
@@ -76,7 +76,7 @@ public class NotificationService {
         if (json == null || json.isBlank()) return List.of();
         try {
             return objectMapper.readValue(json, new TypeReference<List<UUID>>() {});
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return List.of();
         }
     }

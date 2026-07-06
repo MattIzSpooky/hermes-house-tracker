@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
@@ -41,7 +42,7 @@ class ResearchTaskHandlerTest {
     FavoriteService favoriteService;
 
     MeterRegistry meterRegistry = new SimpleMeterRegistry();
-    ObjectMapper objectMapper = new ObjectMapper();
+    ObjectMapper objectMapper = new JsonMapper();
     ResearchTaskHandler handler;
 
     @BeforeEach

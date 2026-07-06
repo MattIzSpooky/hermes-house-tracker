@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.when;
 class WatchTaskHandlerTest {
 
     @Mock ListingService listingService;
-    @Spy ObjectMapper objectMapper;
+    @Spy ObjectMapper objectMapper = new JsonMapper();
     @InjectMocks
     WatchTaskHandler handler;
 
@@ -177,7 +178,7 @@ class WatchTaskHandlerTest {
         task.setStatus(AgentTaskStatus.ACTIVE);
         task.setUserId(UUID.randomUUID());
         task.setName("Utrecht 3-bed");
-        task.setPayload(new ObjectMapper().writeValueAsString(payload));
+        task.setPayload(new JsonMapper().writeValueAsString(payload));
         task.setLastRunAt(lastRunAt);
         task.setNextRunAt(Instant.now());
         return task;

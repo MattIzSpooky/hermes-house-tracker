@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
@@ -59,7 +59,7 @@ class ResearchTaskHandler implements AgentTaskHandler {
         ResearchPayload payload;
         try {
             payload = objectMapper.readValue(task.getPayload(), ResearchPayload.class);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("Failed to deserialize ResearchPayload for task {}", task.getId(), e);
             return Optional.empty();
         }

@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -10,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ProblemDetailAccessDeniedHandlerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new JsonMapper();
     private final ProblemDetailAccessDeniedHandler handler = new ProblemDetailAccessDeniedHandler(objectMapper);
 
     @Test

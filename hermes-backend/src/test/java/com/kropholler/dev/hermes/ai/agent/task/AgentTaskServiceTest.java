@@ -1,6 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.when;
 class AgentTaskServiceTest {
 
     @Mock AgentTaskRepository repo;
-    @Spy ObjectMapper objectMapper;
+    @Spy ObjectMapper objectMapper = new JsonMapper();
     @InjectMocks
     AgentTaskService service;
 
@@ -182,7 +183,7 @@ class AgentTaskServiceTest {
 
     @Test
     void serialize_throwsIllegalStateOnJsonException() throws Exception {
-        doThrow(new com.fasterxml.jackson.core.JsonProcessingException("forced") {})
+        doThrow(new tools.jackson.core.JacksonException("forced") {})
             .when(objectMapper).writeValueAsString(any());
 
         assertThatThrownBy(() -> service.createWatch(UUID.randomUUID(), "name",

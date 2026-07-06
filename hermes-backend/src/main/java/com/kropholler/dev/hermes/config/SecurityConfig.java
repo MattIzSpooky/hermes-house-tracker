@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -41,7 +41,7 @@ public class SecurityConfig {
 
     @Bean
     AccessDeniedHandler accessDeniedHandler() {
-        return new ProblemDetailAccessDeniedHandler(new ObjectMapper());
+        return new ProblemDetailAccessDeniedHandler(new JsonMapper());
     }
 
     @Bean

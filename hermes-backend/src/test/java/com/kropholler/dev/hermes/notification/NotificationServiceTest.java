@@ -1,7 +1,8 @@
 package com.kropholler.dev.hermes.notification;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +29,7 @@ class NotificationServiceTest {
     @Mock SimpMessagingTemplate messaging;
     @Mock
     EmailNotificationSender emailSender;
-    @Spy ObjectMapper objectMapper;
+    @Spy ObjectMapper objectMapper = new JsonMapper();
     @InjectMocks
     NotificationService service;
 
@@ -56,7 +57,7 @@ class NotificationServiceTest {
     @Test
     void save_whenSerializeThrows_usesFallbackEmptyJson() throws Exception {
         // Covers serializeIds catch block (L63-64)
-        doThrow(new JsonProcessingException("forced") {}).when(objectMapper).writeValueAsString(any());
+        doThrow(new JacksonException("forced") {}).when(objectMapper).writeValueAsString(any());
         UUID userId = UUID.randomUUID();
         when(repo.save(any())).thenAnswer(inv -> {
             NotificationEntity n = inv.getArgument(0);

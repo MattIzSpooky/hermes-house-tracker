@@ -1,7 +1,7 @@
 package com.kropholler.dev.hermes.ai.agent.task;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
@@ -107,7 +107,7 @@ public class AgentTaskService {
     private String serialize(Object payload) {
         try {
             return objectMapper.writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize agent task payload", e);
         }
     }

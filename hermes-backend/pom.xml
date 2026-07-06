@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.kropholler.dev</groupId>
@@ -30,8 +30,8 @@
         <java.version>25</java.version>
         <datasource-micrometer.version>2.2.1</datasource-micrometer.version>
         <mapstruct.version>1.6.3</mapstruct.version>
-        <spring-ai.version>2.0.0-RC1</spring-ai.version>
-        <spring-modulith.version>2.0.6</spring-modulith.version>
+        <spring-ai.version>2.0.0</spring-ai.version>
+        <spring-modulith.version>2.0.7</spring-modulith.version>
     </properties>
     <dependencies>
         <dependency>
@@ -49,17 +49,17 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>8.0</version>
+            <version>9.0</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-api-incubator</artifactId>
-            <version>1.55.0-alpha</version>
+            <version>1.63.0-alpha</version>
         </dependency>
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>2.15.0-alpha</version>
+            <version>2.29.0-alpha</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -172,7 +172,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
+            <version>33.6.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -328,7 +328,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.10.0</version>
+                <version>7.23.0</version>
                 <executions>
                     <execution>
                         <id>generate-listing</id>
