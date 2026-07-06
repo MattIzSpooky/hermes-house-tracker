@@ -2,6 +2,8 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.ChatToolProvider;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
+import com.kropholler.dev.hermes.profile.UserProfileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import java.util.UUID;
 public class AgentChatToolProvider implements ChatToolProvider {
 
     private final AgentTaskService agentTaskService;
+    private final UserProfileRepository userProfileRepository;
+    private final GeocodingService geocodingService;
 
     @Override
     public List<Object> provideTools(UUID userId) {
@@ -20,7 +24,8 @@ public class AgentChatToolProvider implements ChatToolProvider {
             new SaveWatchTool(userId, agentTaskService),
             new TriggerResearchTool(userId, agentTaskService),
             new TriggerDigestTool(userId, agentTaskService),
-            new ListWatchesTool(userId, agentTaskService)
+            new ListWatchesTool(userId, agentTaskService),
+            new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService)
         );
     }
 }

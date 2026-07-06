@@ -81,4 +81,29 @@ class GeocodingServiceTest {
         assertThat(result.get().lat()).isEqualTo(51.2574224, within(0.0001));
         assertThat(result.get().lon()).isEqualTo(5.6972390, within(0.0001));
     }
+
+    @Test
+    void geocodeCity_cachedCity_returnsGeocodeResult() {
+        CityEntity city = new CityEntity();
+        city.setLongitude(5.7050797);
+        city.setLatitude(51.2355829);
+        when(cityRepository.findByNameIgnoreCase("Weert")).thenReturn(Optional.of(city));
+
+        Optional<GeocodeResult> result = service.geocodeCity("Weert");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().lat()).isEqualTo(51.2355829, within(0.0001));
+        assertThat(result.get().lon()).isEqualTo(5.7050797, within(0.0001));
+        verifyNoInteractions(nominatimClient);
+    }
+
+    @Test
+    void geocodeCity_notFound_returnsEmpty() {
+        when(cityRepository.findByNameIgnoreCase("Unknown")).thenReturn(Optional.empty());
+        when(nominatimClient.geocodeCity("Unknown")).thenReturn(Optional.empty());
+
+        Optional<GeocodeResult> result = service.geocodeCity("Unknown");
+
+        assertThat(result).isEmpty();
+    }
 }

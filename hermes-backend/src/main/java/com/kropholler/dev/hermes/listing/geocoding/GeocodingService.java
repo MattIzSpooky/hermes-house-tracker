@@ -38,4 +38,10 @@ public class GeocodingService {
             .map(r -> new GeocodeResult(Double.parseDouble(r.lon()), Double.parseDouble(r.lat()), r.boundingbox()));
     }
 
+    @Transactional
+    public Optional<GeocodeResult> geocodeCity(String cityName) {
+        return findOrFetchCity(cityName)
+            .map(c -> new GeocodeResult(c.getLongitude(), c.getLatitude(), null));
+    }
+
 }
