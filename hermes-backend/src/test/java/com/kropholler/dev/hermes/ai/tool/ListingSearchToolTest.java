@@ -49,7 +49,7 @@ class ListingSearchToolTest {
         ChatListingCard card = new ChatListingCard(id, "Teststraat", "1", null,
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
-        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false, null, null, null))
+        when(listingService.findForChat(null, 500000, 3, null, null, null, "Amsterdam", null, false, null, null, null, null))
                 .thenReturn(List.of(listing));
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
@@ -71,7 +71,7 @@ class ListingSearchToolTest {
         ChatListingCard card = new ChatListingCard(id, "Teststraat", "1", null,
                 "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE");
 
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, true, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, true, null, null, null, null))
                 .thenReturn(List.of(listing));
         when(mapper.toChatListingCard(listing)).thenReturn(card);
 
@@ -85,7 +85,7 @@ class ListingSearchToolTest {
 
     @Test
     void searchListings_nullPriceSort_defaultsToAscending() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -98,7 +98,7 @@ class ListingSearchToolTest {
 
     @Test
     void searchListings_emptyResults_holderIsSetToEmpty() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, "south-facing garden", false, null, null, null, null))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -113,7 +113,7 @@ class ListingSearchToolTest {
 
     @Test
     void searchListings_serviceThrows_exceptionPropagatesAndHolderUnchanged() {
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null))
                 .thenThrow(new RuntimeException("DB error"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -128,7 +128,7 @@ class ListingSearchToolTest {
     @Test
     void searchListings_blankStringParams_treatedAsNull() {
         // Covers the blankToNull branch: s != null && s.isBlank() → return null
-        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null))
+        when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null))
                 .thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());

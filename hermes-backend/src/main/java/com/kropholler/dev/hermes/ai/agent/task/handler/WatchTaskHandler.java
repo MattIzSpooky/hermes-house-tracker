@@ -43,7 +43,7 @@ class WatchTaskHandler implements AgentTaskHandler {
             payload.minPrice(), payload.maxPrice(),
             payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(),
             payload.province(), payload.city(), payload.keywords(),
-            false, null, payload.nearCity(), payload.radiusKm()
+            false, null, payload.nearCity(), payload.radiusKm(), null
         );
 
         Instant since = task.getLastRunAt() != null ? task.getLastRunAt() : task.getCreatedAt();

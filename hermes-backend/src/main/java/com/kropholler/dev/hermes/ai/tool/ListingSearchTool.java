@@ -63,7 +63,7 @@ public class ListingSearchTool {
                 minBedrooms, minRooms, minLivingAreaM2,
                 blankToNull(province), blankToNull(city), blankToNull(keywords),
                 sortDesc,
-                blankToNull(nearAddress), blankToNull(nearCity), radiusKm
+                blankToNull(nearAddress), blankToNull(nearCity), radiusKm, null
         ).stream().map(mapper::toChatListingCard).toList();
         log.info("searchListings returned {} results", cards.size());
         resultHolder.set(cards);

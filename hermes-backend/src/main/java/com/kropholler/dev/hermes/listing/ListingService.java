@@ -103,22 +103,52 @@ public class ListingService {
                                         Integer minLivingAreaM2, String province,
                                         String city, String keywords,
                                         boolean sortByPriceDesc,
-                                        String nearAddress, String nearCity, Integer radiusKm) {
+                                        String nearAddress, String nearCity, Integer radiusKm,
+                                        Integer limit) {
         if (radiusKm != null && (nearAddress != null || nearCity != null)) {
             GeocodeResult latLon = resolveLatLon(nearAddress, nearCity);
             if (latLon != null) {
-                List<ListingEntity> results = listingRepository.searchForChatNearLocation(
-                                minBedrooms, minRooms, minLivingAreaM2,
-                                province, keywords, minPrice, maxPrice,
-                                latLon.lon(), latLon.lat(), radiusKm * 1000);
-                Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
-                return results.stream().map(l -> toDto(l, geoById)).toList();
+                return searchNearLocationInternal(latLon.lon(), latLon.lat(),
+                        minBedrooms, minRooms, minLivingAreaM2, province, keywords,
+                        minPrice, maxPrice, radiusKm * 1000, limit);
             }
         }
         List<ListingEntity> results = listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
-                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc);
+                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc, clampLimit(limit));
         Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
         return results.stream().map(l -> toDto(l, geoById)).toList();
+    }
+
+    /**
+     * Radius search using coordinates that are already known (e.g. from a saved, geocoded
+     * user profile) — skips the string-based geocoding {@link #resolveLatLon} performs.
+     */
+    @Transactional(readOnly = true)
+    public List<ListingDto> findNearLocation(double lon, double lat,
+                                              Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2,
+                                              String province, String keywords,
+                                              Integer minPrice, Integer maxPrice,
+                                              int radiusMeters, Integer limit) {
+        return searchNearLocationInternal(lon, lat, minBedrooms, minRooms, minLivingAreaM2,
+                province, keywords, minPrice, maxPrice, radiusMeters, limit);
+    }
+
+    private List<ListingDto> searchNearLocationInternal(double lon, double lat,
+                                                          Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2,
+                                                          String province, String keywords,
+                                                          Integer minPrice, Integer maxPrice,
+                                                          int radiusMeters, Integer limit) {
+        List<ListingEntity> results = listingRepository.searchForChatNearLocation(
+                        minBedrooms, minRooms, minLivingAreaM2,
+                        province, keywords, minPrice, maxPrice,
+                        lon, lat, radiusMeters, clampLimit(limit));
+        Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
+        return results.stream().map(l -> toDto(l, geoById)).toList();
+    }
+
+    private static int clampLimit(Integer limit) {
+        if (limit == null || limit <= 0) return 5;
+        return Math.min(limit, 15);
     }
 
     @Transactional(readOnly = true)
