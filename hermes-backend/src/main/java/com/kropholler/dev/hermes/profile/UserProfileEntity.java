@@ -26,6 +26,7 @@ public class UserProfileEntity {
     private String zipCode;
     private String city;
     private String province;
+    private String email;
 
     private Double latitude;
     private Double longitude;
