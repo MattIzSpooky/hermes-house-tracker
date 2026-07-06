@@ -498,20 +498,25 @@ Expected: PASS.
 
 - [ ] **Step 7: Add a limit-passthrough test to `ListingSearchToolTest`**
 
-Append:
+Add `import static org.mockito.Mockito.verify;` alongside the file's other `org.mockito.Mockito` static imports (it isn't there yet — only `verifyNoInteractions` and `when` are currently imported). Then append:
 
 ```java
     @Test
     void searchListings_limitParam_passedThroughToService() {
+        UUID id = UUID.randomUUID();
+        ListingDto listing = dto(id);
         when(listingService.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, 10))
-                .thenReturn(List.of());
+                .thenReturn(List.of(listing));
+        when(mapper.toChatListingCard(listing)).thenReturn(
+                new ChatListingCard(id, "Teststraat", "1", null, "Amsterdam", "Noord-Holland", 450000, 3, 85, "A", "FOR_SALE"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
-        tool.searchListings(null, null, null, null, null, null, null, null, null, null, null, null, 10);
+        List<ChatListingCard> result = tool.searchListings(null, null, null, null, null, null, null, null, null, null, null, null, 10);
 
-        // verified implicitly by the stub matching; an unstubbed call would return null and NPE on .stream()
+        assertThat(result).hasSize(1);
+        verify(listingService).findForChat(null, null, null, null, null, null, null, null, false, null, null, null, 10);
     }
 ```
 
@@ -683,29 +688,43 @@ git commit -m "feat(profile): add email column to user_profiles"
 
 ### Task 6: `UserProfileSyncFilter` — sync JWT email onto the profile on every authenticated request
 
+**⚠️ Design note (post-dispatch correction):** The plan originally placed this filter in the `config` package. That creates a real Spring Modulith cycle: `config -> profile` (this filter's own dependency) closes a loop with the pre-existing chain `profile -> listing -> scraping -> funda -> config` (via `UserProfileService` → `GeocodingService`, `ListingController`/`NightlyRescrapeScheduler` → `ScrapingQueueService`, `ScrapingWorker` → `FundaClient`, and `FundaListingMapper`/`ScrapingSessionApiMapper` → `MapStructConfig`). None of those other edges are new; only `config -> profile` is. It also breaks 9 `@WebMvcTest` slice tests that `@Import(SecurityConfig.class)`, because `SecurityConfig.filterChain(...)` would require a bean of the concrete, package-private `UserProfileSyncFilter` type to be resolvable in every one of those contexts.
+
+**The fix:** put the filter in the `profile` package instead (so its own `UserProfileRepository`/`UserProfileEntity` usage becomes same-package, not cross-module), and have `SecurityConfig` depend on it only through the external, qualified `OncePerRequestFilter` type — never the concrete class. Spring Modulith's dependency analysis only tracks references between the application's own `com.kropholler.dev.hermes.*` packages; a parameter typed as `org.springframework.web.filter.OncePerRequestFilter` (a framework type) with a `@Qualifier` string creates no such reference. This also fixes the 9-slice-test problem: instead of a `@MockitoBean` (which would still need the concrete type or a lot of duplicated qualifier/stub wiring in every file), one small shared `@TestConfiguration` provides a real, trivial pass-through `OncePerRequestFilter` bean, and every affected test's `@Import` list gains one entry.
+
 **Files:**
-- Create: `hermes-backend/src/main/java/com/kropholler/dev/hermes/config/UserProfileSyncFilter.java`
-- Create: `hermes-backend/src/test/java/com/kropholler/dev/hermes/config/UserProfileSyncFilterTest.java`
+- Create: `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java`
+- Create: `hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterTest.java`
+- Create: `hermes-backend/src/test/java/com/kropholler/dev/hermes/security/NoOpUserProfileSyncFilterTestConfig.java`
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/config/SecurityConfig.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/config/SecurityConfigTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/favorites/FavoriteControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/ListingControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/ListingControllerSearchTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/notification/NotificationControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/report/ReportControllerTest.java`
+- Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/ScrapingSessionControllerTest.java`
 
 **Interfaces:**
 - Consumes: `CurrentUser.from(Jwt)` (Task 4), `UserProfileRepository` (existing), `UserProfileEntity.getEmail()/setEmail()` (Task 5).
-- Produces: `UserProfileSyncFilter` — a `@Component` implementing `OncePerRequestFilter`, registered via `http.addFilterAfter(userProfileSyncFilter, BearerTokenAuthenticationFilter.class)` in `SecurityConfig.filterChain(...)`.
+- Produces: `UserProfileSyncFilter` (package-private, lives in `profile`) — a `@Component` implementing `OncePerRequestFilter`, registered via `http.addFilterAfter(userProfileSyncFilter, BearerTokenAuthenticationFilter.class)` in `SecurityConfig.filterChain(...)`, injected there only as `@Qualifier("userProfileSyncFilter") OncePerRequestFilter`. Also produces `NoOpUserProfileSyncFilterTestConfig`, a shared `@TestConfiguration` supplying a real pass-through `OncePerRequestFilter` bean qualified `"userProfileSyncFilter"`, for use by any `@WebMvcTest` that imports `SecurityConfig`.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/config/UserProfileSyncFilterTest.java`:
+Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterTest.java`:
 
 ```java
-package com.kropholler.dev.hermes.config;
+package com.kropholler.dev.hermes.profile;
 
-import com.kropholler.dev.hermes.profile.UserProfileEntity;
-import com.kropholler.dev.hermes.profile.UserProfileRepository;
+import com.kropholler.dev.hermes.security.CurrentUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -833,7 +852,7 @@ class UserProfileSyncFilterTest {
 }
 ```
 
-Add `import org.junit.jupiter.api.BeforeEach;` alongside the other JUnit imports at the top of the file.
+Note this test lives in the `profile` package now, so it can reference `UserProfileEntity`/`UserProfileRepository` without imports (same package), and only needs to import `CurrentUser` from `security`.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
@@ -842,13 +861,11 @@ Expected: FAIL — `UserProfileSyncFilter` class doesn't exist yet (compile erro
 
 - [ ] **Step 3: Implement `UserProfileSyncFilter`**
 
-Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/config/UserProfileSyncFilter.java`:
+Create `hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java`:
 
 ```java
-package com.kropholler.dev.hermes.config;
+package com.kropholler.dev.hermes.profile;
 
-import com.kropholler.dev.hermes.profile.UserProfileEntity;
-import com.kropholler.dev.hermes.profile.UserProfileRepository;
 import com.kropholler.dev.hermes.security.CurrentUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -868,6 +885,13 @@ import java.time.Instant;
  * Keeps {@code user_profiles.email} in sync with the JWT's {@code email} claim.
  * Runs on every authenticated request so that background jobs (which have no JWT
  * available) can still look up a user's email via their profile.
+ *
+ * Lives in the {@code profile} package (not {@code config}, where it's registered
+ * from) so its own dependency on {@link UserProfileRepository} stays intra-module —
+ * {@code config} only ever references it through the generic, qualified
+ * {@link OncePerRequestFilter} type, never this concrete class, to avoid a
+ * {@code config -> profile} Spring Modulith edge that would close a cycle with the
+ * existing {@code profile -> listing -> scraping -> funda -> config} chain.
  */
 @Component
 @RequiredArgsConstructor
@@ -905,12 +929,14 @@ class UserProfileSyncFilter extends OncePerRequestFilter {
 Run: `cd hermes-backend && ./mvnw -q test -Dtest=UserProfileSyncFilterTest`
 Expected: PASS.
 
-- [ ] **Step 5: Register the filter in `SecurityConfig`**
+- [ ] **Step 5: Register the filter in `SecurityConfig` via a qualified `OncePerRequestFilter`, not the concrete type**
 
-In `SecurityConfig.java`, add the import:
+In `SecurityConfig.java`, add the imports:
 
 ```java
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
+import org.springframework.web.filter.OncePerRequestFilter;
 ```
 
 Change the `filterChain` bean method signature and body from:
@@ -936,7 +962,7 @@ to:
 ```java
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http, AccessDeniedHandler accessDeniedHandler,
-            UserProfileSyncFilter userProfileSyncFilter) throws Exception {
+            @Qualifier("userProfileSyncFilter") OncePerRequestFilter userProfileSyncFilter) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -951,46 +977,110 @@ to:
     }
 ```
 
-- [ ] **Step 6: Update `SecurityConfigTest` to supply the new filter dependency**
+Note `SecurityConfig.java` now has **no import at all** of anything in `com.kropholler.dev.hermes.profile` — only the framework's `OncePerRequestFilter`, referenced by qualifier name. The `@Qualifier("userProfileSyncFilter")` string matches Spring's default bean name for the `UserProfileSyncFilter` class (camel-cased class name), so no explicit `@Component("userProfileSyncFilter")` naming is needed on the filter itself.
 
-`SecurityConfigTest` uses `@WebMvcTest(FavoriteController.class)` with `@Import(SecurityConfig.class)`, so `UserProfileSyncFilter` needs to be resolvable as a bean in that slice test too. Add a `@MockitoBean` for it:
+- [ ] **Step 6: Create the shared no-op test filter config**
 
-```java
-    @MockitoBean UserProfileSyncFilter userProfileSyncFilter;
-```
-
-Add this alongside the other `@MockitoBean` fields (`jwtDecoder`, `favoriteService`, `favoriteApiMapper`). Since `UserProfileSyncFilter` is package-private and `SecurityConfigTest` is in the same package (`com.kropholler.dev.hermes.config`), no import is needed.
-
-Note: a plain Mockito mock of `OncePerRequestFilter` won't actually invoke `filterChain.doFilter(...)` by default, which would make requests hang in the slice test. Use `@MockitoBean(answer = Answers.CALLS_REAL_METHODS)`... actually simpler: since `doFilterInternal` is `protected` and the mock is never told to call through, Mockito's default `RETURNS_DEFAULTS` on a `void` method is a no-op, and `OncePerRequestFilter.doFilter(...)` (the public entry point Spring Security actually calls) is a real, un-mocked method on the real class hierarchy *unless* Mockito fully mocks it too. To keep this simple and correct, mock only what's needed by having Mockito produce a working no-op filter: add `doAnswer` stubbing in each test that hits the filter chain isn't necessary here because `@MockitoBean` mocks the entire object, including `doFilter`. Add this stub once, in a `@BeforeEach`:
+Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/security/NoOpUserProfileSyncFilterTestConfig.java`:
 
 ```java
-    @org.junit.jupiter.api.BeforeEach
-    void passThroughFilter() throws Exception {
-        org.mockito.Mockito.doAnswer(invocation -> {
-            jakarta.servlet.ServletRequest req = invocation.getArgument(0);
-            jakarta.servlet.ServletResponse res = invocation.getArgument(1);
-            jakarta.servlet.FilterChain chain = invocation.getArgument(2);
-            chain.doFilter(req, res);
-            return null;
-        }).when(userProfileSyncFilter).doFilter(
-            org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+package com.kropholler.dev.hermes.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+/**
+ * Supplies the {@code userProfileSyncFilter}-qualified {@link OncePerRequestFilter} bean
+ * that {@code SecurityConfig.filterChain(...)} requires, for any {@code @WebMvcTest} that
+ * imports {@code SecurityConfig} but isn't testing the sync behavior itself (that's covered
+ * by {@code UserProfileSyncFilterTest}). A real pass-through filter, not a mock — simpler
+ * than stubbing a mock's {@code doFilter} to call through in every test.
+ */
+@TestConfiguration
+public class NoOpUserProfileSyncFilterTestConfig {
+
+    @Bean
+    @Qualifier("userProfileSyncFilter")
+    OncePerRequestFilter userProfileSyncFilter() {
+        return new OncePerRequestFilter() {
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+                    throws ServletException, IOException {
+                filterChain.doFilter(request, response);
+            }
+        };
     }
+}
 ```
 
-- [ ] **Step 7: Run `SecurityConfigTest` to confirm existing tests still pass**
+- [ ] **Step 7: Wire the shared test config into every `@WebMvcTest` that imports `SecurityConfig`**
 
-Run: `cd hermes-backend && ./mvnw -q test -Dtest=SecurityConfigTest`
+Nine test files currently do `@Import(SecurityConfig.class)` or `@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class})`. Each needs `NoOpUserProfileSyncFilterTestConfig.class` added to that same `@Import` list, plus the import statement `import com.kropholler.dev.hermes.security.NoOpUserProfileSyncFilterTestConfig;` (skip the import statement in files already in the `security` package, but none of these nine are).
+
+For the seven using single-class `@Import(SecurityConfig.class)` — `SecurityConfigTest.java`, `AgentTaskControllerTest.java`, `ChatHistoryControllerTest.java`, `FavoriteControllerTest.java`, `ListingControllerTest.java`, `NotificationControllerTest.java`, `UserProfileControllerTest.java`, `ScrapingSessionControllerTest.java` — change:
+
+```java
+@Import(SecurityConfig.class)
+```
+
+to:
+
+```java
+@Import({SecurityConfig.class, NoOpUserProfileSyncFilterTestConfig.class})
+```
+
+(That's eight files, not seven — recount: `SecurityConfigTest`, `AgentTaskControllerTest`, `ChatHistoryControllerTest`, `FavoriteControllerTest`, `ListingControllerTest`, `NotificationControllerTest`, `UserProfileControllerTest`, `ScrapingSessionControllerTest` = 8 files using the single-class form.)
+
+For the two using the array form already — `ListingControllerSearchTest.java`, `ReportControllerTest.java` — change:
+
+```java
+@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class})
+```
+
+to:
+
+```java
+@Import({SecurityConfig.class, SecuredMockMvcTestSupport.class, NoOpUserProfileSyncFilterTestConfig.class})
+```
+
+No other changes needed in any of these nine files — no new fields, no stubbing, no `@BeforeEach`. `UserProfileControllerTest.java` is already in the `profile` package, so it does need the `NoOpUserProfileSyncFilterTestConfig` import statement (it's in `security`, a different package) but obviously not for anything else that moved.
+
+- [ ] **Step 8: Run the affected test files and the full backend test suite**
+
+Run: `cd hermes-backend && ./mvnw -q test -Dtest=UserProfileSyncFilterTest,SecurityConfigTest,AgentTaskControllerTest,ChatHistoryControllerTest,FavoriteControllerTest,ListingControllerTest,ListingControllerSearchTest,NotificationControllerTest,UserProfileControllerTest,ReportControllerTest,ScrapingSessionControllerTest`
 Expected: PASS.
 
-- [ ] **Step 8: Run the full backend test suite**
+Run: `cd hermes-backend && ./mvnw -q test -Dtest=HermesBackendApplicationTests#verifyModuleStructure`
+Expected: PASS — confirms the `config -> profile -> listing -> scraping -> funda -> config` cycle is gone.
 
-Run: `cd hermes-backend && ./mvnw -q test`
-Expected: PASS.
+Run: `cd hermes-backend && ./mvnw -q clean test`
+Expected: PASS, full suite.
 
 - [ ] **Step 9: Commit**
 
 ```bash
-git add hermes-backend/src/main/java/com/kropholler/dev/hermes/config/UserProfileSyncFilter.java hermes-backend/src/test/java/com/kropholler/dev/hermes/config/UserProfileSyncFilterTest.java hermes-backend/src/main/java/com/kropholler/dev/hermes/config/SecurityConfig.java hermes-backend/src/test/java/com/kropholler/dev/hermes/config/SecurityConfigTest.java
+git add hermes-backend/src/main/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilter.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileSyncFilterTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/security/NoOpUserProfileSyncFilterTestConfig.java \
+        hermes-backend/src/main/java/com/kropholler/dev/hermes/config/SecurityConfig.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/config/SecurityConfigTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/favorites/FavoriteControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/ListingControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/listing/ListingControllerSearchTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/notification/NotificationControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/report/ReportControllerTest.java \
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/scraping/ScrapingSessionControllerTest.java
 git commit -m "feat(security): sync JWT email onto user profile via a servlet filter"
 ```
 
