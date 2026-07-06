@@ -111,7 +111,7 @@ public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, J
                 l.location::geography,
                 ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography
             ) ASC
-            LIMIT 5
+            LIMIT :limit
             """,
             nativeQuery = true)
     List<ListingEntity> searchForChatNearLocation(
@@ -124,7 +124,8 @@ public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, J
             @Param("maxPrice") Integer maxPrice,
             @Param("lon") double lon,
             @Param("lat") double lat,
-            @Param("radiusMeters") int radiusMeters
+            @Param("radiusMeters") int radiusMeters,
+            @Param("limit") int limit
     );
 
     @Query(value = """
@@ -148,7 +149,7 @@ public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, J
             AND (:minPrice IS NULL OR latest_price.price >= :minPrice)
             AND (:maxPrice IS NULL OR latest_price.price <= :maxPrice)
             ORDER BY CASE WHEN :sortDesc = true THEN -latest_price.price ELSE latest_price.price END ASC NULLS LAST
-            LIMIT 5
+            LIMIT :limit
             """, nativeQuery = true)
     List<ListingEntity> searchForChat(
             @Param("minBedrooms") Integer minBedrooms,
@@ -159,6 +160,7 @@ public interface ListingRepository extends JpaRepository<ListingEntity, UUID>, J
             @Param("keywords") String keywords,
             @Param("minPrice") Integer minPrice,
             @Param("maxPrice") Integer maxPrice,
-            @Param("sortDesc") boolean sortDesc
+            @Param("sortDesc") boolean sortDesc,
+            @Param("limit") int limit
     );
 }
