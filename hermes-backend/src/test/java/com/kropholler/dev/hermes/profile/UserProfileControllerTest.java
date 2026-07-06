@@ -64,6 +64,25 @@ class UserProfileControllerTest {
     }
 
     @Test
+    void updateAddress_syncsEmailFromJwt() throws Exception {
+        UUID subject = UUID.randomUUID();
+        AddressDto dto = new AddressDto("Dorpstraat", "10", null, "1234AB", "Utrecht", "Utrecht", 52.09, 5.12);
+        when(userProfileService.updateAddress(eq(subject), eq("Dorpstraat"), eq("10"), eq(null), eq("1234AB"), eq("Utrecht"), eq("Utrecht")))
+            .thenReturn(dto);
+        when(userProfileApiMapper.toResponse(dto)).thenReturn(new com.kropholler.dev.hermes.profile.openapi.AddressResponse());
+
+        mockMvc.perform(put("/api/profile/address")
+                .with(jwt().jwt(builder -> builder.subject(subject.toString()).claim("email", "user@hermes.local")))
+                .contentType("application/json")
+                .content("""
+                    {"street":"Dorpstraat","houseNumber":"10","zipCode":"1234AB","city":"Utrecht","province":"Utrecht"}
+                    """))
+            .andExpect(status().isOk());
+
+        verify(userProfileService).syncEmail(subject, "user@hermes.local");
+    }
+
+    @Test
     void updateAddress_returns422WhenGeocodingFails() throws Exception {
         UUID subject = UUID.randomUUID();
         when(userProfileService.updateAddress(eq(subject), eq("Nonexistent"), eq("999"), eq(null), eq(null), eq("Nowhereville"), eq(null)))

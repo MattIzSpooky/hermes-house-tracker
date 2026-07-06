@@ -23,8 +23,9 @@ public class UserProfileController implements ProfileApi {
 
     @Override
     public ResponseEntity<AddressResponse> updateAddress(UpdateAddressRequest request) {
+        CurrentUser currentUser = CurrentUser.current();
         AddressDto dto = userProfileService.updateAddress(
-            CurrentUser.current().id(),
+            currentUser.id(),
             request.getStreet(),
             request.getHouseNumber(),
             request.getHouseNumberAddition(),
@@ -32,6 +33,7 @@ public class UserProfileController implements ProfileApi {
             request.getCity(),
             request.getProvince()
         );
+        userProfileService.syncEmail(currentUser.id(), currentUser.email());
         return ResponseEntity.ok(userProfileApiMapper.toResponse(dto));
     }
 }
