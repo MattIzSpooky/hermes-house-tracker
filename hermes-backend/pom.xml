@@ -31,7 +31,7 @@
         <datasource-micrometer.version>2.2.1</datasource-micrometer.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <spring-ai.version>2.0.0</spring-ai.version>
-        <spring-modulith.version>2.0.7</spring-modulith.version>
+        <spring-modulith.version>2.1.0</spring-modulith.version>
     </properties>
     <dependencies>
         <dependency>
@@ -154,7 +154,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.modulith</groupId>
-            <artifactId>spring-modulith-observability</artifactId>
+            <artifactId>spring-modulith-observability-core</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>
