@@ -86,6 +86,7 @@ class AreaResearchTaskHandler implements AgentTaskHandler {
 
         var summaryTool = new GetListingSummaryTool(listingService, listingSummaryService, meterRegistry);
         var historyTool = new GetPriceHistoryTool(listingService, meterRegistry);
+        // discarded — listingIds come from the deterministic candidate set below, never from tool side effects
         var compareTool = new CompareListingsTool(listingService, chatListingCardMapper,
                 new AtomicReference<>(List.of()), meterRegistry);
 

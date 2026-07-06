@@ -115,6 +115,18 @@ class UserProfileSyncFilterTest {
     }
 
     @Test
+    void doFilterInternal_syncThrows_stillContinuesChain() throws Exception {
+        UUID userId = UUID.randomUUID();
+        SecurityContextHolder.getContext().setAuthentication(
+            new JwtAuthenticationToken(jwtWithEmail(userId, "user@hermes.local")));
+        when(userProfileRepository.findById(userId)).thenThrow(new RuntimeException("db hiccup"));
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
     void doFilterInternal_jwtWithoutEmailClaim_skipsSync() throws Exception {
         UUID userId = UUID.randomUUID();
         Jwt jwtNoEmail = Jwt.withTokenValue("token")

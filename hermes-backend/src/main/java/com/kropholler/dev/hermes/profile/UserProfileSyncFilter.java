@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,6 +35,7 @@ import java.time.Instant;
  * (including {@code @WebMvcTest}'s) does not treat as web-layer-relevant and so
  * never auto-includes.
  */
+@Slf4j
 @RequiredArgsConstructor
 class UserProfileSyncFilter extends OncePerRequestFilter {
 
@@ -42,9 +44,13 @@ class UserProfileSyncFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
-            syncEmail(CurrentUser.from(jwt));
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+                syncEmail(CurrentUser.from(jwt));
+            }
+        } catch (Exception e) {
+            log.warn("Failed to sync email onto profile; continuing request", e);
         }
         filterChain.doFilter(request, response);
     }
