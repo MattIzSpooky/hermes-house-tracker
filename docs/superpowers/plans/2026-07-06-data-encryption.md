@@ -4,7 +4,7 @@
 
 **Goal:** Encrypt sensitive columns (chat message content, notification title/body, user profile address/email/geocode, agent task name/payload) at rest, transparently, without touching any caller code outside the entities/repositories/services listed below.
 
-**Architecture:** A new `crypto` package provides a `FieldEncryptor` component wrapping one `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` instance per configured key version (backed by an `EncryptionProperties` `@ConfigurationProperties` record), plus two Spring-managed JPA `AttributeConverter`s (`EncryptedStringConverter`, `EncryptedDoubleConverter`) that delegate to it. Entities apply `@Convert` per field. `FieldEncryptor.encrypt` prefixes ciphertext with the current key version (e.g. `2:<hex>`); `decrypt` parses that prefix to pick the right key, so multiple key versions can coexist across rotations. Each encrypted entity also carries a row-level `encryptionKeyVersion` column, stamped by a shared `EncryptionKeyVersionListener` JPA entity listener — this is *only* for cheap SQL filtering during rotation, not for decrypt correctness. Two existing bypasses of JPA hydration are fixed as part of this work: the chat-session-title native query (reworked into entity-hydrating queries) and the `upsertEmail` native blind-upsert (replaced by a JPQL update + JPA insert fallback). A final Flyway migration (`V15`) truncates the four affected tables (dev data, disposable), widens/retypes the affected columns to `TEXT`, and adds the `encryption_key_version` column to each. A last task adds an admin-triggered `ReencryptionRunner` batch job that migrates rows still on an old key version onto the current one after a rotation.
+**Architecture:** A new `crypto` package provides a `FieldEncryptor` component wrapping one `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` instance per configured key version (backed by an `EncryptionProperties` `@ConfigurationProperties` record), plus two Spring-managed JPA `AttributeConverter`s (`EncryptedStringConverter`, `EncryptedDoubleConverter`) that delegate to it. Entities apply `@Convert` per field. `FieldEncryptor.encrypt` prefixes ciphertext with the current key version (e.g. `2:<hex>`); `decrypt` parses that prefix to pick the right key, so multiple key versions can coexist across rotations. Each encrypted entity also carries a row-level `encryptionKeyVersion` column, stamped by a shared `EncryptionKeyVersionListener` JPA entity listener — this is *only* for cheap SQL filtering during rotation, not for decrypt correctness. Two existing bypasses of JPA hydration are fixed as part of this work: the chat-session-title native query (reworked into entity-hydrating queries) and the `upsertEmail` native blind-upsert (replaced by a JPQL update + JPA insert fallback). Migrations `V15` and `V16` add the `encryption_key_version` column and truncate/widen/retype the affected columns to `TEXT` — split across two files because `ChatMessageRepositoryTest` is the only repository test validating against real Flyway-migrated Postgres, so `chat_messages.encryption_key_version` (`V15`) has to exist before Task 8's broader migration (`V16`) would otherwise land. A last task adds an admin-triggered `ReencryptionRunner` batch job that migrates rows still on an old key version onto the current one after a rotation.
 
 **Tech Stack:** Spring Boot 4.1, Spring Data JPA / Hibernate 6, `spring-security-crypto` (already on the classpath transitively via `spring-boot-starter-oauth2-resource-server` — no new dependency), Flyway, PostgreSQL (+PostGIS) via Testcontainers for integration tests, H2 for plain `@DataJpaTest`s.
 
@@ -17,7 +17,7 @@
 - Every encrypted entity carries a row-level `encryptionKeyVersion` field (`encryption_key_version` column), stamped via the shared `EncryptionKeyVersionListener` (Task 3) — used only for cheap SQL filtering during rotation, never for decrypt correctness.
 - `upsertEmail` (native `INSERT ... ON CONFLICT`) is replaced entirely by a JPQL `updateEmail` + JPA-insert-fallback pair (never re-add native SQL for this path) — see spec Section 4.
 - The insert-fallback path in `UserProfileService.syncEmail` must catch `DataIntegrityViolationException` and retry as an update (race guard — spec Section 4).
-- `V15__encrypt_sensitive_columns.sql` truncates `chat_messages`, `notifications`, `user_profiles`, `agent_tasks` before altering their column types, and adds `encryption_key_version` to all four — existing dev data in those tables is not preserved.
+- `V15__add_chat_messages_encryption_key_version.sql` (Task 4) adds only `chat_messages.encryption_key_version`, needed early because `ChatMessageRepositoryTest` validates against real Flyway-migrated Postgres. `V16__encrypt_sensitive_columns.sql` (Task 8) truncates `chat_messages`, `notifications`, `user_profiles`, `agent_tasks`, alters the remaining column types, and adds `encryption_key_version` to the other three tables — existing dev data in those tables is not preserved.
 - The re-encryption job (Task 9) never relies on JPA dirty-checking to force a rewrite — plaintext values re-set on an already-loaded entity are equal to their loaded snapshot, so Hibernate would treat the entity as unchanged and silently skip the `UPDATE`. It instead issues an explicit JPQL bulk update per row, passing back the decrypted plaintext so the converter re-encrypts it under the current version during translation.
 - No change to the PostGIS radius-search code path or the `listings` table.
 
@@ -512,6 +512,8 @@ git commit -m "feat: add EncryptionVersioned and EncryptionKeyVersionListener"
 
 This task both applies encryption to `ChatMessageEntity.content` and fixes the one native-SQL bypass this creates (spec Section 4, fix #1) — they must ship together or the chat sidebar breaks.
 
+**Migration-ordering note:** `ChatMessageRepositoryTest` is the only repository test in this whole plan that boots real Postgres via Testcontainers with `spring.flyway.enabled=true` and `ddl-auto=validate` — every other encrypted-entity test (Tasks 5–7) runs against H2 with Hibernate auto-generating the schema, so it never needs a real migration to be in place first. That means this task's entity change (adding `encryptionKeyVersion`) needs the `chat_messages.encryption_key_version` column to actually exist in the Flyway-migrated test database *now*, not after Task 8's migration lands. This task therefore gets its own small, additive migration (`V15`); Task 8's migration is renumbered to `V16` and no longer adds this column to `chat_messages` (it still does so for the other three tables).
+
 **Files:**
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessageEntity.java`
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepository.java`
@@ -520,6 +522,7 @@ This task both applies encryption to `ChatMessageEntity.content` and fixes the o
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryService.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryServiceTest.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java`
+- Create: `hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql`
 
 **Interfaces:**
 - Consumes: `EncryptedStringConverter` from Task 2; `EncryptionVersioned`, `EncryptionKeyVersionListener` from Task 3.
@@ -963,12 +966,22 @@ class ChatMessageRepositoryTest {
 }
 ```
 
-- [ ] **Step 8: Run the tests**
+- [ ] **Step 8: Write the additive migration for `chat_messages.encryption_key_version`**
+
+`ChatMessageRepositoryTest` boots real Postgres via Testcontainers with Flyway migrations applied and `ddl-auto=validate` — it needs this column to physically exist, not just be declared on the entity. Create `hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql`:
+
+```sql
+ALTER TABLE chat_messages ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
+```
+
+(No truncate needed — this is a purely additive column with a default, safe on existing rows. The `TRUNCATE`/`TEXT`-widening migration in Task 8 is renumbered to `V16` and no longer adds this column to `chat_messages`, since it's already added here.)
+
+- [ ] **Step 9: Run the tests**
 
 Run: `cd hermes-backend && mvn -q test -Dtest=ChatHistoryServiceTest,ChatMessageRepositoryTest`
 Expected: PASS. `ChatMessageRepositoryTest` requires Docker (Testcontainers) to be running.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessageEntity.java \
@@ -976,7 +989,8 @@ git add hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessa
         hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatSessionOverviewProjection.java \
         hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryService.java \
         hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryServiceTest.java \
-        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java \
+        hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql
 git commit -m "feat: encrypt chat message content and rework session-title query"
 ```
 
@@ -1644,10 +1658,12 @@ git commit -m "feat: encrypt agent task name and payload"
 
 ---
 
-### Task 8: Flyway migration to widen/retype the affected columns and add key-version columns
+### Task 8: Flyway migration to widen/retype the affected columns and add remaining key-version columns
+
+Task 4 already added `chat_messages.encryption_key_version` via its own `V15` migration (see the migration-ordering note in Task 4) — that was necessary because `ChatMessageRepositoryTest` is the only repository test in this plan that validates against real Flyway-migrated Postgres. This task's migration is `V16`; it does not touch `chat_messages.encryption_key_version` again.
 
 **Files:**
-- Create: `hermes-backend/src/main/resources/db/migration/V15__encrypt_sensitive_columns.sql`
+- Create: `hermes-backend/src/main/resources/db/migration/V16__encrypt_sensitive_columns.sql`
 
 **Interfaces:**
 - Consumes: nothing new — this is a pure schema migration matching the entity changes from Tasks 4–7.
@@ -1676,26 +1692,25 @@ ALTER TABLE agent_tasks ALTER COLUMN payload DROP DEFAULT;
 ALTER TABLE agent_tasks ALTER COLUMN payload TYPE TEXT USING payload::text;
 ALTER TABLE agent_tasks ALTER COLUMN payload SET DEFAULT '{}';
 
-ALTER TABLE chat_messages ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
 ALTER TABLE notifications ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
 ALTER TABLE user_profiles ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
 ALTER TABLE agent_tasks ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
 ```
 
-(`chat_messages.content` and `notifications.body` are already `TEXT` — no change needed. Truncating `notifications`/`agent_tasks` in one `TRUNCATE` statement avoids needing `CASCADE` for the `notifications.task_id → agent_tasks.id` foreign key, since Postgres resolves ordering across tables listed in the same statement. All four tables are truncated above, so `encryption_key_version DEFAULT 1` never needs to backfill any pre-existing row — every row inserted afterward goes through the `EncryptionKeyVersionListener`, which always stamps the real current version regardless of this column default.)
+(`chat_messages.content` and `notifications.body` are already `TEXT` — no change needed, and `chat_messages.encryption_key_version` was already added by Task 4's `V15`. Truncating `notifications`/`agent_tasks` in one `TRUNCATE` statement avoids needing `CASCADE` for the `notifications.task_id → agent_tasks.id` foreign key, since Postgres resolves ordering across tables listed in the same statement. All tables here are truncated above, so `encryption_key_version DEFAULT 1` never needs to backfill any pre-existing row — every row inserted afterward goes through the `EncryptionKeyVersionListener`, which always stamps the real current version regardless of this column default.)
 
 - [ ] **Step 2: Run the full backend test suite**
 
 Run: `cd hermes-backend && mvn test`
-Expected: PASS, all tests green. This is the real verification of the migration SQL — `ChatMessageRepositoryTest`, `ListingRepositoryGeoTest`, and `ListingRepositoryRadiusTest` all boot a Postgres+PostGIS Testcontainers instance with `spring.flyway.enabled=true`, which runs the full migration chain including `V15` before Hibernate's `ddl-auto=validate` check. A syntax error or type mismatch in `V15` will surface as a Flyway migration failure in any of those test classes.
+Expected: PASS, all tests green. This is the real verification of the migration SQL — `ChatMessageRepositoryTest`, `ListingRepositoryGeoTest`, and `ListingRepositoryRadiusTest` all boot a Postgres+PostGIS Testcontainers instance with `spring.flyway.enabled=true`, which runs the full migration chain including `V15` and `V16` before Hibernate's `ddl-auto=validate` check. A syntax error or type mismatch in `V16` will surface as a Flyway migration failure in any of those test classes.
 
-If any test class fails to start with a Flyway error, read the migration failure message (it names the exact statement and reason), fix the SQL in `V15__encrypt_sensitive_columns.sql`, and re-run.
+If any test class fails to start with a Flyway error, read the migration failure message (it names the exact statement and reason), fix the SQL in `V16__encrypt_sensitive_columns.sql`, and re-run.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add hermes-backend/src/main/resources/db/migration/V15__encrypt_sensitive_columns.sql
-git commit -m "feat: add V15 migration widening encrypted columns to TEXT and adding encryption_key_version"
+git add hermes-backend/src/main/resources/db/migration/V16__encrypt_sensitive_columns.sql
+git commit -m "feat: add V16 migration widening encrypted columns to TEXT and adding remaining encryption_key_version columns"
 ```
 
 ---
