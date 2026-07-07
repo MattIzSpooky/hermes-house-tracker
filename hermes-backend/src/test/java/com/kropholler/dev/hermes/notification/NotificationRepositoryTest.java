@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -17,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @EnableConfigurationProperties(EncryptionProperties.class)
-@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class})
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 class NotificationRepositoryTest {
 
     @Autowired NotificationRepository repository;

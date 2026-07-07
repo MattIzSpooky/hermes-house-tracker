@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     ChatMessageRepositoryTest.Containers.class,
     FieldEncryptor.class,
     EncryptedStringConverter.class,
+    EncryptedDoubleConverter.class,
     EncryptionKeyVersionListener.class
 })
 @TestPropertySource(properties = {
