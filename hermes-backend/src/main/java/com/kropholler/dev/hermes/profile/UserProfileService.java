@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.profile;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,7 +54,20 @@ public class UserProfileService {
     @Transactional
     public void syncEmail(UUID userId, String email) {
         if (email == null || email.isBlank()) return;
-        repository.upsertEmail(userId, email);
+        int updated = repository.updateEmail(userId, email);
+        if (updated == 0) {
+            UserProfileEntity entity = new UserProfileEntity();
+            entity.setUserId(userId);
+            entity.setEmail(email);
+            entity.setUpdatedAt(Instant.now());
+            try {
+                repository.save(entity);
+            } catch (DataIntegrityViolationException e) {
+                // Lost a race with a concurrent syncEmail call for the same new user — the row
+                // now exists, so retry as an update instead of failing the request.
+                repository.updateEmail(userId, email);
+            }
+        }
     }
 
     private static AddressDto toDto(UserProfileEntity entity) {
