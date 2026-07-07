@@ -825,12 +825,19 @@ class ChatHistoryServiceTest {
 
 Replace the full contents of `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java`:
 
+`@DataJpaTest` does not component-scan plain `@Component` beans, so `FieldEncryptor`, `EncryptedStringConverter`, and `EncryptionKeyVersionListener` must be pulled in explicitly via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties` — otherwise the converter on `content` fails to resolve with `NoSuchBeanDefinitionException: FieldEncryptor`:
+
 ```java
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -847,7 +854,13 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(ChatMessageRepositoryTest.Containers.class)
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({
+    ChatMessageRepositoryTest.Containers.class,
+    FieldEncryptor.class,
+    EncryptedStringConverter.class,
+    EncryptionKeyVersionListener.class
+})
 @TestPropertySource(properties = {
     "spring.test.database.replace=none",
     "spring.flyway.enabled=true",
@@ -1008,19 +1021,29 @@ git commit -m "feat: encrypt chat message content and rework session-title query
 
 - [ ] **Step 1: Write the failing test**
 
+`@DataJpaTest` does not component-scan plain `@Component` beans (confirmed empirically in Task 4), so `FieldEncryptor`, `EncryptedStringConverter`, and `EncryptionKeyVersionListener` must be pulled in explicitly via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties` — otherwise the converter on `NotificationEntity.title`/`body` fails to resolve with `NoSuchBeanDefinitionException: FieldEncryptor`:
+
 ```java
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class})
 class NotificationRepositoryTest {
 
     @Autowired NotificationRepository repository;
@@ -1388,13 +1411,22 @@ git rm hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfil
 
 Create `hermes-backend/src/test/java/com/kropholler/dev/hermes/profile/UserProfileRepositoryUpdateEmailTest.java`:
 
+`@DataJpaTest` does not component-scan plain `@Component` beans (confirmed empirically in Task 4), so `FieldEncryptor`, `EncryptedStringConverter`, `EncryptedDoubleConverter`, and `EncryptionKeyVersionListener` must be pulled in explicitly via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties`:
+
 ```java
 package com.kropholler.dev.hermes.profile;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -1402,6 +1434,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 class UserProfileRepositoryUpdateEmailTest {
 
     @Autowired UserProfileRepository repository;
@@ -1499,10 +1533,16 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.Instant;
@@ -1512,6 +1552,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class})
 @TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class AgentTaskRepositoryTest {
 
@@ -2098,12 +2140,19 @@ class AgentTaskReencryptionTask implements Reencryptable {
 
 `ChatMessageReencryptionTaskTest` exercises the real converter + JPQL bulk-update path against H2. It simulates a row written before a rotation by inserting its ciphertext directly via native SQL (encrypted with the v1 key, tagged `encryption_key_version = 1`) rather than going through the entity listener — the listener always stamps whatever the *current* version is, so it can't produce "legacy" data on its own in a single test context. `NotificationReencryptionTaskTest`, `UserProfileReencryptionTaskTest`, and `AgentTaskReencryptionTaskTest` follow this exact same pattern for their own tables/fields and are not reproduced here.
 
+`@DataJpaTest` does not component-scan plain `@Component` beans, so `FieldEncryptor`, `EncryptedStringConverter`, `EncryptionKeyVersionListener`, and `ChatMessageReencryptionTask` itself must be pulled in via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties` (same wiring as Task 4's `ChatMessageRepositoryTest`):
+
 ```java
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.encrypt.Encryptors;
@@ -2114,7 +2163,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(ChatMessageReencryptionTask.class)
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class, ChatMessageReencryptionTask.class})
 @TestPropertySource(properties = "hermes.encryption.current-version=2")
 class ChatMessageReencryptionTaskTest {
 
