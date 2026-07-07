@@ -48,6 +48,20 @@ class FieldEncryptorTest {
     }
 
     @Test
+    void decrypt_missingVersionPrefix_throwsClearError() {
+        assertThatThrownBy(() -> encryptor.decrypt("not-a-valid-stored-value"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("missing key-version prefix");
+    }
+
+    @Test
+    void decrypt_malformedVersionPrefix_throwsClearError() {
+        assertThatThrownBy(() -> encryptor.decrypt("abc:deadbeef"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("malformed key-version prefix");
+    }
+
+    @Test
     void encrypt_nullInput_returnsNull() {
         assertThat(encryptor.encrypt(null)).isNull();
     }
@@ -55,5 +69,27 @@ class FieldEncryptorTest {
     @Test
     void decrypt_nullInput_returnsNull() {
         assertThat(encryptor.decrypt(null)).isNull();
+    }
+
+    @Test
+    void constructor_saltNotValidHex_throwsClearError() {
+        EncryptionProperties badProperties = new EncryptionProperties(
+            Map.of(1, "some-key"), Map.of(1, "not-hex!!"), 1);
+
+        assertThatThrownBy(() -> new FieldEncryptor(badProperties))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("hermes.encryption.salts.1")
+            .hasMessageContaining("valid hex string");
+    }
+
+    @Test
+    void constructor_saltMissingForConfiguredKey_throwsClearError() {
+        EncryptionProperties badProperties = new EncryptionProperties(
+            Map.of(1, "some-key"), Map.of(), 1);
+
+        assertThatThrownBy(() -> new FieldEncryptor(badProperties))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("hermes.encryption.salts.1")
+            .hasMessageContaining("not configured");
     }
 }

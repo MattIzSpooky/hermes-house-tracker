@@ -20,7 +20,19 @@ public class FieldEncryptor {
         this.encryptorsByVersion = properties.keys().entrySet().stream()
             .collect(Collectors.toUnmodifiableMap(
                 Map.Entry::getKey,
-                e -> Encryptors.text(e.getValue(), properties.salts().get(e.getKey()))));
+                e -> Encryptors.text(e.getValue(), requireValidSalt(e.getKey(), properties.salts().get(e.getKey())))));
+    }
+
+    private static String requireValidSalt(int version, String salt) {
+        if (salt == null) {
+            throw new IllegalStateException(
+                "hermes.encryption.salts." + version + " is not configured, but hermes.encryption.keys." + version + " is");
+        }
+        if (!salt.matches("[0-9a-fA-F]+")) {
+            throw new IllegalStateException(
+                "hermes.encryption.salts." + version + " must be a valid hex string (only 0-9a-f characters), got: " + salt);
+        }
+        return salt;
     }
 
     public int getCurrentVersion() {
@@ -36,7 +48,15 @@ public class FieldEncryptor {
     public String decrypt(String stored) {
         if (stored == null) return null;
         int separatorIndex = stored.indexOf(VERSION_SEPARATOR);
-        int version = Integer.parseInt(stored.substring(0, separatorIndex));
+        if (separatorIndex <= 0) {
+            throw new IllegalArgumentException("Stored value is not a valid encrypted field (missing key-version prefix): " + stored);
+        }
+        int version;
+        try {
+            version = Integer.parseInt(stored.substring(0, separatorIndex));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Stored value has a malformed key-version prefix: " + stored, e);
+        }
         String ciphertext = stored.substring(separatorIndex + 1);
         return requireEncryptor(version).decrypt(ciphertext);
     }
