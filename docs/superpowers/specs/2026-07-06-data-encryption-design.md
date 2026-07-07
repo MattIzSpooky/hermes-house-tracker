@@ -9,18 +9,20 @@ Encrypts sensitive user-generated data at rest — chat messages, notifications,
 
 The scope is column-level, transparent encryption via JPA `AttributeConverter`s, not a blanket table/database-level encryption scheme. This keeps the change localized to entity definitions and two supporting converter classes, and leaves every other read/write path (repositories, services, controllers) untouched wherever they go through normal JPA entity hydration.
 
-Two code paths bypass normal entity hydration and need explicit handling (Section 3): a native-SQL read used for the chat sidebar, and a native-SQL blind upsert used for email sync.
+Two code paths bypass normal entity hydration and need explicit handling (Section 4): a native-SQL read used for the chat sidebar, and a native-SQL blind upsert used for email sync.
 
 ## 1. Architecture
 
 A new `crypto` package holds:
 
-- **`FieldEncryptor`** — a Spring `@Component` wrapping `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` (already transitively available via `spring-security-crypto`, no new dependency). Exposes:
+- **`FieldEncryptor`** — a Spring `@Component` wrapping one `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` instance per configured key version (already transitively available via `spring-security-crypto`, no new dependency). Exposes:
   ```java
   public String encrypt(String plaintext) // null-safe: null in, null out
   public String decrypt(String ciphertext) // null-safe: null in, null out
   ```
-  Backed by two new properties: `hermes.encryption.key` and `hermes.encryption.salt`, both required, sourced from environment variables (matching the existing convention for other secrets in `application.properties`).
+  Backed by indexed properties `hermes.encryption.keys.<n>` / `hermes.encryption.salts.<n>` (one pair per key version, `n` starting at `1`) plus `hermes.encryption.current-version`, all required, sourced from environment variables (matching the existing convention for other secrets in `application.properties`). At startup, `FieldEncryptor` builds a `Map<Integer, TextEncryptor>` from every configured version. `encrypt` always uses the `current-version` encryptor and prefixes its output with the version, e.g. `2:<hex>`. `decrypt` parses the leading version prefix and looks up the matching encryptor from the map — see [Key versioning and rotation](#3-key-versioning-and-rotation) below.
+
+  Note: `Encryptors.text(key, salt)`'s underlying `AesBytesEncryptor` already generates a random 16-byte IV per call and prepends it to the ciphertext bytes before hex-encoding the result into one string. So each stored value already carries its own IV inline — no separate IV column or field is needed; this is inherent to the encryptor Spring provides, not something this design has to add.
 
 - **`EncryptedStringConverter`** — `AttributeConverter<String, String>`, `@Convert(converter = EncryptedStringConverter.class)`, delegates to `FieldEncryptor`. Used for all `String` fields being encrypted.
 
@@ -39,9 +41,23 @@ Both converters are Spring-managed beans (`autoApply = false`, referenced explic
 | `AgentTaskEntity` | `name` | `EncryptedStringConverter` | `VARCHAR`→`TEXT` |
 | `AgentTaskEntity` | `payload` | `EncryptedStringConverter` | drops `@JdbcTypeCode(SqlTypes.JSON)`, `JSONB`→`TEXT` |
 
+Each of the four tables (`chat_messages`, `notifications`, `user_profiles`, `agent_tasks`) also gains an `encryption_key_version INT NOT NULL DEFAULT 1` column — see [Key versioning and rotation](#3-key-versioning-and-rotation).
+
 Explicitly NOT encrypted: `NotificationEntity.listingIds`, `AgentTaskEntity.type/status/schedule`, all `listings.*` columns (public data, and `latitude`/`longitude` there must stay queryable by PostGIS `ST_DWithin` across many rows — unlike `user_profiles`, which is only ever looked up by `userId`).
 
-## 3. Special-case fixes for native-SQL bypasses
+## 3. Key versioning and rotation
+
+Rotating `hermes.encryption.keys.*` must not make previously-encrypted data unreadable, and there must be a way to migrate old rows onto the newest key without a flag day. Two independent markers make this possible, each solving a different half of the problem:
+
+**Per-field embedded version (decrypt correctness).** `AttributeConverter`s only see one column at a time — they cannot read a sibling column on the same entity to learn which key version encrypted a given field. So the version travels with the ciphertext itself: `FieldEncryptor.encrypt` prefixes its output with the current version, e.g. `2:<hex-ciphertext-with-embedded-iv>`. `FieldEncryptor.decrypt` parses the prefix and picks the matching `TextEncryptor` from its `Map<Integer, TextEncryptor>`. This keeps every converter fully self-contained — no entity-level lifecycle hooks, no cross-column coupling — while still supporting any number of coexisting key versions.
+
+**Row-level `encryption_key_version` column (cheap auditing/filtering).** This column is *not* consulted for decryption — it exists purely so the re-encryption job (Section 5) can find candidate rows with a plain SQL filter (`WHERE encryption_key_version < :current`) instead of decrypting every row up front to inspect its embedded version. It's stamped via a `@PrePersist`/`@PreUpdate` entity listener that writes `FieldEncryptor`'s current version constant whenever a row is inserted or updated. Because all encrypted fields on a row are always written together using the current key at save time, the row-level value and the per-field embedded versions stay in agreement in normal operation; the re-encryption job still re-derives ground truth per field via `decrypt`, so a theoretical mismatch is harmless.
+
+**Multi-key configuration.** `hermes.encryption.keys.<n>` and `hermes.encryption.salts.<n>` are indexed properties, one pair per key version (`n` starting at `1`), plus `hermes.encryption.current-version` naming which one is active for new writes. All prior versions must stay configured for as long as any row might still carry that version's prefix — removing a version's key/salt before every row referencing it has been re-encrypted makes that data permanently undecryptable. `src/test/resources/application.properties` needs at least two versions configured so rotation and mixed-version decryption can be exercised in tests.
+
+To rotate a key: add a new `hermes.encryption.keys.<n+1>`/`salts.<n+1>` pair, bump `hermes.encryption.current-version`, deploy, then run the re-encryption job (Section 5) to migrate existing rows off the old version. Once no row references an old version (confirmed via the `encryption_key_version` column), its key/salt properties can be safely removed in a later deploy.
+
+## 4. Special-case fixes for native-SQL bypasses
 
 One existing native query bypasses `AttributeConverter`s entirely (converters only apply during normal entity hydration) and must be fixed alongside the schema change:
 
@@ -82,19 +98,39 @@ The update-then-maybe-insert sequence isn't atomic the way `ON CONFLICT` was, so
 
 No other native queries in the codebase touch an encrypted column (confirmed by inspection of `NotificationRepository` and `AgentTaskRepository`).
 
-## 4. Migration and testing
+## 5. Re-encryption tooling
+
+After a key rotation (Section 3), rows written under an old version need to be migrated onto the current one. This is an admin-triggered batch job, not a standing scheduled process — rotations are rare, operator-initiated events, and a continuous sweep would just be idle most of the time.
+
+**Trigger.** A `CommandLineRunner` gated behind a flag (e.g. `--reencrypt` / a dedicated Spring profile), run manually by an operator after bumping `hermes.encryption.current-version` and redeploying. Not exposed as a public HTTP endpoint.
+
+**Mechanics, per encrypted table:**
+1. Page through rows where `encryption_key_version < current-version` (the cheap SQL filter the row-level column exists for), in fixed-size batches (e.g. 500 rows) via a derived query (`findByEncryptionKeyVersionLessThan`), to bound memory and transaction size.
+2. For each row, load it as a normal JPA entity — `AttributeConverter`s transparently decrypt every field using its embedded old-version prefix.
+3. Issue an explicit `@Modifying` JPQL bulk update for that row, passing every encrypted field's *decrypted* plaintext back in as bind parameters, alongside `current-version` for `encryption_key_version`.
+
+Step 3 is deliberately not "re-set the field on the loaded entity and `save()`, relying on dirty-checking" — that doesn't work here. Hibernate's dirty-checking compares an entity's current in-memory attribute value against the snapshot it loaded, and both are the same decrypted `String`/`Double`; re-setting a field to its own value looks unchanged, so a plain `save()` would silently skip the `UPDATE` and the row would stay on the old key version forever. The JPQL bulk update sidesteps this: Hibernate applies each field's `AttributeConverter` to the bind parameter during query translation, so passing back the plaintext re-encrypts it under whatever `FieldEncryptor` currently considers current — no separate encrypt call needed in the job itself, and no dependence on entity-level change detection.
+
+Each batch commits in its own transaction so a failure partway through a table only needs to resume from the last committed page (rows already re-encrypted no longer match the `encryption_key_version < current-version` filter), not restart the whole table.
+
+**Completion check.** Rotation is done for a given old version once `SELECT count(*) WHERE encryption_key_version = :oldVersion` is `0` across all four tables; only then is it safe to remove that version's `hermes.encryption.keys.<n>`/`salts.<n>` properties.
+
+## 6. Migration and testing
 
 A single new Flyway migration, `V15__encrypt_sensitive_columns.sql`:
 - `TRUNCATE` the four affected tables (`chat_messages`, `notifications`, `user_profiles`, `agent_tasks`) — existing dev data is disposable and can't be transparently re-encrypted by a SQL migration anyway.
-- `ALTER COLUMN ... TYPE TEXT` for every column listed in the table above.
+- `ALTER COLUMN ... TYPE TEXT` for every column listed in the Section 2 table.
 - Drop the `JSONB` typing on `agent_tasks.payload` (column becomes plain `TEXT`; `AgentTaskEntity.payload`'s `@JdbcTypeCode(SqlTypes.JSON)` annotation is removed to match).
+- Add `encryption_key_version INT NOT NULL DEFAULT 1` to each of the four tables.
 
-`src/test/resources/application.properties` gets fixed test values for `hermes.encryption.key`/`hermes.encryption.salt` so encrypt/decrypt round-trips work in unit and Testcontainers-based tests. Because converters are transparent at the entity level, existing tests that assert on these fields' values (`ChatMessageRepositoryTest`, `UserProfileServiceTest`, `AgentTaskServiceTest`, etc.) need no changes. `UserProfileRepositoryUpsertEmailTest` is renamed/rewritten to exercise `updateEmail` + the insert fallback (no more native-upsert-specific assertions, since the new path is plain JPQL/JPA); it can drop its Testcontainers/Postgres dependency and run against the default H2 `@DataJpaTest` setup, since JPQL bulk updates and JPA saves are portable across databases — unlike the old `ON CONFLICT` syntax, which was Postgres-only. The only remaining test that asserts on **raw SQL/JDBC** results for an affected column is the chat-session-title query (being reworked in this same design, Section 3).
+`src/test/resources/application.properties` gets fixed test values for at least two key versions (`hermes.encryption.keys.1`/`.2`, matching `salts.1`/`.2`, and a `current-version`) so encrypt/decrypt round-trips, version-prefix parsing, and mixed-version decryption can all be exercised in unit and Testcontainers-based tests. Because converters are transparent at the entity level, existing tests that assert on these fields' values (`ChatMessageRepositoryTest`, `UserProfileServiceTest`, `AgentTaskServiceTest`, etc.) need no changes. `UserProfileRepositoryUpsertEmailTest` is renamed/rewritten to exercise `updateEmail` + the insert fallback (no more native-upsert-specific assertions, since the new path is plain JPQL/JPA); it can drop its Testcontainers/Postgres dependency and run against the default H2 `@DataJpaTest` setup, since JPQL bulk updates and JPA saves are portable across databases — unlike the old `ON CONFLICT` syntax, which was Postgres-only. The only remaining test that asserts on **raw SQL/JDBC** results for an affected column is the chat-session-title query (being reworked in this same design, Section 4).
+
+New tests specific to this design: `FieldEncryptorTest` covering encrypt/decrypt round-trips per version and decrypt-by-embedded-version-lookup across multiple configured versions; and re-encryption-job tests covering the paging/batch-completion loop and the per-table JPQL bulk-update-and-re-encrypt behavior against an H2-backed repository fixture.
 
 ## Out of scope
 
 - Encrypting `listings.*` columns (public scraped data, and lat/lon there must remain queryable for PostGIS spatial search).
 - Encrypting `AgentTaskEntity.type`, `status`, `schedule`, or `NotificationEntity.listingIds` — none carry user-authored content.
 - Any change to the PostGIS radius-search code path — it operates exclusively on the unencrypted `listings` table.
-- Key rotation / re-encryption tooling — out of scope for this initial pass; a future concern once the columns exist.
+- Automatic/scheduled key rotation — this design supports rotation via a manually-triggered re-encryption job (Section 5); it does not add a mechanism that rotates keys or triggers re-encryption on its own.
 - Preserving existing `chat_messages`/`notifications`/`user_profiles`/`agent_tasks` data across the migration (explicitly wiped per user's choice).
