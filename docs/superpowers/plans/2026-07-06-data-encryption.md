@@ -1700,10 +1700,9 @@ Create `hermes-backend/src/main/resources/db/migration/V16__widen_agent_tasks_co
 ALTER TABLE agent_tasks ALTER COLUMN name TYPE TEXT;
 ALTER TABLE agent_tasks ALTER COLUMN payload DROP DEFAULT;
 ALTER TABLE agent_tasks ALTER COLUMN payload TYPE TEXT USING payload::text;
-ALTER TABLE agent_tasks ALTER COLUMN payload SET DEFAULT '{}';
 ```
 
-(No `TRUNCATE`/`encryption_key_version` needed here — `V15` already handled both for `agent_tasks`, back when it was widened to cover all four tables' truncation and version columns up front. This migration only carries the `agent_tasks`-specific TEXT-widening + JSON-typing removal, since only this task's entity change needs it. `chat_messages.content` and `notifications.body` are already `TEXT`; no other tables need touching here.)
+(No `TRUNCATE`/`encryption_key_version` needed here — `V15` already handled both for `agent_tasks`, back when it was widened to cover all four tables' truncation and version columns up front. This migration only carries the `agent_tasks`-specific TEXT-widening + JSON-typing removal, since only this task's entity change needs it. `chat_messages.content` and `notifications.body` are already `TEXT`; no other tables need touching here. No `SET DEFAULT` is re-added on `payload` after dropping it — a plaintext `'{}'` DB-level default on a now-encrypted column would be a latent trap: JPA always writes the encrypted value explicitly, so the default is never used in practice, but any row inserted outside JPA would silently store unencrypted `{}` and fail to decrypt later. `AgentTaskEntity.payload`'s Java-level default (`= "{}"`) already covers normal entity construction.)
 
 - [ ] **Step 6: Run the full backend test suite**
 

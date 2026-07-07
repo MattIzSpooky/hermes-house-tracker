@@ -102,7 +102,7 @@ No other native queries in the codebase touch an encrypted column (confirmed by 
 
 After a key rotation (Section 3), rows written under an old version need to be migrated onto the current one. This is an admin-triggered batch job, not a standing scheduled process — rotations are rare, operator-initiated events, and a continuous sweep would just be idle most of the time.
 
-**Trigger.** A `CommandLineRunner` gated behind a flag (e.g. `--reencrypt` / a dedicated Spring profile), run manually by an operator after bumping `hermes.encryption.current-version` and redeploying. Not exposed as a public HTTP endpoint.
+**Trigger.** A `CommandLineRunner` (`ReencryptionRunner`) gated behind the `reencrypt` Spring profile (`@Profile("reencrypt")`), activated by setting `SPRING_PROFILES_ACTIVE=reencrypt` (or `--spring.profiles.active=reencrypt`) when starting the app, run manually by an operator after bumping `hermes.encryption.current-version` and redeploying. Not exposed as a public HTTP endpoint. Note this boots the *whole* application (web server, schedulers, everything) under that profile, not just the batch job — the operator should stop the process once the runbook below confirms completion, rather than leaving it running.
 
 **Mechanics, per encrypted table:**
 1. Page through rows where `encryption_key_version < current-version` (the cheap SQL filter the row-level column exists for), in fixed-size batches (e.g. 500 rows) via a derived query (`findByEncryptionKeyVersionLessThan`), to bound memory and transaction size.
@@ -114,6 +114,13 @@ Step 3 is deliberately not "re-set the field on the loaded entity and `save()`, 
 Each batch commits in its own transaction so a failure partway through a table only needs to resume from the last committed page (rows already re-encrypted no longer match the `encryption_key_version < current-version` filter), not restart the whole table.
 
 **Completion check.** Rotation is done for a given old version once `SELECT count(*) WHERE encryption_key_version = :oldVersion` is `0` across all four tables; only then is it safe to remove that version's `hermes.encryption.keys.<n>`/`salts.<n>` properties.
+
+**Rotation runbook.**
+1. Pick the next version number `n+1`. Add `hermes.encryption.keys.<n+1>` and `hermes.encryption.salts.<n+1>` (new key material) to `application.properties`, alongside every existing version's properties — do not remove old ones yet.
+2. Set `hermes.encryption.current-version=<n+1>` and deploy. From this point, all new writes use the new key; old rows still decrypt fine via their embedded version prefix.
+3. Start one instance with `SPRING_PROFILES_ACTIVE=reencrypt` (in addition to whatever profiles are normally active). `ReencryptionRunner` runs once at startup, sweeping all four tables until each returns 0 rows for the current version filter, then logs completion and the process keeps running as a normal (now idle) app instance — stop it once step 4 confirms completion.
+4. Run the completion check above for version `n` (the previous version) against all four tables. If any table still has rows on version `n`, something went wrong (check logs) — do not proceed to step 5.
+5. Once confirmed, remove `hermes.encryption.keys.<n>`/`salts.<n>` (the now-unused old version) from `application.properties` in a later deploy.
 
 ## 6. Migration and testing
 
