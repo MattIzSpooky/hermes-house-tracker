@@ -19,11 +19,14 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/hermes/protocol/openid-connect/certs
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://localhost:8081/realms/hermes
       # Field-level encryption (see docs/superpowers/specs/2026-07-06-data-encryption-design.md).
-      # Required, no default - the app fails to start without them. Dev-only values below;
-      # override with real secrets for any non-local environment. HERMES_ENCRYPTION_SALT_V1
-      # must be a valid hex string (only 0-9a-f).
+      # KEY_V1/SALT_V1 are required, no default - the app fails to start without them. Dev-only
+      # values below; override with real secrets for any non-local environment.
+      # HERMES_ENCRYPTION_SALT_V1 must be a valid hex string (only 0-9a-f).
+      # CURRENT_VERSION defaults to 1 in application.properties if unset here too; override it
+      # to test key rotation locally (add a matching KEY_V<n>/SALT_V<n> pair alongside).
       HERMES_ENCRYPTION_KEY_V1: ${HERMES_ENCRYPTION_KEY_V1:-dev-local-encryption-key-v1}
       HERMES_ENCRYPTION_SALT_V1: ${HERMES_ENCRYPTION_SALT_V1:-a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4}
+      HERMES_ENCRYPTION_CURRENT_VERSION: ${HERMES_ENCRYPTION_CURRENT_VERSION:-1}
     depends_on:
       postgres:
         condition: service_healthy
