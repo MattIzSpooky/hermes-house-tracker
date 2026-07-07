@@ -33,6 +33,8 @@ class AgentTaskExecutor {
             return;
         }
         try {
+            log.info("Received task {} with type: {}", task.getId(), task.getType());
+
             handler.handle(task).ifPresent(content ->
                 notificationService.save(task.getId(), task.getUserId(), content));
         } catch (Exception e) {
