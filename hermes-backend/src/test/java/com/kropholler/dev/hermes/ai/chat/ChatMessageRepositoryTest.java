@@ -1,7 +1,14 @@
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -11,14 +18,21 @@ import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(ChatMessageRepositoryTest.Containers.class)
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({
+    ChatMessageRepositoryTest.Containers.class,
+    FieldEncryptor.class,
+    EncryptedStringConverter.class,
+    EncryptedDoubleConverter.class,
+    EncryptionKeyVersionListener.class
+})
 @TestPropertySource(properties = {
     "spring.test.database.replace=none",
     "spring.flyway.enabled=true",
@@ -39,6 +53,7 @@ class ChatMessageRepositoryTest {
     }
 
     @Autowired ChatMessageRepository chatMessageRepository;
+    @Autowired EntityManager em;
 
     private ChatMessageEntity saveMessage(UUID sessionId, UUID userId, String role, String content) {
         ChatMessageEntity m = new ChatMessageEntity();
@@ -50,23 +65,23 @@ class ChatMessageRepositoryTest {
     }
 
     @Test
-    void findSessionSummariesByUserId_groupsBySessionAndUsesFirstUserMessageAsTitleSource() {
+    void content_isStoredEncryptedAtRest() {
         UUID userId = UUID.randomUUID();
-        UUID sessionId = UUID.randomUUID();
-        saveMessage(sessionId, userId, "USER", "First message in this conversation");
-        saveMessage(sessionId, userId, "ASSISTANT", "A reply");
-        saveMessage(sessionId, userId, "USER", "A follow-up question");
+        ChatMessageEntity saved = saveMessage(UUID.randomUUID(), userId, "USER", "a very secret message");
+        em.clear();
 
-        List<ChatSessionProjection> result = chatMessageRepository.findSessionSummariesByUserId(userId);
+        Object rawContent = em.createNativeQuery("SELECT content FROM chat_messages WHERE id = :id")
+            .setParameter("id", saved.getId())
+            .getSingleResult();
 
-        assertThat(result).hasSize(1);
-        ChatSessionProjection summary = result.get(0);
-        assertThat(summary.getSessionId()).isEqualTo(sessionId);
-        assertThat(summary.getTitleSource()).isEqualTo("First message in this conversation");
+        assertThat(rawContent).isNotEqualTo("a very secret message");
+        assertThat(chatMessageRepository.findById(saved.getId()).orElseThrow().getContent())
+            .isEqualTo("a very secret message");
+        assertThat(saved.getEncryptionKeyVersion()).isEqualTo(1);
     }
 
     @Test
-    void findSessionSummariesByUserId_multipleSessionsOrderedByMostRecentFirst() throws InterruptedException {
+    void findSessionOverviewsByUserId_groupsBySessionOrderedByMostRecentFirst() throws InterruptedException {
         UUID userId = UUID.randomUUID();
         UUID olderSession = UUID.randomUUID();
         UUID newerSession = UUID.randomUUID();
@@ -74,7 +89,7 @@ class ChatMessageRepositoryTest {
         Thread.sleep(10); // ensure a strictly later created_at for the newer session
         saveMessage(newerSession, userId, "USER", "Newer conversation");
 
-        List<ChatSessionProjection> result = chatMessageRepository.findSessionSummariesByUserId(userId);
+        List<ChatSessionOverviewProjection> result = chatMessageRepository.findSessionOverviewsByUserId(userId);
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getSessionId()).isEqualTo(newerSession);
@@ -82,14 +97,29 @@ class ChatMessageRepositoryTest {
     }
 
     @Test
-    void findSessionSummariesByUserId_onlyReturnsCallersOwnSessions() {
+    void findSessionOverviewsByUserId_onlyReturnsCallersOwnSessions() {
         UUID userId = UUID.randomUUID();
         UUID otherUserId = UUID.randomUUID();
         saveMessage(UUID.randomUUID(), otherUserId, "USER", "Someone else's conversation");
 
-        List<ChatSessionProjection> result = chatMessageRepository.findSessionSummariesByUserId(userId);
+        List<ChatSessionOverviewProjection> result = chatMessageRepository.findSessionOverviewsByUserId(userId);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc_returnsFirstUserMessageDecrypted() {
+        UUID userId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+        saveMessage(sessionId, userId, "USER", "First message in this conversation");
+        saveMessage(sessionId, userId, "ASSISTANT", "A reply");
+        saveMessage(sessionId, userId, "USER", "A follow-up question");
+
+        Optional<ChatMessageEntity> result = chatMessageRepository
+            .findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc(sessionId, userId, "USER");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getContent()).isEqualTo("First message in this conversation");
     }
 
     @Test
@@ -104,7 +134,7 @@ class ChatMessageRepositoryTest {
         chatMessageRepository.deleteBySessionIdAndUserId(sessionId, userId);
 
         assertThat(chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId)).isEmpty();
-        assertThat(chatMessageRepository.findSessionSummariesByUserId(otherUserId)).hasSize(1);
+        assertThat(chatMessageRepository.findSessionOverviewsByUserId(otherUserId)).hasSize(1);
     }
 
     @Test

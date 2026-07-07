@@ -1,8 +1,14 @@
 package com.kropholler.dev.hermes.listing.data;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
@@ -18,7 +24,14 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-@Import(ListingRepositoryGeoTest.Containers.class)
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({
+    ListingRepositoryGeoTest.Containers.class,
+    FieldEncryptor.class,
+    EncryptedStringConverter.class,
+    EncryptedDoubleConverter.class,
+    EncryptionKeyVersionListener.class
+})
 @TestPropertySource(properties = {
     "spring.test.database.replace=none",
     "spring.flyway.enabled=true",

@@ -1,0 +1,3 @@
+ALTER TABLE agent_tasks ALTER COLUMN name TYPE TEXT;
+ALTER TABLE agent_tasks ALTER COLUMN payload DROP DEFAULT;
+ALTER TABLE agent_tasks ALTER COLUMN payload TYPE TEXT USING payload::text;

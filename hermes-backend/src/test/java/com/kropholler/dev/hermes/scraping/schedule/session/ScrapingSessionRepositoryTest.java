@@ -1,10 +1,17 @@
 package com.kropholler.dev.hermes.scraping.schedule.session;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionStatus;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 import java.util.Optional;
@@ -12,6 +19,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 @TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class ScrapingSessionRepositoryTest {
 

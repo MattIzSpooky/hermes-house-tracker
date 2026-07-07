@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -129,12 +130,39 @@ class UserProfileServiceTest {
     }
 
     @Test
-    void syncEmail_delegatesToRepositoryUpsert() {
+    void syncEmail_existingRow_updatesViaJpql() {
         UUID userId = UUID.randomUUID();
+        when(repository.updateEmail(userId, "user@hermes.local")).thenReturn(1);
 
         service.syncEmail(userId, "user@hermes.local");
 
-        verify(repository).upsertEmail(userId, "user@hermes.local");
+        verify(repository).updateEmail(userId, "user@hermes.local");
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void syncEmail_noExistingRow_insertsNewProfile() {
+        UUID userId = UUID.randomUUID();
+        when(repository.updateEmail(userId, "user@hermes.local")).thenReturn(0);
+
+        service.syncEmail(userId, "user@hermes.local");
+
+        ArgumentCaptor<UserProfileEntity> captor = ArgumentCaptor.forClass(UserProfileEntity.class);
+        verify(repository).save(captor.capture());
+        assertThat(captor.getValue().getUserId()).isEqualTo(userId);
+        assertThat(captor.getValue().getEmail()).isEqualTo("user@hermes.local");
+        assertThat(captor.getValue().getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void syncEmail_raceOnInsert_retriesAsUpdate() {
+        UUID userId = UUID.randomUUID();
+        when(repository.updateEmail(userId, "user@hermes.local")).thenReturn(0);
+        when(repository.save(any())).thenThrow(new DataIntegrityViolationException("duplicate key"));
+
+        service.syncEmail(userId, "user@hermes.local");
+
+        verify(repository, times(2)).updateEmail(userId, "user@hermes.local");
     }
 
     @Test

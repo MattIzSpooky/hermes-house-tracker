@@ -12,12 +12,17 @@ import java.util.UUID;
 public class ChatHistoryService {
 
     private static final int MAX_TITLE_LENGTH = 60;
+    private static final int MAX_SESSIONS = 50;
 
     private final ChatMessageRepository chatMessageRepository;
 
     public List<ChatSessionSummaryDto> listSessions(UUID userId) {
-        return chatMessageRepository.findSessionSummariesByUserId(userId).stream()
-            .map(p -> new ChatSessionSummaryDto(p.getSessionId(), truncateTitle(p.getTitleSource()), p.getLastMessageAt()))
+        return chatMessageRepository.findSessionOverviewsByUserId(userId).stream()
+            .limit(MAX_SESSIONS)
+            .map(o -> new ChatSessionSummaryDto(
+                o.getSessionId(),
+                truncateTitle(titleSourceFor(userId, o.getSessionId())),
+                o.getLastMessageAt()))
             .toList();
     }
 
@@ -30,6 +35,13 @@ public class ChatHistoryService {
     @Transactional
     public void deleteSession(UUID userId, UUID sessionId) {
         chatMessageRepository.deleteBySessionIdAndUserId(sessionId, userId);
+    }
+
+    private String titleSourceFor(UUID userId, UUID sessionId) {
+        return chatMessageRepository
+            .findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc(sessionId, userId, "USER")
+            .map(ChatMessageEntity::getContent)
+            .orElse(null);
     }
 
     private static String truncateTitle(String titleSource) {

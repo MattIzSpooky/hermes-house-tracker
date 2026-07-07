@@ -1,10 +1,17 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import com.kropholler.dev.hermes.listing.data.ListingEntity;
 import com.kropholler.dev.hermes.listing.data.ListingRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,6 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * see {@link ListingRepositoryRadiusTest} for the spatial {@code withinRadius} tests.
  */
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 class ListingSpecificationsTest {
 
     @Autowired ListingRepository listingRepository;

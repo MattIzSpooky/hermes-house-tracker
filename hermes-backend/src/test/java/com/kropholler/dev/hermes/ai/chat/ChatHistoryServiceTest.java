@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,22 +20,32 @@ class ChatHistoryServiceTest {
     @Mock ChatMessageRepository chatMessageRepository;
     @InjectMocks ChatHistoryService service;
 
-    private ChatSessionProjection projection(UUID sessionId, String titleSource, Instant lastMessageAt) {
-        return new ChatSessionProjection() {
+    private ChatSessionOverviewProjection overview(UUID sessionId, Instant lastMessageAt) {
+        return new ChatSessionOverviewProjection() {
             @Override public UUID getSessionId() { return sessionId; }
             @Override public Instant getLastMessageAt() { return lastMessageAt; }
-            @Override public String getTitleSource() { return titleSource; }
         };
     }
 
+    private ChatMessageEntity userMessage(UUID sessionId, UUID userId, String content) {
+        ChatMessageEntity e = new ChatMessageEntity();
+        e.setSessionId(sessionId);
+        e.setUserId(userId);
+        e.setRole("USER");
+        e.setContent(content);
+        return e;
+    }
+
     @Test
-    void listSessions_mapsProjectionsToDtosWithTruncatedTitle() {
+    void listSessions_mapsOverviewsToDtosWithTruncatedTitle() {
         UUID userId = UUID.randomUUID();
         UUID sessionId = UUID.randomUUID();
         Instant lastMessageAt = Instant.parse("2026-06-01T08:00:00Z");
         String longMessage = "x".repeat(80);
-        when(chatMessageRepository.findSessionSummariesByUserId(userId))
-            .thenReturn(List.of(projection(sessionId, longMessage, lastMessageAt)));
+        when(chatMessageRepository.findSessionOverviewsByUserId(userId))
+            .thenReturn(List.of(overview(sessionId, lastMessageAt)));
+        when(chatMessageRepository.findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc(sessionId, userId, "USER"))
+            .thenReturn(Optional.of(userMessage(sessionId, userId, longMessage)));
 
         List<ChatSessionSummaryDto> result = service.listSessions(userId);
 
@@ -48,12 +59,29 @@ class ChatHistoryServiceTest {
     @Test
     void listSessions_shortTitleSourceIsNotTruncated() {
         UUID userId = UUID.randomUUID();
-        when(chatMessageRepository.findSessionSummariesByUserId(userId))
-            .thenReturn(List.of(projection(UUID.randomUUID(), "Short message", Instant.now())));
+        UUID sessionId = UUID.randomUUID();
+        when(chatMessageRepository.findSessionOverviewsByUserId(userId))
+            .thenReturn(List.of(overview(sessionId, Instant.now())));
+        when(chatMessageRepository.findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc(sessionId, userId, "USER"))
+            .thenReturn(Optional.of(userMessage(sessionId, userId, "Short message")));
 
         List<ChatSessionSummaryDto> result = service.listSessions(userId);
 
         assertThat(result.get(0).title()).isEqualTo("Short message");
+    }
+
+    @Test
+    void listSessions_noUserMessageYet_titleIsEmptyString() {
+        UUID userId = UUID.randomUUID();
+        UUID sessionId = UUID.randomUUID();
+        when(chatMessageRepository.findSessionOverviewsByUserId(userId))
+            .thenReturn(List.of(overview(sessionId, Instant.now())));
+        when(chatMessageRepository.findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc(sessionId, userId, "USER"))
+            .thenReturn(Optional.empty());
+
+        List<ChatSessionSummaryDto> result = service.listSessions(userId);
+
+        assertThat(result.get(0).title()).isEmpty();
     }
 
     @Test

@@ -1,9 +1,16 @@
 package com.kropholler.dev.hermes.profile;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
+import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
+import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
+import com.kropholler.dev.hermes.crypto.EncryptionProperties;
+import com.kropholler.dev.hermes.crypto.FieldEncryptor;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -12,6 +19,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@EnableConfigurationProperties(EncryptionProperties.class)
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 class UserProfileRepositoryTest {
 
     @Autowired
