@@ -14,8 +14,8 @@ public class JacksonConfig {
 
     @Bean
     @Primary
-    @ConditionalOnMissingBean(ObjectMapper.class)
-    public ObjectMapper objectMapper() {
+    @ConditionalOnMissingBean(JsonMapper.class)
+    public JsonMapper objectMapper() {
         return JsonMapper.builder()
             .findAndAddModules()
             .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
