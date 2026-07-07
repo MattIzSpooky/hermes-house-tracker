@@ -4,7 +4,7 @@
 
 **Goal:** Encrypt sensitive columns (chat message content, notification title/body, user profile address/email/geocode, agent task name/payload) at rest, transparently, without touching any caller code outside the entities/repositories/services listed below.
 
-**Architecture:** A new `crypto` package provides a `FieldEncryptor` component wrapping one `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` instance per configured key version (backed by an `EncryptionProperties` `@ConfigurationProperties` record), plus two Spring-managed JPA `AttributeConverter`s (`EncryptedStringConverter`, `EncryptedDoubleConverter`) that delegate to it. Entities apply `@Convert` per field. `FieldEncryptor.encrypt` prefixes ciphertext with the current key version (e.g. `2:<hex>`); `decrypt` parses that prefix to pick the right key, so multiple key versions can coexist across rotations. Each encrypted entity also carries a row-level `encryptionKeyVersion` column, stamped by a shared `EncryptionKeyVersionListener` JPA entity listener — this is *only* for cheap SQL filtering during rotation, not for decrypt correctness. Two existing bypasses of JPA hydration are fixed as part of this work: the chat-session-title native query (reworked into entity-hydrating queries) and the `upsertEmail` native blind-upsert (replaced by a JPQL update + JPA insert fallback). Migrations `V15` and `V16` add the `encryption_key_version` column and truncate/widen/retype the affected columns to `TEXT` — split across two files because `ChatMessageRepositoryTest` is the only repository test validating against real Flyway-migrated Postgres, so `chat_messages.encryption_key_version` (`V15`) has to exist before Task 8's broader migration (`V16`) would otherwise land. A last task adds an admin-triggered `ReencryptionRunner` batch job that migrates rows still on an old key version onto the current one after a rotation.
+**Architecture:** A new `crypto` package provides a `FieldEncryptor` component wrapping one `org.springframework.security.crypto.encrypt.Encryptors.text(key, salt)` instance per configured key version (backed by an `EncryptionProperties` `@ConfigurationProperties` record), plus two Spring-managed JPA `AttributeConverter`s (`EncryptedStringConverter`, `EncryptedDoubleConverter`) that delegate to it. Entities apply `@Convert` per field. `FieldEncryptor.encrypt` prefixes ciphertext with the current key version (e.g. `2:<hex>`); `decrypt` parses that prefix to pick the right key, so multiple key versions can coexist across rotations. Each encrypted entity also carries a row-level `encryptionKeyVersion` column, stamped by a shared `EncryptionKeyVersionListener` JPA entity listener — this is *only* for cheap SQL filtering during rotation, not for decrypt correctness. Two existing bypasses of JPA hydration are fixed as part of this work: the chat-session-title native query (reworked into entity-hydrating queries) and the `upsertEmail` native blind-upsert (replaced by a JPQL update + JPA insert fallback). Two Flyway migrations carry the schema changes: `V15` (created right after Task 3, before any entity task ran) truncates all four tables and widens/retypes/adds `encryption_key_version` for `chat_messages`, `notifications`, and `user_profiles`; `V16` (Task 7) does the same for `agent_tasks`, deferred to that task because widening it earlier — before its entity change landed — would itself have created a schema mismatch. They aren't a single end-of-plan migration because `ChatMessageRepositoryTest`/`ListingRepositoryGeoTest`/`ListingRepositoryRadiusTest` validate against real Flyway-migrated Postgres and Hibernate's `ddl-auto=validate` checks the *entire* entity metamodel, not just the table each test's own repository targets — a table left un-migrated breaks those tests regardless of whether they touch it. A last task adds an admin-triggered `ReencryptionRunner` batch job that migrates rows still on an old key version onto the current one after a rotation.
 
 **Tech Stack:** Spring Boot 4.1, Spring Data JPA / Hibernate 6, `spring-security-crypto` (already on the classpath transitively via `spring-boot-starter-oauth2-resource-server` — no new dependency), Flyway, PostgreSQL (+PostGIS) via Testcontainers for integration tests, H2 for plain `@DataJpaTest`s.
 
@@ -17,8 +17,9 @@
 - Every encrypted entity carries a row-level `encryptionKeyVersion` field (`encryption_key_version` column), stamped via the shared `EncryptionKeyVersionListener` (Task 3) — used only for cheap SQL filtering during rotation, never for decrypt correctness.
 - `upsertEmail` (native `INSERT ... ON CONFLICT`) is replaced entirely by a JPQL `updateEmail` + JPA-insert-fallback pair (never re-add native SQL for this path) — see spec Section 4.
 - The insert-fallback path in `UserProfileService.syncEmail` must catch `DataIntegrityViolationException` and retry as an update (race guard — spec Section 4).
-- `V15__add_chat_messages_encryption_key_version.sql` (Task 4) adds only `chat_messages.encryption_key_version`, needed early because `ChatMessageRepositoryTest` validates against real Flyway-migrated Postgres. `V16__encrypt_sensitive_columns.sql` (Task 8) truncates `chat_messages`, `notifications`, `user_profiles`, `agent_tasks`, alters the remaining column types, and adds `encryption_key_version` to the other three tables — existing dev data in those tables is not preserved.
+- `V15__encrypt_sensitive_columns.sql` (created right after Task 3, verified/present by Task 4) truncates all four tables, widens `notifications`/`user_profiles` columns to `TEXT`, and adds `encryption_key_version` to all four — needed early because `ChatMessageRepositoryTest`/`ListingRepositoryGeoTest`/`ListingRepositoryRadiusTest` validate against real Flyway-migrated Postgres and Hibernate checks the whole metamodel, not just the table under test. `V16__widen_agent_tasks_columns.sql` (Task 7) widens `agent_tasks.name`/`payload` to `TEXT` and drops the `JSONB` typing, deferred to Task 7 because widening it before that task's entity change would itself have created a mismatch. Existing dev data in all four tables is not preserved (`V15`'s `TRUNCATE`).
 - The re-encryption job (Task 9) never relies on JPA dirty-checking to force a rewrite — plaintext values re-set on an already-loaded entity are equal to their loaded snapshot, so Hibernate would treat the entity as unchanged and silently skip the `UPDATE`. It instead issues an explicit JPQL bulk update per row, passing back the decrypted plaintext so the converter re-encrypts it under the current version during translation.
+- `@DataJpaTest` does not component-scan plain `@Component` beans, but Hibernate's persistence unit spans *every* `@Entity` in the app for *every* `@DataJpaTest` context — not just the entity the test's own repository targets. So `FieldEncryptor`, `EncryptedStringConverter`, `EncryptedDoubleConverter`, and `EncryptionKeyVersionListener` must be `@Import`ed (with `EncryptionProperties` via `@EnableConfigurationProperties`) into **every** `@DataJpaTest` class in the whole backend, not just the ones this plan directly modifies — confirmed by this breaking four files entirely outside this plan's scope (`ListingSpecificationsTest`, `ListingRepositoryRadiusTest`, `ListingRepositoryGeoTest`, `ScrapingSessionRepositoryTest`) once enough entities carried `@Convert`. Both converters are always required together, even in tests whose own entity only uses one of them, for the same shared-metamodel reason.
 - No change to the PostGIS radius-search code path or the `listings` table.
 
 ---
@@ -512,7 +513,7 @@ git commit -m "feat: add EncryptionVersioned and EncryptionKeyVersionListener"
 
 This task both applies encryption to `ChatMessageEntity.content` and fixes the one native-SQL bypass this creates (spec Section 4, fix #1) — they must ship together or the chat sidebar breaks.
 
-**Migration-ordering note:** `ChatMessageRepositoryTest` is the only repository test in this whole plan that boots real Postgres via Testcontainers with `spring.flyway.enabled=true` and `ddl-auto=validate` — every other encrypted-entity test (Tasks 5–7) runs against H2 with Hibernate auto-generating the schema, so it never needs a real migration to be in place first. That means this task's entity change (adding `encryptionKeyVersion`) needs the `chat_messages.encryption_key_version` column to actually exist in the Flyway-migrated test database *now*, not after Task 8's migration lands. This task therefore gets its own small, additive migration (`V15`); Task 8's migration is renumbered to `V16` and no longer adds this column to `chat_messages` (it still does so for the other three tables).
+**Migration-ordering note:** `ChatMessageRepositoryTest` is the only repository test dispatched so far in this plan that boots real Postgres via Testcontainers with `spring.flyway.enabled=true` and `ddl-auto=validate`. Hibernate validates the *entire* entity metamodel for that kind of test — not just `ChatMessageEntity` — so it needs a real migration covering every encrypted table's schema change, not just this task's own. `V15__encrypt_sensitive_columns.sql` therefore runs early (immediately after Task 3, before this task), covering `chat_messages`, `notifications`, and `user_profiles` (TRUNCATE + TEXT-widening + `encryption_key_version`) — see the plan's Architecture section for the full history of why. `agent_tasks` stays untouched until Task 7's own small migration, since only that entity's Java mapping needs to change to match a widened `agent_tasks` schema.
 
 **Files:**
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessageEntity.java`
@@ -522,7 +523,7 @@ This task both applies encryption to `ChatMessageEntity.content` and fixes the o
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryService.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryServiceTest.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java`
-- Create: `hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql`
+- Verify (create if missing): `hermes-backend/src/main/resources/db/migration/V15__encrypt_sensitive_columns.sql`
 
 **Interfaces:**
 - Consumes: `EncryptedStringConverter` from Task 2; `EncryptionVersioned`, `EncryptionKeyVersionListener` from Task 3.
@@ -830,6 +831,7 @@ Replace the full contents of `hermes-backend/src/test/java/com/kropholler/dev/he
 ```java
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -859,6 +861,7 @@ import static org.assertj.core.api.Assertions.assertThat;
     ChatMessageRepositoryTest.Containers.class,
     FieldEncryptor.class,
     EncryptedStringConverter.class,
+    EncryptedDoubleConverter.class,
     EncryptionKeyVersionListener.class
 })
 @TestPropertySource(properties = {
@@ -979,15 +982,9 @@ class ChatMessageRepositoryTest {
 }
 ```
 
-- [ ] **Step 8: Write the additive migration for `chat_messages.encryption_key_version`**
+- [ ] **Step 8: Ensure `V15` exists and covers `chat_messages`**
 
-`ChatMessageRepositoryTest` boots real Postgres via Testcontainers with Flyway migrations applied and `ddl-auto=validate` — it needs this column to physically exist, not just be declared on the entity. Create `hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql`:
-
-```sql
-ALTER TABLE chat_messages ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
-```
-
-(No truncate needed — this is a purely additive column with a default, safe on existing rows. The `TRUNCATE`/`TEXT`-widening migration in Task 8 is renumbered to `V16` and no longer adds this column to `chat_messages`, since it's already added here.)
+`ChatMessageRepositoryTest` boots real Postgres via Testcontainers with Flyway migrations applied and `ddl-auto=validate` — Hibernate validates the *entire* entity metamodel for this kind of test, not just the entity the test's own repository targets. A single early migration, `V15__encrypt_sensitive_columns.sql`, must exist by this point covering `chat_messages`, `notifications`, and `user_profiles` (TRUNCATE + TEXT-widening + `encryption_key_version` on all three) — see the plan's Architecture section and Task 8 for why this moved this early instead of landing at the end. `agent_tasks`' own widening is deferred to Task 7 (that entity hasn't changed yet, so widening it now would itself create a mismatch). If `V15` doesn't already exist when you reach this step, write it now with exactly that scope before proceeding — do not scope it to `chat_messages` alone. (Step 7's code block already has `ChatMessageRepositoryTest`'s `@Import` list including `EncryptedDoubleConverter` for this same shared-metamodel reason.)
 
 - [ ] **Step 9: Run the tests**
 
@@ -1003,7 +1000,7 @@ git add hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatMessa
         hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryService.java \
         hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatHistoryServiceTest.java \
         hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/chat/ChatMessageRepositoryTest.java \
-        hermes-backend/src/main/resources/db/migration/V15__add_chat_messages_encryption_key_version.sql
+        hermes-backend/src/main/resources/db/migration/V15__encrypt_sensitive_columns.sql
 git commit -m "feat: encrypt chat message content and rework session-title query"
 ```
 
@@ -1026,6 +1023,7 @@ git commit -m "feat: encrypt chat message content and rework session-title query
 ```java
 package com.kropholler.dev.hermes.notification;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -1043,7 +1041,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @EnableConfigurationProperties(EncryptionProperties.class)
-@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class})
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 class NotificationRepositoryTest {
 
     @Autowired NotificationRepository repository;
@@ -1514,9 +1512,12 @@ git commit -m "feat: encrypt user profile fields, replace native upsertEmail wit
 
 ### Task 7: Encrypt agent task name and payload
 
+**Migration note:** `AgentTaskRepositoryTest` itself runs against H2 with `ddl-auto=create-drop` (auto-generated schema), so it doesn't need a real migration to pass. But once `AgentTaskEntity.name`/`payload` change shape here, the *other* tests that validate against real Flyway-migrated Postgres (`ChatMessageRepositoryTest`, `ListingRepositoryGeoTest`, `ListingRepositoryRadiusTest`) will fail unless the real `agent_tasks` schema is updated to match, in the same task — Hibernate validates the whole entity metamodel for those tests, not just the entity each one's own repository targets (see Task 4's migration-ordering note for the first time this bit us). This task therefore adds its own migration, `V16__widen_agent_tasks_columns.sql`.
+
 **Files:**
 - Modify: `hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskEntity.java`
 - Modify: `hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskRepositoryTest.java`
+- Create: `hermes-backend/src/main/resources/db/migration/V16__widen_agent_tasks_columns.sql`
 
 **Interfaces:**
 - Consumes: `EncryptedStringConverter` from Task 2; `EncryptionVersioned`, `EncryptionKeyVersionListener` from Task 3.
@@ -1533,6 +1534,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskRepository;
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -1553,7 +1555,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @EnableConfigurationProperties(EncryptionProperties.class)
-@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class})
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class})
 @TestPropertySource(properties = "spring.jpa.hibernate.ddl-auto=create-drop")
 class AgentTaskRepositoryTest {
 
@@ -1690,70 +1692,45 @@ public class AgentTaskEntity implements EncryptionVersioned {
 Run: `cd hermes-backend && mvn -q test -Dtest=AgentTaskRepositoryTest`
 Expected: PASS (3/3 tests green)
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Write `V16` to widen `agent_tasks` columns**
+
+Create `hermes-backend/src/main/resources/db/migration/V16__widen_agent_tasks_columns.sql`:
+
+```sql
+ALTER TABLE agent_tasks ALTER COLUMN name TYPE TEXT;
+ALTER TABLE agent_tasks ALTER COLUMN payload DROP DEFAULT;
+ALTER TABLE agent_tasks ALTER COLUMN payload TYPE TEXT USING payload::text;
+ALTER TABLE agent_tasks ALTER COLUMN payload SET DEFAULT '{}';
+```
+
+(No `TRUNCATE`/`encryption_key_version` needed here — `V15` already handled both for `agent_tasks`, back when it was widened to cover all four tables' truncation and version columns up front. This migration only carries the `agent_tasks`-specific TEXT-widening + JSON-typing removal, since only this task's entity change needs it. `chat_messages.content` and `notifications.body` are already `TEXT`; no other tables need touching here.)
+
+- [ ] **Step 6: Run the full backend test suite**
+
+Run: `cd hermes-backend && mvn test`
+Expected: PASS, all tests green (this confirms Task 8 is unnecessary — see Task 8 below). This is the real verification of the migration SQL — `ChatMessageRepositoryTest`, `ListingRepositoryGeoTest`, and `ListingRepositoryRadiusTest` all boot a Postgres+PostGIS Testcontainers instance with `spring.flyway.enabled=true`, which runs the full migration chain including `V15` and `V16` before Hibernate's `ddl-auto=validate` check. A syntax error or type mismatch in `V16` will surface as a Flyway migration failure in any of those test classes.
+
+If any test class fails to start with a Flyway error, read the migration failure message (it names the exact statement and reason), fix the SQL in `V16__widen_agent_tasks_columns.sql`, and re-run.
+
+- [ ] **Step 7: Commit**
 
 ```bash
 git add hermes-backend/src/main/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskEntity.java \
-        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskRepositoryTest.java
+        hermes-backend/src/test/java/com/kropholler/dev/hermes/ai/agent/task/AgentTaskRepositoryTest.java \
+        hermes-backend/src/main/resources/db/migration/V16__widen_agent_tasks_columns.sql
 git commit -m "feat: encrypt agent task name and payload"
 ```
 
 ---
 
-### Task 8: Flyway migration to widen/retype the affected columns and add remaining key-version columns
+### Task 8: Removed — folded into Task 4 (V15) and Task 7 (V16)
 
-Task 4 already added `chat_messages.encryption_key_version` via its own `V15` migration (see the migration-ordering note in Task 4) — that was necessary because `ChatMessageRepositoryTest` is the only repository test in this plan that validates against real Flyway-migrated Postgres. This task's migration is `V16`; it does not touch `chat_messages.encryption_key_version` again.
+This task originally planned a single end-of-plan migration (`V15__encrypt_sensitive_columns.sql`, all four tables at once). That doesn't work: Hibernate's `ddl-auto=validate` validates the *entire* entity metamodel for `ChatMessageRepositoryTest`/`ListingRepositoryGeoTest`/`ListingRepositoryRadiusTest`, so every encrypted table's schema change must land in the same migration window as its entity change, not deferred to a single migration at the very end — a table left un-migrated breaks those three tests even though they don't touch that table's repository. Discovered mid-implementation (during Task 6), confirmed with the human, and resolved as follows:
 
-**Files:**
-- Create: `hermes-backend/src/main/resources/db/migration/V16__encrypt_sensitive_columns.sql`
+- `V15__encrypt_sensitive_columns.sql` (created directly once the cross-cutting problem was found, immediately after Task 3 rather than at the end): `TRUNCATE` all four tables, `ALTER COLUMN ... TYPE TEXT` for `notifications`/`user_profiles`, and `encryption_key_version` on all four tables. `agent_tasks.name`/`payload` were deliberately left untouched here — widening them before Task 7's entity change would itself have created a mismatch, for the identical reason.
+- `V16__widen_agent_tasks_columns.sql` (Task 7, Step 5): the `agent_tasks.name`/`payload` TEXT-widening and JSON-typing removal, added in lockstep with the only entity change that needs it.
 
-**Interfaces:**
-- Consumes: nothing new — this is a pure schema migration matching the entity changes from Tasks 4–7.
-
-- [ ] **Step 1: Write the migration**
-
-```sql
-TRUNCATE TABLE chat_messages;
-TRUNCATE TABLE agent_tasks, notifications;
-TRUNCATE TABLE user_profiles;
-
-ALTER TABLE notifications ALTER COLUMN title TYPE TEXT;
-
-ALTER TABLE user_profiles ALTER COLUMN street TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN house_number TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN house_number_addition TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN zip_code TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN city TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN province TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN email TYPE TEXT;
-ALTER TABLE user_profiles ALTER COLUMN latitude TYPE TEXT USING latitude::text;
-ALTER TABLE user_profiles ALTER COLUMN longitude TYPE TEXT USING longitude::text;
-
-ALTER TABLE agent_tasks ALTER COLUMN name TYPE TEXT;
-ALTER TABLE agent_tasks ALTER COLUMN payload DROP DEFAULT;
-ALTER TABLE agent_tasks ALTER COLUMN payload TYPE TEXT USING payload::text;
-ALTER TABLE agent_tasks ALTER COLUMN payload SET DEFAULT '{}';
-
-ALTER TABLE notifications ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
-ALTER TABLE user_profiles ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
-ALTER TABLE agent_tasks ADD COLUMN encryption_key_version INT NOT NULL DEFAULT 1;
-```
-
-(`chat_messages.content` and `notifications.body` are already `TEXT` — no change needed, and `chat_messages.encryption_key_version` was already added by Task 4's `V15`. Truncating `notifications`/`agent_tasks` in one `TRUNCATE` statement avoids needing `CASCADE` for the `notifications.task_id → agent_tasks.id` foreign key, since Postgres resolves ordering across tables listed in the same statement. All tables here are truncated above, so `encryption_key_version DEFAULT 1` never needs to backfill any pre-existing row — every row inserted afterward goes through the `EncryptionKeyVersionListener`, which always stamps the real current version regardless of this column default.)
-
-- [ ] **Step 2: Run the full backend test suite**
-
-Run: `cd hermes-backend && mvn test`
-Expected: PASS, all tests green. This is the real verification of the migration SQL — `ChatMessageRepositoryTest`, `ListingRepositoryGeoTest`, and `ListingRepositoryRadiusTest` all boot a Postgres+PostGIS Testcontainers instance with `spring.flyway.enabled=true`, which runs the full migration chain including `V15` and `V16` before Hibernate's `ddl-auto=validate` check. A syntax error or type mismatch in `V16` will surface as a Flyway migration failure in any of those test classes.
-
-If any test class fails to start with a Flyway error, read the migration failure message (it names the exact statement and reason), fix the SQL in `V16__encrypt_sensitive_columns.sql`, and re-run.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add hermes-backend/src/main/resources/db/migration/V16__encrypt_sensitive_columns.sql
-git commit -m "feat: add V16 migration widening encrypted columns to TEXT and adding remaining encryption_key_version columns"
-```
+Nothing is left for a dedicated "Task 8" to do. Run `mvn test` once more at the start of Task 9 (or as part of the final whole-branch review) to confirm the full suite is still green before proceeding — no new files.
 
 ---
 
@@ -2140,11 +2117,12 @@ class AgentTaskReencryptionTask implements Reencryptable {
 
 `ChatMessageReencryptionTaskTest` exercises the real converter + JPQL bulk-update path against H2. It simulates a row written before a rotation by inserting its ciphertext directly via native SQL (encrypted with the v1 key, tagged `encryption_key_version = 1`) rather than going through the entity listener — the listener always stamps whatever the *current* version is, so it can't produce "legacy" data on its own in a single test context. `NotificationReencryptionTaskTest`, `UserProfileReencryptionTaskTest`, and `AgentTaskReencryptionTaskTest` follow this exact same pattern for their own tables/fields and are not reproduced here.
 
-`@DataJpaTest` does not component-scan plain `@Component` beans, so `FieldEncryptor`, `EncryptedStringConverter`, `EncryptionKeyVersionListener`, and `ChatMessageReencryptionTask` itself must be pulled in via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties` (same wiring as Task 4's `ChatMessageRepositoryTest`):
+`@DataJpaTest` does not component-scan plain `@Component` beans, so `FieldEncryptor`, `EncryptedStringConverter`, `EncryptedDoubleConverter`, `EncryptionKeyVersionListener`, and `ChatMessageReencryptionTask` itself must be pulled in via `@Import`, with `EncryptionProperties` via `@EnableConfigurationProperties` (same wiring as Task 4's `ChatMessageRepositoryTest` — `EncryptedDoubleConverter` is needed even though `ChatMessageEntity` has no `Double` field, since `UserProfileEntity` shares the same persistence unit):
 
 ```java
 package com.kropholler.dev.hermes.ai.chat;
 
+import com.kropholler.dev.hermes.crypto.EncryptedDoubleConverter;
 import com.kropholler.dev.hermes.crypto.EncryptedStringConverter;
 import com.kropholler.dev.hermes.crypto.EncryptionKeyVersionListener;
 import com.kropholler.dev.hermes.crypto.EncryptionProperties;
@@ -2164,7 +2142,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @EnableConfigurationProperties(EncryptionProperties.class)
-@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptionKeyVersionListener.class, ChatMessageReencryptionTask.class})
+@Import({FieldEncryptor.class, EncryptedStringConverter.class, EncryptedDoubleConverter.class, EncryptionKeyVersionListener.class, ChatMessageReencryptionTask.class})
 @TestPropertySource(properties = "hermes.encryption.current-version=2")
 class ChatMessageReencryptionTaskTest {
 
@@ -2233,7 +2211,7 @@ git commit -m "feat: add admin-triggered re-encryption tooling for key rotation"
 
 ## Self-Review Notes
 
-- **Spec coverage:** Section 1 (architecture) → Tasks 1–2. Section 2 (field table) → Tasks 4–7, one task per entity group. Section 3 (key versioning and rotation) → Task 1 (embedded version prefix + multi-key config), Task 3 (row-level `encryption_key_version` column + listener), Tasks 4–7 (applying the column/interface/listener to each entity). Section 4 fix #1 (chat title query) → Task 4. Section 4 fix #2 (`upsertEmail` → JPQL) → Task 6. Section 5 (re-encryption tooling) → Task 9. Section 6 (migration + testing) → Task 8, plus the `UserProfileRepositoryUpdateEmailTest`/`NotificationRepositoryTest` additions in Tasks 5–6, which drop the Testcontainers dependency the old upsert test needed.
+- **Spec coverage:** Section 1 (architecture) → Tasks 1–2. Section 2 (field table) → Tasks 4–7, one task per entity group. Section 3 (key versioning and rotation) → Task 1 (embedded version prefix + multi-key config), Task 3 (row-level `encryption_key_version` column + listener), Tasks 4–7 (applying the column/interface/listener to each entity). Section 4 fix #1 (chat title query) → Task 4. Section 4 fix #2 (`upsertEmail` → JPQL) → Task 6. Section 5 (re-encryption tooling) → Task 9. Section 6 (migration + testing) → `V15` (created directly once the cross-cutting Hibernate-validation issue was found, right after Task 3) plus `V16` (Task 7), since a single end-of-plan migration (the original Task 8) doesn't work — see the plan's Architecture paragraph and the removed Task 8 section for why. Also the `UserProfileRepositoryUpdateEmailTest`/`NotificationRepositoryTest` additions in Tasks 5–6, which drop the Testcontainers dependency the old upsert test needed.
 - **Type consistency checked:** `updateEmail(UUID, String): int` name/signature matches between `UserProfileRepository` (Task 6, Step 2) and every caller/test (`UserProfileService`, `UserProfileServiceTest`, `UserProfileRepositoryUpdateEmailTest`). `ChatSessionOverviewProjection`/`findSessionOverviewsByUserId`/`findFirstBySessionIdAndUserIdAndRoleOrderByCreatedAtAsc` names match across `ChatMessageRepository`, `ChatHistoryService`, and both chat test files. `Reencryptable`'s two methods (`tableName()`, `reencryptBatch()`) and each `reencrypt(...)` bulk-update signature match between every repository (Task 9, Step 5) and its corresponding `*ReencryptionTask` implementation.
 - **Package-visibility check:** `NotificationRepository`/`NotificationEntity` and `AgentTaskRepository`/`AgentTaskEntity` are package-private by design; Task 9 respects this by placing each entity's `Reencryptable` implementation inside its own package rather than centralizing entity-specific logic in `crypto`, so no existing visibility is widened.
 - **Correctness check on Hibernate dirty-checking:** re-encryption cannot rely on loading an entity and re-saving it unchanged (Global Constraints) — Task 9's `reencryptBatch()` methods use explicit `@Modifying` JPQL bulk updates instead, so the `AttributeConverter` re-encrypts the passed-back plaintext during query translation regardless of entity dirty state.
