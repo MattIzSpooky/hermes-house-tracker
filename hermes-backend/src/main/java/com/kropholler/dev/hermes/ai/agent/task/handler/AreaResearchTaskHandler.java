@@ -67,17 +67,26 @@ class AreaResearchTaskHandler implements AgentTaskHandler {
             return Optional.empty();
         }
 
+        log.info("Area research task {} started: userId={}, radiusKm={}, minPrice={}, maxPrice={}, minBedrooms={}, minRooms={}, minLivingAreaM2={}, keywords={}, limit={}, overrideLat={}, overrideLon={}",
+                task.getId(), task.getUserId(), payload.radiusKm(), payload.minPrice(), payload.maxPrice(),
+                payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(), payload.keywords(),
+                payload.limit(), payload.overrideLat(), payload.overrideLon());
+
         double[] center = resolveCenter(task.getUserId(), payload);
         if (center == null) {
             log.warn("No center coordinates available for area research task {}; skipping this run", task.getId());
             return Optional.empty();
         }
+        log.info("Area research task {}: resolved center lon={}, lat={}, radiusMeters={}",
+                task.getId(), center[0], center[1], payload.radiusKm() * 1000);
 
         List<ListingDto> candidates = listingService.findNearLocation(
                 center[0], center[1],
                 payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(),
                 null, payload.keywords(), payload.minPrice(), payload.maxPrice(),
                 payload.radiusKm() * 1000, payload.limit());
+
+        log.info("Area research task {}: {} candidate(s) found within radius", task.getId(), candidates.size());
 
         if (candidates.isEmpty()) {
             log.info("Area research task {}: no candidates found within radius", task.getId());
@@ -96,7 +105,11 @@ class AreaResearchTaskHandler implements AgentTaskHandler {
                 .call()
                 .content();
 
-        if (result == null || result.isBlank()) return Optional.empty();
+        if (result == null || result.isBlank()) {
+            log.info("Area research task {}: LLM returned no content, skipping notification", task.getId());
+            return Optional.empty();
+        }
+        log.info("Area research task {} completed: {} listing(s) in notification", task.getId(), candidates.size());
 
         List<UUID> listingIds = candidates.stream().map(ListingDto::id).toList();
         return Optional.of(new NotificationContent(

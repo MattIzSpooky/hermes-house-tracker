@@ -64,6 +64,8 @@ class ResearchTaskHandler implements AgentTaskHandler {
             return Optional.empty();
         }
 
+        log.info("Research task {} started: userId={}, prompt={}", task.getId(), task.getUserId(), payload.prompt());
+
         AtomicReference<List<ChatListingCard>> resultHolder = new AtomicReference<>(List.of());
         UUID userId = task.getUserId();
 
@@ -80,11 +82,15 @@ class ResearchTaskHandler implements AgentTaskHandler {
             .call()
             .content();
 
-        if (result == null || result.isBlank()) return Optional.empty();
+        if (result == null || result.isBlank()) {
+            log.info("Research task {}: LLM returned no content, skipping notification", task.getId());
+            return Optional.empty();
+        }
 
         List<UUID> listingIds = resultHolder.get().stream()
             .map(ChatListingCard::id)
             .toList();
+        log.info("Research task {} completed: {} listing(s) in notification", task.getId(), listingIds.size());
 
         return Optional.of(new NotificationContent(
             "Research complete: " + task.getName(), result, listingIds));

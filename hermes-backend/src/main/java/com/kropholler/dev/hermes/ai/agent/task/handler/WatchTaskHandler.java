@@ -39,12 +39,17 @@ class WatchTaskHandler implements AgentTaskHandler {
             return Optional.empty();
         }
 
+        log.info("Watch task {} started: userId={}, city={}, province={}, nearCity={}, radiusKm={}, minPrice={}, maxPrice={}, minBedrooms={}",
+                task.getId(), task.getUserId(), payload.city(), payload.province(), payload.nearCity(),
+                payload.radiusKm(), payload.minPrice(), payload.maxPrice(), payload.minBedrooms());
+
         List<ListingDto> matches = listingService.findForChat(
             payload.minPrice(), payload.maxPrice(),
             payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(),
             payload.province(), payload.city(), payload.keywords(),
             false, null, payload.nearCity(), payload.radiusKm(), null
         );
+        log.info("Watch task {}: {} total match(es) before new/price-changed filtering", task.getId(), matches.size());
 
         Instant since = task.getLastRunAt() != null ? task.getLastRunAt() : task.getCreatedAt();
 
@@ -89,6 +94,8 @@ class WatchTaskHandler implements AgentTaskHandler {
         }
 
         List<UUID> ids = all.stream().map(ListingDto::id).toList();
+        log.info("Watch task {} completed: {} new, {} price-changed listing(s) in notification",
+                task.getId(), newListings.size(), priceChangedListings.size());
         return Optional.of(new NotificationContent(title.toString(), body.toString(), ids));
     }
 

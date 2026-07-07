@@ -65,6 +65,8 @@ class DigestTaskHandler implements AgentTaskHandler {
             return Optional.empty();
         }
 
+        log.info("Digest task {} started: userId={}, cities={}", task.getId(), task.getUserId(), payload.cities());
+
         String citiesList = payload.cities().stream().collect(Collectors.joining(", "));
         String prompt = """
             Generate a friendly weekly market digest for these cities: %s.
@@ -90,7 +92,11 @@ class DigestTaskHandler implements AgentTaskHandler {
             .call()
             .content();
 
-        if (result == null || result.isBlank()) return Optional.empty();
+        if (result == null || result.isBlank()) {
+            log.info("Digest task {}: LLM returned no content, skipping notification", task.getId());
+            return Optional.empty();
+        }
+        log.info("Digest task {} completed", task.getId());
 
         return Optional.of(new NotificationContent(
             "Weekly digest: " + task.getName(), result, List.of()));
