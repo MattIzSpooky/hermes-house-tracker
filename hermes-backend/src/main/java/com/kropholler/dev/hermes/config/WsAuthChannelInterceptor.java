@@ -1,6 +1,8 @@
 package com.kropholler.dev.hermes.config;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Role;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
@@ -15,7 +17,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+// ROLE_INFRASTRUCTURE opts this bean out of Spring Modulith's observability AOP wrapping
+// (ModuleObservabilityBeanPostProcessor skips infrastructure-role beans). Without it, Modulith
+// throws a NullPointerException trying to render preSend's Message<?> parameter for tracing -
+// ResolvableType.resolve() returns null for the unbounded wildcard, and Modulith's
+// FormattableType.of() doesn't null-check before calling getTypeName(). That NPE aborts preSend
+// entirely, silently dropping every message sent through this channel (chat SEND included).
 @Component
+@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 @RequiredArgsConstructor
 public class WsAuthChannelInterceptor implements ChannelInterceptor {
 
