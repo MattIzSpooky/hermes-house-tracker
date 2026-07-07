@@ -2,11 +2,19 @@ package com.kropholler.dev.hermes.crypto;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FieldEncryptorTest {
 
-    private final FieldEncryptor encryptor = new FieldEncryptor("test-encryption-key", "abcd1234abcd1234");
+    private final EncryptionProperties properties = new EncryptionProperties(
+        Map.of(1, "old-key", 2, "new-key"),
+        Map.of(1, "abcd1234abcd1234", 2, "1234abcd1234abcd"),
+        2
+    );
+    private final FieldEncryptor encryptor = new FieldEncryptor(properties);
 
     @Test
     void encryptThenDecrypt_returnsOriginalPlaintext() {
@@ -14,6 +22,29 @@ class FieldEncryptorTest {
 
         assertThat(ciphertext).isNotEqualTo("hello@hermes.local");
         assertThat(encryptor.decrypt(ciphertext)).isEqualTo("hello@hermes.local");
+    }
+
+    @Test
+    void encrypt_prefixesCiphertextWithCurrentVersion() {
+        String ciphertext = encryptor.encrypt("hello@hermes.local");
+
+        assertThat(ciphertext).startsWith("2:");
+    }
+
+    @Test
+    void decrypt_supportsValueEncryptedUnderAnOlderVersion() {
+        FieldEncryptor olderEncryptor = new FieldEncryptor(new EncryptionProperties(
+            Map.of(1, "old-key"), Map.of(1, "abcd1234abcd1234"), 1));
+        String oldCiphertext = olderEncryptor.encrypt("hello@hermes.local");
+
+        assertThat(oldCiphertext).startsWith("1:");
+        assertThat(encryptor.decrypt(oldCiphertext)).isEqualTo("hello@hermes.local");
+    }
+
+    @Test
+    void decrypt_unknownVersion_throws() {
+        assertThatThrownBy(() -> encryptor.decrypt("99:deadbeef"))
+            .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
