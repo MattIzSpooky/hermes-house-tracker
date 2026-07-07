@@ -14,6 +14,15 @@ public class EncryptedStringConverter implements AttributeConverter<String, Stri
         this.fieldEncryptor = fieldEncryptor;
     }
 
+    // Spring AOT processing (spring-boot:process-aot) builds Hibernate's metamodel
+    // without a live ApplicationContext, so it can't resolve the constructor-injected
+    // FieldEncryptor and falls back to reflective no-arg instantiation just to inspect
+    // this converter's generic type parameters — it never invokes convert methods on
+    // the resulting instance.
+    EncryptedStringConverter() {
+        this.fieldEncryptor = null;
+    }
+
     @Override
     public String convertToDatabaseColumn(String attribute) {
         return fieldEncryptor.encrypt(attribute);
