@@ -27,4 +27,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
     @Modifying
     @Query(value = "DELETE FROM chat_messages WHERE session_id = :sessionId AND user_id = :userId", nativeQuery = true)
     void deleteBySessionIdAndUserId(@Param("sessionId") UUID sessionId, @Param("userId") UUID userId);
+
+    List<ChatMessageEntity> findByEncryptionKeyVersionLessThan(int version, org.springframework.data.domain.Pageable pageable);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE ChatMessageEntity m SET m.content = :content, m.encryptionKeyVersion = :version WHERE m.id = :id")
+    void reencrypt(@Param("id") UUID id, @Param("content") String content, @Param("version") int version);
 }
