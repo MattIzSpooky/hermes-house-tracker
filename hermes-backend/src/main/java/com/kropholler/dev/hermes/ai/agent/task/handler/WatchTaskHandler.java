@@ -6,6 +6,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
+import com.kropholler.dev.hermes.listing.ListingChatSearchCriteria;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import lombok.RequiredArgsConstructor;
@@ -43,12 +44,13 @@ class WatchTaskHandler implements AgentTaskHandler {
                 task.getId(), task.getUserId(), payload.city(), payload.province(), payload.nearCity(),
                 payload.radiusKm(), payload.minPrice(), payload.maxPrice(), payload.minBedrooms());
 
-        List<ListingDto> matches = listingService.findForChat(
-            payload.minPrice(), payload.maxPrice(),
-            payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(),
-            payload.province(), payload.city(), payload.keywords(),
-            false, null, payload.nearCity(), payload.radiusKm(), null
-        );
+        List<ListingDto> matches = listingService.findForChat(ListingChatSearchCriteria.builder()
+                .minPrice(payload.minPrice()).maxPrice(payload.maxPrice())
+                .minBedrooms(payload.minBedrooms()).minRooms(payload.minRooms())
+                .minLivingAreaM2(payload.minLivingAreaM2())
+                .province(payload.province()).city(payload.city()).keywords(payload.keywords())
+                .nearCity(payload.nearCity()).radiusKm(payload.radiusKm())
+                .build());
         log.info("Watch task {}: {} total match(es) before new/price-changed filtering", task.getId(), matches.size());
 
         Instant since = task.getLastRunAt() != null ? task.getLastRunAt() : task.getCreatedAt();

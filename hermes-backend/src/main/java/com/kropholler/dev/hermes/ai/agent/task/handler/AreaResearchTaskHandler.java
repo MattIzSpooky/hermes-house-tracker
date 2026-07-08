@@ -8,6 +8,7 @@ import com.kropholler.dev.hermes.ai.tool.CompareListingsTool;
 import com.kropholler.dev.hermes.ai.tool.GetListingSummaryTool;
 import com.kropholler.dev.hermes.ai.tool.GetPriceHistoryTool;
 import com.kropholler.dev.hermes.listing.ListingDto;
+import com.kropholler.dev.hermes.listing.ListingRadiusSearchCriteria;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.notification.NotificationContent;
@@ -80,11 +81,15 @@ class AreaResearchTaskHandler implements AgentTaskHandler {
         log.info("Area research task {}: resolved center lon={}, lat={}, radiusMeters={}",
                 task.getId(), center[0], center[1], payload.radiusKm() * 1000);
 
-        List<ListingDto> candidates = listingService.findNearLocation(
-                center[0], center[1],
-                payload.minBedrooms(), payload.minRooms(), payload.minLivingAreaM2(),
-                null, payload.keywords(), payload.minPrice(), payload.maxPrice(),
-                payload.radiusKm() * 1000, payload.limit());
+        List<ListingDto> candidates = listingService.findNearLocation(ListingRadiusSearchCriteria.builder()
+                .lon(center[0]).lat(center[1])
+                .radiusMeters(payload.radiusKm() * 1000)
+                .minBedrooms(payload.minBedrooms()).minRooms(payload.minRooms())
+                .minLivingAreaM2(payload.minLivingAreaM2())
+                .keywords(payload.keywords())
+                .minPrice(payload.minPrice()).maxPrice(payload.maxPrice())
+                .limit(payload.limit())
+                .build());
 
         log.info("Area research task {}: {} candidate(s) found within radius", task.getId(), candidates.size());
 

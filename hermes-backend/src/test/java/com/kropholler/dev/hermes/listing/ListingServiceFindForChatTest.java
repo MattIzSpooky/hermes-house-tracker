@@ -73,6 +73,30 @@ class ListingServiceFindForChatTest {
                 .thenReturn(results);
     }
 
+    private static ListingChatSearchCriteria chatCriteria(Integer minPrice, Integer maxPrice, Integer minBedrooms,
+            Integer minRooms, Integer minLivingAreaM2, String province, String city, String keywords,
+            boolean sortByPriceDesc, String nearAddress, String nearCity, Integer radiusKm, Integer limit) {
+        return ListingChatSearchCriteria.builder()
+                .minPrice(minPrice).maxPrice(maxPrice)
+                .minBedrooms(minBedrooms).minRooms(minRooms).minLivingAreaM2(minLivingAreaM2)
+                .province(province).city(city).keywords(keywords)
+                .sortByPriceDesc(sortByPriceDesc)
+                .nearAddress(nearAddress).nearCity(nearCity).radiusKm(radiusKm).limit(limit)
+                .build();
+    }
+
+    private static ListingRadiusSearchCriteria radiusCriteria(double lon, double lat, Integer minBedrooms,
+            Integer minRooms, Integer minLivingAreaM2, String province, String keywords, Integer minPrice,
+            Integer maxPrice, int radiusMeters, Integer limit) {
+        return ListingRadiusSearchCriteria.builder()
+                .lon(lon).lat(lat)
+                .minBedrooms(minBedrooms).minRooms(minRooms).minLivingAreaM2(minLivingAreaM2)
+                .province(province).keywords(keywords)
+                .minPrice(minPrice).maxPrice(maxPrice)
+                .radiusMeters(radiusMeters).limit(limit)
+                .build();
+    }
+
     @Test
     void findForChat_minPrice_excludesListingsBelowMinPrice() {
         // Price filtering is now in SQL; mock returns what the DB would return after filtering.
@@ -80,7 +104,7 @@ class ListingServiceFindForChatTest {
         ListingEntity expensive = listingWithPrice(300_000);
         stubSearchForChat(List.of(exact, expensive));
 
-        List<ListingDto> result = service.findForChat(200_000, null, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(200_000, null, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(dto -> dto.currentPrice() >= 200_000);
@@ -93,7 +117,7 @@ class ListingServiceFindForChatTest {
         ListingEntity exact = listingWithPrice(200_000);
         stubSearchForChat(List.of(cheap, exact));
 
-        List<ListingDto> result = service.findForChat(null, 200_000, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(null, 200_000, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(dto -> dto.currentPrice() <= 200_000);
@@ -105,7 +129,7 @@ class ListingServiceFindForChatTest {
         ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
-        List<ListingDto> result = service.findForChat(100_000, null, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(100_000, null, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).currentPrice()).isEqualTo(200_000);
@@ -117,7 +141,7 @@ class ListingServiceFindForChatTest {
         ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(withPrice));
 
-        List<ListingDto> result = service.findForChat(null, 300_000, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(null, 300_000, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).currentPrice()).isEqualTo(200_000);
@@ -129,7 +153,7 @@ class ListingServiceFindForChatTest {
         ListingEntity b = listingWithPrice(200_000);
         stubSearchForChat(List.of(a, b));
 
-        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(2);
     }
@@ -141,7 +165,7 @@ class ListingServiceFindForChatTest {
         ListingEntity withPrice = listingWithPrice(200_000);
         stubSearchForChat(List.of(noPrice, withPrice));
 
-        List<ListingDto> result = service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null);
+        List<ListingDto> result = service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, null));
 
         assertThat(result).hasSize(2);
     }
@@ -156,8 +180,8 @@ class ListingServiceFindForChatTest {
                 any(), any(), any(), any(), any(), any(), any(),
                 eq(4.9041), eq(52.3676), eq(5_000), anyInt())).thenReturn(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "Kerkstraat 13", null, 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "Kerkstraat 13", null, 5, null));
 
         verify(geocodingService).geocodeAddress("Kerkstraat 13", "", "");
         verify(listingRepository).searchForChatNearLocation(
@@ -177,8 +201,8 @@ class ListingServiceFindForChatTest {
                 any(), any(), any(), any(), any(), any(), any(),
                 eq(4.9041), eq(52.3676), eq(10_000), anyInt())).thenReturn(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, null, "Amsterdam", 10, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, null, "Amsterdam", 10, null));
 
         verify(geocodingService).findOrFetchCity("Amsterdam");
         verify(geocodingService, never()).geocodeAddress(any(), any(), any());
@@ -192,8 +216,8 @@ class ListingServiceFindForChatTest {
         when(geocodingService.geocodeAddress("Unknown Street", "", "")).thenReturn(Optional.empty());
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "Unknown Street", null, 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "Unknown Street", null, 5, null));
 
         verify(listingRepository, never()).searchForChatNearLocation(
                 any(), any(), any(), any(), any(), any(), any(), anyDouble(), anyDouble(), anyInt(), anyInt());
@@ -212,8 +236,8 @@ class ListingServiceFindForChatTest {
                 anyDouble(), anyDouble(), anyInt(), anyInt())).thenReturn(List.of());
 
         // blank nearAddress → first branch of resolveLatLon is skipped → resolves via nearCity
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "  ", "Amsterdam", 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "  ", "Amsterdam", 5, null));
 
         verify(geocodingService, never()).geocodeAddress(any(), any(), any());
         verify(geocodingService).findOrFetchCity("Amsterdam");
@@ -223,8 +247,8 @@ class ListingServiceFindForChatTest {
     void findForChat_radiusKmNull_nearAddressIgnored_usesRegularSearch() {
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "Kerkstraat 13", null, null, null); // radiusKm=null → radius path skipped
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "Kerkstraat 13", null, null, null)); // radiusKm=null → radius path skipped
 
         verifyNoInteractions(geocodingService);
         verify(listingRepository, never()).searchForChatNearLocation(
@@ -236,8 +260,8 @@ class ListingServiceFindForChatTest {
         // radiusKm != null but (null != null || null != null) is false → outer condition fails
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, null, null, 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, null, null, 5, null));
 
         verifyNoInteractions(geocodingService);
         verify(listingRepository, never()).searchForChatNearLocation(
@@ -249,8 +273,8 @@ class ListingServiceFindForChatTest {
         // Reaches resolveLatLon(" ", null): nearAddress blank → skip; nearCity null → skip; return null
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "  ", null, 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "  ", null, 5, null));
 
         verifyNoInteractions(geocodingService);
         verify(listingRepository, never()).searchForChatNearLocation(
@@ -262,8 +286,8 @@ class ListingServiceFindForChatTest {
         // Reaches resolveLatLon(" ", "  "): both blank → both branches skipped → return null
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null,
-                false, "  ", "  ", 5, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null,
+                false, "  ", "  ", 5, null));
 
         verifyNoInteractions(geocodingService);
         verify(listingRepository, never()).searchForChatNearLocation(
@@ -276,7 +300,7 @@ class ListingServiceFindForChatTest {
     void findForChat_nullLimit_defaultsToFive() {
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, null);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, null));
 
         verify(listingRepository).searchForChat(any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), eq(5));
     }
@@ -285,7 +309,7 @@ class ListingServiceFindForChatTest {
     void findForChat_limitAboveFifteen_clampedToFifteen() {
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, 20);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, 20));
 
         verify(listingRepository).searchForChat(any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), eq(15));
     }
@@ -294,7 +318,7 @@ class ListingServiceFindForChatTest {
     void findForChat_limitWithinRange_passedThroughUnchanged() {
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, 10);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, 10));
 
         verify(listingRepository).searchForChat(any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), eq(10));
     }
@@ -303,7 +327,7 @@ class ListingServiceFindForChatTest {
     void findForChat_zeroOrNegativeLimit_clampedToFive() {
         stubSearchForChat(List.of());
 
-        service.findForChat(null, null, null, null, null, null, null, null, false, null, null, null, 0);
+        service.findForChat(chatCriteria(null, null, null, null, null, null, null, null, false, null, null, null, 0));
 
         verify(listingRepository).searchForChat(any(), any(), any(), any(), any(), any(), any(), any(), anyBoolean(), eq(5));
     }
@@ -316,7 +340,7 @@ class ListingServiceFindForChatTest {
                 any(), any(), any(), any(), any(), any(), any(),
                 eq(4.9041), eq(52.3676), eq(5_000), eq(5))).thenReturn(List.of());
 
-        service.findNearLocation(4.9041, 52.3676, null, null, null, null, null, null, null, 5_000, null);
+        service.findNearLocation(radiusCriteria(4.9041, 52.3676, null, null, null, null, null, null, null, 5_000, null));
 
         verifyNoInteractions(geocodingService);
         verify(listingRepository).searchForChatNearLocation(
@@ -330,7 +354,7 @@ class ListingServiceFindForChatTest {
                 any(), any(), any(), any(), any(), any(), any(),
                 anyDouble(), anyDouble(), anyInt(), eq(15))).thenReturn(List.of());
 
-        service.findNearLocation(4.9041, 52.3676, null, null, null, null, null, null, null, 5_000, 30);
+        service.findNearLocation(radiusCriteria(4.9041, 52.3676, null, null, null, null, null, null, null, 5_000, 30));
 
         verify(listingRepository).searchForChatNearLocation(
                 any(), any(), any(), any(), any(), any(), any(),

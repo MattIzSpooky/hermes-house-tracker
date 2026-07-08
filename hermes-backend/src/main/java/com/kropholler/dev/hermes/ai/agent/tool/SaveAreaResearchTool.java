@@ -2,12 +2,12 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
+import com.kropholler.dev.hermes.ai.agent.tool.json.SaveAreaResearchToolParams;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.profile.UserProfileRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
-import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
@@ -30,21 +30,9 @@ class SaveAreaResearchTool extends TaskTool {
         + "reviewing price, size, bedrooms, and value. Call this when the user wants ongoing curated "
         + "recommendations near a location, e.g. 'find me the best 10 houses within 15km of my address "
         + "every day'. Use limit to control how many listings to rank (default 5, max 15).")
-    public String saveAreaResearch(
-        @ToolParam(required = false, description = "Friendly name for this search, e.g. 'Best homes near me'") String name,
-        @ToolParam(description = "Search radius in kilometres from the target location") Integer radiusKm,
-        @ToolParam(required = false, description = "Number of listings to rank, default 5, max 15") Integer limit,
-        @ToolParam(required = false, description = "Minimum number of bedrooms") Integer minBedrooms,
-        @ToolParam(required = false, description = "Minimum total rooms") Integer minRooms,
-        @ToolParam(required = false, description = "Minimum living area in square metres") Integer minLivingAreaM2,
-        @ToolParam(required = false, description = "Minimum asking price in euros") Integer minPrice,
-        @ToolParam(required = false, description = "Maximum asking price in euros") Integer maxPrice,
-        @ToolParam(required = false, description = "Keywords to search in descriptions") String keywords,
-        @ToolParam(required = false, description = "Address to search near instead of the user's home address, format: 'houseNumber, street, city'") String nearAddress,
-        @ToolParam(required = false, description = "City to search near instead of the user's home address") String nearCity
-    ) {
+    public String saveAreaResearch(SaveAreaResearchToolParams params) {
         log.info("saveAreaResearch called: userId={}, radiusKm={}, limit={}, nearAddress={}, nearCity={}",
-            userId, radiusKm, limit, nearAddress, nearCity);
+            userId, params.radiusKm(), params.limit(), params.nearAddress(), params.nearCity());
         if (!hasEmail()) {
             log.warn("saveAreaResearch rejected for user {}: no email on file", userId);
             return "Please make sure your account has an email address before setting up notifications.";
@@ -53,10 +41,11 @@ class SaveAreaResearchTool extends TaskTool {
         Double overrideLon = null;
         Double overrideLat = null;
 
-        if (hasOverride(nearAddress, nearCity)) {
-            GeocodeResult geocoded = geocodeOverride(nearAddress, nearCity);
+        if (hasOverride(params.nearAddress(), params.nearCity())) {
+            GeocodeResult geocoded = geocodeOverride(params.nearAddress(), params.nearCity());
             if (geocoded == null) {
-                log.warn("saveAreaResearch could not geocode nearAddress={}, nearCity={} for user {}", nearAddress, nearCity, userId);
+                log.warn("saveAreaResearch could not geocode nearAddress={}, nearCity={} for user {}",
+                    params.nearAddress(), params.nearCity(), userId);
                 return "Could not find that location — we could not find a match for that address or city, please try again.";
             }
             overrideLon = geocoded.lon();
@@ -67,10 +56,11 @@ class SaveAreaResearchTool extends TaskTool {
             return "Please set your home address in your profile before creating an area search.";
         }
 
-        String taskName = (name != null && !name.isBlank()) ? name : "Best listings within " + radiusKm + "km";
+        String taskName = (params.name() != null && !params.name().isBlank())
+            ? params.name() : "Best listings within " + params.radiusKm() + "km";
         AreaResearchPayload payload = new AreaResearchPayload(
-            radiusKm, limit, minBedrooms, minRooms, minLivingAreaM2, minPrice, maxPrice,
-            blankToNull(keywords), overrideLon, overrideLat);
+            params.radiusKm(), params.limit(), params.minBedrooms(), params.minRooms(), params.minLivingAreaM2(),
+            params.minPrice(), params.maxPrice(), blankToNull(params.keywords()), overrideLon, overrideLat);
         agentTaskService.createAreaResearch(userId, taskName, payload);
         log.info("Area research '{}' saved for user {}", taskName, userId);
         return "Area research '" + taskName + "' saved — I'll research and rank the best listings daily.";

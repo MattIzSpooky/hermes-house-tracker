@@ -8,6 +8,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskEntity;
 import com.kropholler.dev.hermes.notification.NotificationContent;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.WatchTaskHandler;
+import com.kropholler.dev.hermes.listing.ListingChatSearchCriteria;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -40,8 +41,7 @@ class WatchTaskHandlerTest {
     void returnsEmptyWhenNoNewListings() throws Exception {
         AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto old = listing(Instant.now().minusSeconds(7200)); // seen before lastRunAt
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(old));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(old));
 
         Optional<NotificationContent> result = handler.handle(task);
 
@@ -52,8 +52,7 @@ class WatchTaskHandlerTest {
     void returnsNotificationWhenNewListingFound() throws Exception {
         AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto newListing = listing(Instant.now().minusSeconds(60)); // seen after lastRunAt
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(newListing));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(newListing));
 
         Optional<NotificationContent> result = handler.handle(task);
 
@@ -68,8 +67,7 @@ class WatchTaskHandlerTest {
         AgentTaskEntity task = watchTask(null);
         task.setCreatedAt(Instant.now().minusSeconds(3600));
         ListingDto newListing = listing(Instant.now().minusSeconds(60)); // seen after createdAt
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(newListing));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(newListing));
 
         Optional<NotificationContent> result = handler.handle(task);
 
@@ -82,8 +80,7 @@ class WatchTaskHandlerTest {
         // firstSeenAt == null → doesn't count as new, falls to price history check
         AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto noDate = listing(null); // firstSeenAt is null
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(noDate));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(noDate));
         when(listingService.findPriceHistoryByListingId(any())).thenReturn(List.of());
 
         Optional<NotificationContent> result = handler.handle(task);
@@ -96,8 +93,7 @@ class WatchTaskHandlerTest {
         // Exercises anyMatch lambda branches: timestamp==null (false) and timestamp!=null+!isAfter (false)
         AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto old = listing(Instant.now().minusSeconds(7200));
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(old));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(old));
         PriceHistoryEntryDto nullTs = new PriceHistoryEntryDto(UUID.randomUUID(), 350000, "asking_price", null, null, null);
         PriceHistoryEntryDto oldTs  = new PriceHistoryEntryDto(UUID.randomUUID(), 340000, "asking_price", null, null, Instant.now().minusSeconds(7200));
         when(listingService.findPriceHistoryByListingId(any())).thenReturn(List.of(nullTs, oldTs));
@@ -112,8 +108,7 @@ class WatchTaskHandlerTest {
         // Listing is old (not new), but has a recent asking_price entry → priceChanged = true
         AgentTaskEntity task = watchTask(Instant.now().minusSeconds(3600));
         ListingDto old = listing(Instant.now().minusSeconds(7200));
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(old));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(old));
         // null timestamp (false) then recent timestamp (true → anyMatch short-circuits)
         PriceHistoryEntryDto nullTs   = new PriceHistoryEntryDto(UUID.randomUUID(), 360000, "asking_price", null, null, null);
         PriceHistoryEntryDto recentTs = new PriceHistoryEntryDto(UUID.randomUUID(), 340000, "asking_price", null, null, Instant.now().minusSeconds(30));
@@ -133,8 +128,7 @@ class WatchTaskHandlerTest {
         AgentTaskEntity task = watchTask(since);
         ListingDto newListing = listing(Instant.now().minusSeconds(60));
         ListingDto oldListing = listing(Instant.now().minusSeconds(7200));
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(newListing, oldListing));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(newListing, oldListing));
         PriceHistoryEntryDto recentTs = new PriceHistoryEntryDto(UUID.randomUUID(), 330000, "asking_price", null, null, Instant.now().minusSeconds(30));
         when(listingService.findPriceHistoryByListingId(any())).thenReturn(List.of(recentTs));
 
@@ -151,8 +145,7 @@ class WatchTaskHandlerTest {
             UUID.randomUUID(), "funda1", "http://x.com", "Kerkstraat", "5", null,
             "1234AB", "Utrecht", "Utrecht", Instant.now().minusSeconds(60), Instant.now(),
             null, ListingStatus.FOR_SALE, null, 90, 3, 2, null, null, null);
-        when(listingService.findForChat(any(), any(), any(), any(), any(), any(), any(), any(),
-            any(Boolean.class), any(), any(), any(), any())).thenReturn(List.of(noPrice));
+        when(listingService.findForChat(any(ListingChatSearchCriteria.class))).thenReturn(List.of(noPrice));
 
         Optional<NotificationContent> result = handler.handle(task);
 

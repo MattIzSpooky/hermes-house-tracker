@@ -6,6 +6,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.listing.ListingDto;
+import com.kropholler.dev.hermes.listing.ListingRadiusSearchCriteria;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
@@ -70,6 +71,18 @@ class AreaResearchTaskHandlerTest {
             350000, ListingStatus.FOR_SALE, null, 120, 5, 3, null, null, null);
     }
 
+    private static ListingRadiusSearchCriteria radiusCriteria(double lon, double lat, Integer minBedrooms,
+            Integer minRooms, Integer minLivingAreaM2, String province, String keywords, Integer minPrice,
+            Integer maxPrice, int radiusMeters, Integer limit) {
+        return ListingRadiusSearchCriteria.builder()
+                .lon(lon).lat(lat)
+                .minBedrooms(minBedrooms).minRooms(minRooms).minLivingAreaM2(minLivingAreaM2)
+                .province(province).keywords(keywords)
+                .minPrice(minPrice).maxPrice(maxPrice)
+                .radiusMeters(radiusMeters).limit(limit)
+                .build();
+    }
+
     private void stubAiNarrative(String narrative) {
         when(chatClient.prompt()).thenReturn(promptSpec);
         when(promptSpec.user(anyString())).thenReturn(promptSpec);
@@ -88,7 +101,7 @@ class AreaResearchTaskHandlerTest {
         profile.setLatitude(52.3676);
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(profile));
         UUID listingId = UUID.randomUUID();
-        when(listingService.findNearLocation(4.9041, 52.3676, 3, null, 80, null, null, null, 500000, 15_000, 5))
+        when(listingService.findNearLocation(radiusCriteria(4.9041, 52.3676, 3, null, 80, null, null, null, 500000, 15_000, 5)))
             .thenReturn(List.of(listing(listingId)));
         stubAiNarrative("1. Herenstraat 10 is the best match because it fits the budget and size.");
 
@@ -104,7 +117,7 @@ class AreaResearchTaskHandlerTest {
     void handle_overrideCoordinates_usedInsteadOfProfile() {
         UUID userId = UUID.randomUUID();
         AreaResearchPayload payload = new AreaResearchPayload(10, 5, null, null, null, null, null, null, 5.1214, 52.0907);
-        when(listingService.findNearLocation(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5))
+        when(listingService.findNearLocation(radiusCriteria(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5)))
             .thenReturn(List.of(listing(UUID.randomUUID())));
         stubAiNarrative("Good options near the overridden location.");
 
@@ -144,7 +157,7 @@ class AreaResearchTaskHandlerTest {
     void handle_noCandidatesFound_returnsEmptyWithoutCallingAi() {
         UUID userId = UUID.randomUUID();
         AreaResearchPayload payload = new AreaResearchPayload(10, 5, null, null, null, null, null, null, 5.1214, 52.0907);
-        when(listingService.findNearLocation(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5))
+        when(listingService.findNearLocation(radiusCriteria(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5)))
             .thenReturn(List.of());
 
         Optional<NotificationContent> result = handler.handle(task(userId, payload));
@@ -157,7 +170,7 @@ class AreaResearchTaskHandlerTest {
     void handle_aiReturnsBlank_returnsEmpty() {
         UUID userId = UUID.randomUUID();
         AreaResearchPayload payload = new AreaResearchPayload(10, 5, null, null, null, null, null, null, 5.1214, 52.0907);
-        when(listingService.findNearLocation(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5))
+        when(listingService.findNearLocation(radiusCriteria(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5)))
             .thenReturn(List.of(listing(UUID.randomUUID())));
         stubAiNarrative("   ");
 
@@ -170,7 +183,7 @@ class AreaResearchTaskHandlerTest {
     void handle_aiReturnsNull_returnsEmpty() {
         UUID userId = UUID.randomUUID();
         AreaResearchPayload payload = new AreaResearchPayload(10, 5, null, null, null, null, null, null, 5.1214, 52.0907);
-        when(listingService.findNearLocation(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5))
+        when(listingService.findNearLocation(radiusCriteria(5.1214, 52.0907, null, null, null, null, null, null, null, 10_000, 5)))
             .thenReturn(List.of(listing(UUID.randomUUID())));
         stubAiNarrative(null);
 

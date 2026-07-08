@@ -5,6 +5,7 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
+import com.kropholler.dev.hermes.ai.agent.tool.json.SaveAreaResearchToolParams;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.profile.UserProfileEntity;
@@ -39,6 +40,13 @@ class SaveAreaResearchToolTest {
         return new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService, "user@hermes.local");
     }
 
+    private static SaveAreaResearchToolParams params(String name, Integer radiusKm, Integer limit, Integer minBedrooms,
+            Integer minRooms, Integer minLivingAreaM2, Integer minPrice, Integer maxPrice, String keywords,
+            String nearAddress, String nearCity) {
+        return new SaveAreaResearchToolParams(name, radiusKm, limit, minBedrooms, minRooms, minLivingAreaM2,
+                minPrice, maxPrice, keywords, nearAddress, nearCity);
+    }
+
     @Test
     void noOverrideAndProfileHasAddress_createsTask() {
         UUID userId = UUID.randomUUID();
@@ -51,7 +59,7 @@ class SaveAreaResearchToolTest {
             AgentTaskStatus.ACTIVE, userId, "Best listings within 15km", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.createAreaResearch(any(), anyString(), any())).thenReturn(dto);
 
-        String result = tool(userId).saveAreaResearch(null, 15, 10, 3, null, 80, null, 500000, null, null, null);
+        String result = tool(userId).saveAreaResearch(params(null, 15, 10, 3, null, 80, null, 500000, null, null, null));
 
         ArgumentCaptor<AreaResearchPayload> cap = ArgumentCaptor.forClass(AreaResearchPayload.class);
         verify(agentTaskService).createAreaResearch(eq(userId), anyString(), cap.capture());
@@ -68,7 +76,7 @@ class SaveAreaResearchToolTest {
         UUID userId = UUID.randomUUID();
         when(userProfileRepository.findById(userId)).thenReturn(Optional.empty());
 
-        String result = tool(userId).saveAreaResearch(null, 15, null, null, null, null, null, null, null, null, null);
+        String result = tool(userId).saveAreaResearch(params(null, 15, null, null, null, null, null, null, null, null, null));
 
         assertThat(result).contains("set your home address");
         verify(agentTaskService, never()).createAreaResearch(any(), anyString(), any());
@@ -81,7 +89,7 @@ class SaveAreaResearchToolTest {
         profile.setUserId(userId);
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(profile));
 
-        String result = tool(userId).saveAreaResearch(null, 15, null, null, null, null, null, null, null, null, null);
+        String result = tool(userId).saveAreaResearch(params(null, 15, null, null, null, null, null, null, null, null, null));
 
         assertThat(result).contains("set your home address");
         verify(agentTaskService, never()).createAreaResearch(any(), anyString(), any());
@@ -96,8 +104,8 @@ class SaveAreaResearchToolTest {
             AgentTaskStatus.ACTIVE, userId, "name", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.createAreaResearch(any(), anyString(), any())).thenReturn(dto);
 
-        String result = tool(userId).saveAreaResearch(null, 10, null, null, null, null, null, null, null,
-            "10, Kerkstraat, Utrecht", null);
+        String result = tool(userId).saveAreaResearch(params(null, 10, null, null, null, null, null, null, null,
+            "10, Kerkstraat, Utrecht", null));
 
         ArgumentCaptor<AreaResearchPayload> cap = ArgumentCaptor.forClass(AreaResearchPayload.class);
         verify(agentTaskService).createAreaResearch(eq(userId), anyString(), cap.capture());
@@ -116,8 +124,8 @@ class SaveAreaResearchToolTest {
             AgentTaskStatus.ACTIVE, userId, "name", "0 0 8 * * *", null, Instant.now(), Instant.now());
         when(agentTaskService.createAreaResearch(any(), anyString(), any())).thenReturn(dto);
 
-        String result = tool(userId).saveAreaResearch(null, 10, null, null, null, null, null, null, null,
-            null, "Rotterdam");
+        String result = tool(userId).saveAreaResearch(params(null, 10, null, null, null, null, null, null, null,
+            null, "Rotterdam"));
 
         ArgumentCaptor<AreaResearchPayload> cap = ArgumentCaptor.forClass(AreaResearchPayload.class);
         verify(agentTaskService).createAreaResearch(eq(userId), anyString(), cap.capture());
@@ -131,8 +139,8 @@ class SaveAreaResearchToolTest {
         UUID userId = UUID.randomUUID();
         when(geocodingService.geocodeAddress("Nowhere Street", "", "")).thenReturn(Optional.empty());
 
-        String result = tool(userId).saveAreaResearch(null, 10, null, null, null, null, null, null, null,
-            "Nowhere Street", null);
+        String result = tool(userId).saveAreaResearch(params(null, 10, null, null, null, null, null, null, null,
+            "Nowhere Street", null));
 
         assertThat(result).contains("could not find", "Could not find");
         verify(agentTaskService, never()).createAreaResearch(any(), anyString(), any());
@@ -148,7 +156,7 @@ class SaveAreaResearchToolTest {
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(profile));
         when(agentTaskService.createAreaResearch(any(), anyString(), any())).thenReturn(null);
 
-        tool(userId).saveAreaResearch("  ", 12, null, null, null, null, null, null, null, null, null);
+        tool(userId).saveAreaResearch(params("  ", 12, null, null, null, null, null, null, null, null, null));
 
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
         verify(agentTaskService).createAreaResearch(eq(userId), nameCaptor.capture(), any());
@@ -165,7 +173,7 @@ class SaveAreaResearchToolTest {
         when(userProfileRepository.findById(userId)).thenReturn(Optional.of(profile));
         when(agentTaskService.createAreaResearch(any(), anyString(), any())).thenReturn(null);
 
-        tool(userId).saveAreaResearch("My search", 12, null, null, null, null, null, null, "  ", null, null);
+        tool(userId).saveAreaResearch(params("My search", 12, null, null, null, null, null, null, "  ", null, null));
 
         ArgumentCaptor<AreaResearchPayload> cap = ArgumentCaptor.forClass(AreaResearchPayload.class);
         verify(agentTaskService).createAreaResearch(eq(userId), eq("My search"), cap.capture());
@@ -177,7 +185,7 @@ class SaveAreaResearchToolTest {
         UUID userId = UUID.randomUUID();
         SaveAreaResearchTool tool = new SaveAreaResearchTool(userId, agentTaskService, userProfileRepository, geocodingService, null);
 
-        String result = tool.saveAreaResearch(null, 15, null, null, null, null, null, null, null, null, null);
+        String result = tool.saveAreaResearch(params(null, 15, null, null, null, null, null, null, null, null, null));
 
         assertThat(result).contains("email address");
         verify(agentTaskService, never()).createAreaResearch(any(), anyString(), any());

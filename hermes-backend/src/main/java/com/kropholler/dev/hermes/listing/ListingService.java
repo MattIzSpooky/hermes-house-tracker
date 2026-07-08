@@ -101,23 +101,26 @@ public class ListingService {
     }
 
     @Transactional(readOnly = true)
-    public List<ListingDto> findForChat(Integer minPrice, Integer maxPrice,
-                                        Integer minBedrooms, Integer minRooms,
-                                        Integer minLivingAreaM2, String province,
-                                        String city, String keywords,
-                                        boolean sortByPriceDesc,
-                                        String nearAddress, String nearCity, Integer radiusKm,
-                                        Integer limit) {
-        if (radiusKm != null && (nearAddress != null || nearCity != null)) {
-            GeocodeResult latLon = resolveLatLon(nearAddress, nearCity);
+    public List<ListingDto> findForChat(ListingChatSearchCriteria criteria) {
+        if (criteria.hasRadiusSearch()) {
+            GeocodeResult latLon = resolveLatLon(criteria.nearAddress(), criteria.nearCity());
             if (latLon != null) {
-                return searchNearLocationInternal(latLon.lon(), latLon.lat(),
-                        minBedrooms, minRooms, minLivingAreaM2, province, keywords,
-                        minPrice, maxPrice, radiusKm * 1000, limit);
+                return searchNearLocationInternal(ListingRadiusSearchCriteria.builder()
+                        .lon(latLon.lon()).lat(latLon.lat())
+                        .radiusMeters(criteria.radiusKm() * 1000)
+                        .minBedrooms(criteria.minBedrooms()).minRooms(criteria.minRooms())
+                        .minLivingAreaM2(criteria.minLivingAreaM2())
+                        .province(criteria.province()).keywords(criteria.keywords())
+                        .minPrice(criteria.minPrice()).maxPrice(criteria.maxPrice())
+                        .limit(criteria.limit())
+                        .build());
             }
         }
-        List<ListingEntity> results = listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
-                        province, city, keywords, minPrice, maxPrice, sortByPriceDesc, clampLimit(limit));
+        List<ListingEntity> results = listingRepository.searchForChat(
+                        criteria.minBedrooms(), criteria.minRooms(), criteria.minLivingAreaM2(),
+                        criteria.province(), criteria.city(), criteria.keywords(),
+                        criteria.minPrice(), criteria.maxPrice(), criteria.sortByPriceDesc(),
+                        clampLimit(criteria.limit()));
         log.debug("findForChat matched {} listing(s)", results.size());
         Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
         return results.stream().map(l -> toDto(l, geoById)).toList();
@@ -128,24 +131,15 @@ public class ListingService {
      * user profile) — skips the string-based geocoding {@link #resolveLatLon} performs.
      */
     @Transactional(readOnly = true)
-    public List<ListingDto> findNearLocation(double lon, double lat,
-                                              Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2,
-                                              String province, String keywords,
-                                              Integer minPrice, Integer maxPrice,
-                                              int radiusMeters, Integer limit) {
-        return searchNearLocationInternal(lon, lat, minBedrooms, minRooms, minLivingAreaM2,
-                province, keywords, minPrice, maxPrice, radiusMeters, limit);
+    public List<ListingDto> findNearLocation(ListingRadiusSearchCriteria criteria) {
+        return searchNearLocationInternal(criteria);
     }
 
-    private List<ListingDto> searchNearLocationInternal(double lon, double lat,
-                                                          Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2,
-                                                          String province, String keywords,
-                                                          Integer minPrice, Integer maxPrice,
-                                                          int radiusMeters, Integer limit) {
+    private List<ListingDto> searchNearLocationInternal(ListingRadiusSearchCriteria criteria) {
         List<ListingEntity> results = listingRepository.searchForChatNearLocation(
-                        minBedrooms, minRooms, minLivingAreaM2,
-                        province, keywords, minPrice, maxPrice,
-                        lon, lat, radiusMeters, clampLimit(limit));
+                        criteria.minBedrooms(), criteria.minRooms(), criteria.minLivingAreaM2(),
+                        criteria.province(), criteria.keywords(), criteria.minPrice(), criteria.maxPrice(),
+                        criteria.lon(), criteria.lat(), criteria.radiusMeters(), clampLimit(criteria.limit()));
         Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
         return results.stream().map(l -> toDto(l, geoById)).toList();
     }
