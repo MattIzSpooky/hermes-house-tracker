@@ -45,6 +45,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
 
+  /api/agent-tasks/{id}/run:
+    post:
+      tags: [AgentTasks]
+      operationId: runAgentTask
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Task execution queued
+        '404':
+          description: Agent task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        '403':
+          description: Agent task exists but does not belong to the caller, or caller is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+
 components:
   schemas:
     AgentTaskResponse:
