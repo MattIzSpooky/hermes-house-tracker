@@ -29,6 +29,7 @@ public class ListingController implements ListingsApi {
     private final ListingGeocodingBackfillService backfillService;
 
     @Override
+    @SuppressWarnings("java:S107") // parameter list is fixed by the generated ListingsApi interface
     public ResponseEntity<ListingPage> getListings(Integer page, Integer size,
             String street, String houseNumber, String houseNumberAddition,
             String zipCode, String city, String province,
