@@ -14,4 +14,8 @@ export class AgentTaskService {
   deleteTask(id: string): Observable<void> {
     return this.http.delete<void>(`/api/agent-tasks/${id}`);
   }
+
+  runNow(id: string): Observable<void> {
+    return this.http.post<void>(`/api/agent-tasks/${id}/run`, null);
+  }
 }

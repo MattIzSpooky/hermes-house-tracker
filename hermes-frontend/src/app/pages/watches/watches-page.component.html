@@ -5,6 +5,10 @@
     <em>"Alert me when a 3-bed house in Utrecht appears under &euro;400,000."</em>
   </p>
 
+  @if (runError()) {
+    <div class="text-sm text-red-600 bg-red-50 rounded-lg p-3 mb-4">{{ runError() }}</div>
+  }
+
   @if (tasks().length === 0) {
     <div class="text-gray-500 text-sm bg-gray-50 rounded-lg p-6 text-center">
       No active watches. Open the chat and ask to be alerted when matching listings appear.
@@ -30,7 +34,19 @@
               <td class="px-4 py-3 text-gray-500 text-xs">{{ task.schedule ?? 'one-shot' }}</td>
               <td class="px-4 py-3 text-gray-500">{{ task.lastRunAt ? (task.lastRunAt | date:'short') : '&mdash;' }}</td>
               <td class="px-4 py-3 text-gray-500">{{ task.nextRunAt | date:'short' }}</td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-3 text-right space-x-3 whitespace-nowrap">
+                @if (isAdmin) {
+                  @if (queuedTaskId() === task.id) {
+                    <span class="text-emerald-600 text-xs font-medium">Queued</span>
+                  } @else {
+                    <button
+                      (click)="runNow(task.id)"
+                      [disabled]="runningTaskId() === task.id"
+                      class="text-cyan-600 hover:text-cyan-800 text-xs font-medium disabled:opacity-50">
+                      {{ runningTaskId() === task.id ? 'Running...' : 'Run now' }}
+                    </button>
+                  }
+                }
                 <button
                   (click)="delete(task.id)"
                   class="text-red-500 hover:text-red-700 text-xs font-medium">
