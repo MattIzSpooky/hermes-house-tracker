@@ -5,11 +5,13 @@ import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.profile.UserProfileRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
+@Slf4j
 class SaveAreaResearchTool extends TaskTool {
 
     private final UserProfileRepository userProfileRepository;
@@ -41,7 +43,10 @@ class SaveAreaResearchTool extends TaskTool {
         @ToolParam(required = false, description = "Address to search near instead of the user's home address, format: 'houseNumber, street, city'") String nearAddress,
         @ToolParam(required = false, description = "City to search near instead of the user's home address") String nearCity
     ) {
+        log.info("saveAreaResearch called: userId={}, radiusKm={}, limit={}, nearAddress={}, nearCity={}",
+            userId, radiusKm, limit, nearAddress, nearCity);
         if (!hasEmail()) {
+            log.warn("saveAreaResearch rejected for user {}: no email on file", userId);
             return "Please make sure your account has an email address before setting up notifications.";
         }
 
@@ -51,11 +56,14 @@ class SaveAreaResearchTool extends TaskTool {
         if (hasOverride(nearAddress, nearCity)) {
             GeocodeResult geocoded = geocodeOverride(nearAddress, nearCity);
             if (geocoded == null) {
+                log.warn("saveAreaResearch could not geocode nearAddress={}, nearCity={} for user {}", nearAddress, nearCity, userId);
                 return "Could not find that location — we could not find a match for that address or city, please try again.";
             }
             overrideLon = geocoded.lon();
             overrideLat = geocoded.lat();
+            log.debug("saveAreaResearch resolved override location to lon={}, lat={}", overrideLon, overrideLat);
         } else if (!userHasHomeAddress()) {
+            log.warn("saveAreaResearch rejected for user {}: no home address on file", userId);
             return "Please set your home address in your profile before creating an area search.";
         }
 
@@ -64,6 +72,7 @@ class SaveAreaResearchTool extends TaskTool {
             radiusKm, limit, minBedrooms, minRooms, minLivingAreaM2, minPrice, maxPrice,
             blankToNull(keywords), overrideLon, overrideLat);
         agentTaskService.createAreaResearch(userId, taskName, payload);
+        log.info("Area research '{}' saved for user {}", taskName, userId);
         return "Area research '" + taskName + "' saved — I'll research and rank the best listings daily.";
     }
 

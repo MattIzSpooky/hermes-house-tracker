@@ -28,12 +28,13 @@ class AgentTaskExecutor {
 
     void execute(AgentTaskEntity task) {
         AgentTaskHandler handler = handlers.get(task.getType());
+        log.info("Received task {} with type: {}", task.getId(), task.getType());
         if (handler == null) {
             log.warn("No handler registered for task type {}, skipping task {}", task.getType(), task.getId());
             return;
         }
         try {
-            log.info("Received task {} with type: {}", task.getId(), task.getType());
+            log.info("Executing task {} with type: {}", task.getId(), task.getType());
 
             handler.handle(task).ifPresent(content ->
                 notificationService.save(task.getId(), task.getUserId(), content));

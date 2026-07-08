@@ -42,6 +42,7 @@ public class FindPriceDropTool implements AITool<PriceDropParams> {
 
         List<PriceDropResult> results = listingService.findPriceDropListings(city, minDrop);
         resultHolder.set(results.stream().map(r -> mapper.toChatListingCard(r.listing())).toList());
+        log.info("findPriceDrop returned {} results", results.size());
 
         if (results.isEmpty()) {
             return "No listings found with a price drop of at least " + minDrop + "%" +

@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.report;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -21,14 +23,18 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public Optional<ListingReport> generateReport(UUID listingId) {
-        return listingService.findById(listingId).map(listing -> {
+        log.debug("generateReport called: listingId={}", listingId);
+        Optional<ListingReport> report = listingService.findById(listingId).map(listing -> {
             List<PriceHistoryEntryDto> history = listingService.findPriceHistoryByListingId(listingId);
 
             List<PriceHistoryEntryDto> askingPrices = history.stream()
                 .filter(e -> "asking_price".equals(e.status()))
                 .toList();
 
-            if (askingPrices.isEmpty()) return null;
+            if (askingPrices.isEmpty()) {
+                log.debug("generateReport: no asking-price history for listing {}", listingId);
+                return null;
+            }
 
             Integer initialPrice = askingPrices.getFirst().price();
             Integer currentPrice = askingPrices.getLast().price();
@@ -52,5 +58,9 @@ public class ReportService {
                 priceHistory, listing.status()
             );
         });
+        if (report.isEmpty()) {
+            log.debug("generateReport: no listing or report data found for {}", listingId);
+        }
+        return report;
     }
 }

@@ -4,6 +4,7 @@ import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionEntity
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScrapingQueueService {
@@ -27,6 +29,8 @@ public class ScrapingQueueService {
                                             Integer minArea, Integer maxArea, int pageLimit) {
         int clampedLimit = Math.min(pageLimit, maxPageLimit);
         String url = buildSearchUrl(city, minPrice, maxPrice, minArea, maxArea, 1);
+        log.info("enqueueSearch: city={}, minPrice={}, maxPrice={}, pageLimit={} (clamped to {})",
+                city, minPrice, maxPrice, pageLimit, clampedLimit);
 
         ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.SEARCH);
@@ -38,11 +42,14 @@ public class ScrapingQueueService {
         session.setPageLimit(clampedLimit);
         session.setFundaUrl(url);
 
-        return mapper.toDto(sessionRepository.save(session));
+        ScrapingSessionDto dto = mapper.toDto(sessionRepository.save(session));
+        log.info("enqueueSearch created session {}", dto.id());
+        return dto;
     }
 
     @Transactional
     public ScrapingSessionDto enqueueRescrape(String listingUrl, String city) {
+        log.info("enqueueRescrape: city={}, listingUrl={}", city, listingUrl);
         ScrapingSessionEntity session = new ScrapingSessionEntity();
         session.setType(ScrapingSessionType.RESCRAPE);
         session.setCity(city);
@@ -50,7 +57,9 @@ public class ScrapingQueueService {
         session.setFundaUrl(listingUrl);
         session.setTargetListingUrl(listingUrl);
 
-        return mapper.toDto(sessionRepository.save(session));
+        ScrapingSessionDto dto = mapper.toDto(sessionRepository.save(session));
+        log.info("enqueueRescrape created session {}", dto.id());
+        return dto;
     }
 
     @Transactional(readOnly = true)

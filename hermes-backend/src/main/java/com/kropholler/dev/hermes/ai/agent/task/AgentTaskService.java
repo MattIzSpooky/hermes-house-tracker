@@ -38,7 +38,9 @@ public class AgentTaskService {
         task.setPayload(serialize(payload));
         task.setSchedule("0 0 8 * * *");
         task.setNextRunAt(computeNext("0 0 8 * * *"));
-        return toDto(agentTaskRepository.save(task));
+        AgentTaskDto dto = toDto(agentTaskRepository.save(task));
+        log.info("Created WATCH task {} for user {}", dto.id(), userId);
+        return dto;
     }
 
     @Transactional
@@ -49,7 +51,9 @@ public class AgentTaskService {
         task.setName("Research: " + prompt.substring(0, Math.min(60, prompt.length())));
         task.setPayload(serialize(new ResearchPayload(prompt)));
         task.setNextRunAt(Instant.now());
-        return toDto(agentTaskRepository.save(task));
+        AgentTaskDto dto = toDto(agentTaskRepository.save(task));
+        log.info("Created RESEARCH task {} for user {}", dto.id(), userId);
+        return dto;
     }
 
     @Transactional
@@ -61,7 +65,9 @@ public class AgentTaskService {
         task.setPayload(serialize(new DigestPayload(cities)));
         task.setSchedule("0 0 8 * * MON");
         task.setNextRunAt(computeNext("0 0 8 * * MON"));
-        return toDto(agentTaskRepository.save(task));
+        AgentTaskDto dto = toDto(agentTaskRepository.save(task));
+        log.info("Created DIGEST task {} for user {}, cities={}", dto.id(), userId, cities);
+        return dto;
     }
 
     @Transactional
@@ -73,14 +79,18 @@ public class AgentTaskService {
         task.setPayload(serialize(payload));
         task.setSchedule("0 0 8 * * *");
         task.setNextRunAt(computeNext("0 0 8 * * *"));
-        return toDto(agentTaskRepository.save(task));
+        AgentTaskDto dto = toDto(agentTaskRepository.save(task));
+        log.info("Created AREA_RESEARCH task {} for user {}", dto.id(), userId);
+        return dto;
     }
 
     @Transactional(readOnly = true)
     public List<AgentTaskDto> findByUserId(UUID userId) {
-        return agentTaskRepository
+        List<AgentTaskDto> tasks = agentTaskRepository
             .findAllByUserIdAndStatusOrderByCreatedAtDesc(userId, AgentTaskStatus.ACTIVE)
             .stream().map(this::toDto).toList();
+        log.debug("findByUserId found {} active task(s) for user {}", tasks.size(), userId);
+        return tasks;
     }
 
     @Transactional
@@ -92,6 +102,7 @@ public class AgentTaskService {
             throw new AccessDeniedException("Not authorized to delete this agent task");
         }
         agentTaskRepository.delete(task);
+        log.info("Deleted task {} for user {}", taskId, userId);
     }
 
     @Transactional
@@ -103,12 +114,16 @@ public class AgentTaskService {
             task.setStatus(AgentTaskStatus.COMPLETED);
         }
         agentTaskRepository.save(task);
+        log.debug("markRan: task {} lastRunAt updated, nextRunAt={}, status={}",
+            task.getId(), task.getNextRunAt(), task.getStatus());
     }
 
     @Transactional(readOnly = true)
     public List<AgentTaskEntity> findDueTasks() {
-        return agentTaskRepository.findAllByStatusAndNextRunAtLessThanEqual(
+        List<AgentTaskEntity> due = agentTaskRepository.findAllByStatusAndNextRunAtLessThanEqual(
             AgentTaskStatus.ACTIVE, Instant.now());
+        log.debug("findDueTasks found {} due task(s)", due.size());
+        return due;
     }
 
     private Instant computeNext(String schedule) {

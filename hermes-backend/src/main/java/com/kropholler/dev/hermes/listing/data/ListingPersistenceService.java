@@ -10,6 +10,7 @@ import com.kropholler.dev.hermes.funda.RawListing;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionCompleted;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionType;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.modulith.events.ApplicationModuleListener;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ListingPersistenceService {
@@ -33,11 +35,14 @@ public class ListingPersistenceService {
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onScrapingSessionCompleted(ScrapingSessionCompleted event) {
+        log.info("onScrapingSessionCompleted: type={}, listingCount={}", event.type(), event.listings().size());
         List<Runnable> afterCommit = new ArrayList<>();
+        int newCount = 0;
 
         for (RawListing raw : event.listings()) {
             var existing = listingRepository.findByFundaId(raw.fundaId());
             boolean isNew = existing.isEmpty();
+            if (isNew) newCount++;
             ListingEntity listing = existing.orElseGet(() -> createListing(raw));
 
             Instant now = Instant.now();
@@ -63,6 +68,7 @@ public class ListingPersistenceService {
             }
         }
 
+        log.debug("onScrapingSessionCompleted persisted {} listing(s), {} new", event.listings().size(), newCount);
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
@@ -74,11 +80,13 @@ public class ListingPersistenceService {
     @ApplicationModuleListener
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onListingNotFound(ListingNotFound event) {
+        log.info("onListingNotFound: fundaId={}", event.fundaId());
         listingRepository.findByFundaId(event.fundaId()).ifPresent(listing -> {
             listing.setStatus(ListingStatus.DELETED);
             listing.setDeletedAt(Instant.now());
             listing.setLastUpdatedAt(Instant.now());
             listingRepository.save(listing);
+            log.info("Marked listing {} as deleted (fundaId={})", listing.getId(), event.fundaId());
         });
     }
 

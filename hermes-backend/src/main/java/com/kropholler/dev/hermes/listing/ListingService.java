@@ -36,6 +36,7 @@ public class ListingService {
 
     @Transactional(readOnly = true)
     public Page<ListingDto> findAll(ListingSearchParams params, Pageable pageable) {
+        log.debug("findAll called: params={}, page={}, size={}", params, pageable.getPageNumber(), pageable.getPageSize());
         if (params.isEmpty()) {
             Page<ListingEntity> page = listingRepository.findAll(pageable);
             Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(page.getContent()));
@@ -48,6 +49,8 @@ public class ListingService {
             GeocodeResult latLon = resolveRadiusCenter(params);
             if (latLon != null) {
                 spec = spec.and(ListingSpecifications.withinRadius(latLon.lon(), latLon.lat(), params.radiusKm() * 1000));
+            } else {
+                log.warn("findAll radius search could not resolve a center for params={}", params);
             }
         }
         Page<ListingEntity> page = listingRepository.findAll(spec, pageable);
@@ -115,6 +118,7 @@ public class ListingService {
         }
         List<ListingEntity> results = listingRepository.searchForChat(minBedrooms, minRooms, minLivingAreaM2,
                         province, city, keywords, minPrice, maxPrice, sortByPriceDesc, clampLimit(limit));
+        log.debug("findForChat matched {} listing(s)", results.size());
         Map<UUID, ListingGeoProjection> geoById = fetchGeoSafely(idsOf(results));
         return results.stream().map(l -> toDto(l, geoById)).toList();
     }
@@ -155,6 +159,7 @@ public class ListingService {
     public List<PriceDropResult> findPriceDropListings(String city, double minDropPercent) {
         List<UUID> ids = listingRepository.findListingIdsWithPriceDrop(city, minDropPercent)
                 .stream().map(UUID::fromString).toList();
+        log.debug("findPriceDropListings: city={}, minDropPercent={}, candidateCount={}", city, minDropPercent, ids.size());
         return listingRepository.findByIdIn(ids).stream()
                 .map(listing -> {
                     List<PriceHistoryEntryDto> history = priceHistoryRepository
@@ -189,11 +194,13 @@ public class ListingService {
     }
 
     public void refreshAllPriceHistory() {
+        log.info("Refreshing price history for all listings");
         priceHistoryService.refreshAll();
     }
 
     @Transactional
     public void deleteAllDeleted() {
+        log.info("Deleting all listings marked as deleted");
         listingRepository.deleteAllByDeletedAtIsNotNull();
     }
 

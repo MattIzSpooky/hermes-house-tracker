@@ -1,11 +1,13 @@
 package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
+@Slf4j
 class TriggerResearchTool extends TaskTool {
 
     protected TriggerResearchTool(UUID userId, AgentTaskService agentTaskService, String email) {
@@ -19,10 +21,13 @@ class TriggerResearchTool extends TaskTool {
     public String triggerResearch(
         @ToolParam(description = "The research question or task to investigate in detail") String prompt
     ) {
+        log.info("triggerResearch called: userId={}, promptLength={}", userId, prompt != null ? prompt.length() : 0);
         if (!hasEmail()) {
+            log.warn("triggerResearch rejected for user {}: no email on file", userId);
             return "Please make sure your account has an email address before setting up notifications.";
         }
         agentTaskService.createResearch(userId, prompt);
+        log.info("Research task queued for user {}", userId);
         return "Research queued — results will appear as a notification shortly.";
     }
 }

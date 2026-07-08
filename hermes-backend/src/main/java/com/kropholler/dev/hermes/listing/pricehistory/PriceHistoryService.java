@@ -28,7 +28,9 @@ public class PriceHistoryService {
     private final JmsTemplate jmsTemplate;
 
     public void refreshAll() {
+        log.info("refreshAll: enqueueing price history fetches for all non-deleted listings");
         int page = 0;
+        int queued = 0;
         Page<ListingEntity> batch;
         do {
             batch = listingRepository.findAllByDeletedAtIsNull(PageRequest.of(page, 100));
@@ -36,6 +38,7 @@ public class PriceHistoryService {
                 try {
                     jmsTemplate.convertAndSend(JmsQueues.PRICE_HISTORY_FETCH,
                         new FetchPriceHistoryCommand(listing.getId(), listing.getFundaId()));
+                    queued++;
                 } catch (Exception e) {
                     log.warn("Failed to enqueue price history fetch for listing {}: {}",
                         listing.getId(), e.getMessage());
@@ -43,6 +46,7 @@ public class PriceHistoryService {
             }
             page++;
         } while (batch.hasNext());
+        log.info("refreshAll: queued {} price history fetch(es)", queued);
     }
 
     // @Transactional begins a logical transaction but Hibernate 6 DELAYED_ACQUISITION_AND_HOLD
@@ -50,7 +54,9 @@ public class PriceHistoryService {
     // is held during the proxyFacade HTTP call below.
     @Transactional
     public void fetchAndStore(UUID listingId, String fundaId) {
+        log.debug("fetchAndStore called: listingId={}, fundaId={}", listingId, fundaId);
         List<RawPriceChange> changes = fundaClient.getPriceHistory(fundaId);
+        int saved = 0;
         for (RawPriceChange change : changes) {
             if (change.timestamp() == null) continue;
             if (priceHistoryRepository.existsByListingIdAndTimestamp(listingId, change.timestamp())) {
@@ -64,6 +70,8 @@ public class PriceHistoryService {
             entry.setDate(change.date());
             entry.setTimestamp(change.timestamp());
             priceHistoryRepository.save(entry);
+            saved++;
         }
+        log.debug("fetchAndStore saved {} of {} price change(s) for listing {}", saved, changes.size(), listingId);
     }
 }

@@ -3,11 +3,13 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.UUID;
 
+@Slf4j
 class SaveWatchTool extends TaskTool {
 
     protected SaveWatchTool(UUID userId, AgentTaskService agentTaskService, String email) {
@@ -30,7 +32,10 @@ class SaveWatchTool extends TaskTool {
         @ToolParam(required = false, description = "City to search near") String nearCity,
         @ToolParam(required = false, description = "Radius in km when nearCity is set") Integer radiusKm
     ) {
+        log.info("saveWatch called: userId={}, city={}, province={}, minPrice={}, maxPrice={}, minBedrooms={}, nearCity={}, radiusKm={}",
+            userId, city, province, minPrice, maxPrice, minBedrooms, nearCity, radiusKm);
         if (!hasEmail()) {
+            log.warn("saveWatch rejected for user {}: no email on file", userId);
             return "Please make sure your account has an email address before setting up notifications.";
         }
         String watchName = (name != null && !name.isBlank()) ? name : buildName(city, minBedrooms, maxPrice);
@@ -40,6 +45,7 @@ class SaveWatchTool extends TaskTool {
             blankToNull(nearCity), radiusKm
         );
         agentTaskService.createWatch(userId, watchName, payload);
+        log.info("Watch '{}' saved for user {}", watchName, userId);
         return "Watch '" + watchName + "' saved — I'll alert you daily when matching listings appear.";
     }
 

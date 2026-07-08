@@ -84,6 +84,7 @@ public class AiChatService {
         msg.setRole("USER");
         msg.setContent(content);
         chatMessageRepository.save(msg);
+        log.debug("Saved USER message for session={}, userId={}, length={}", sessionId, userId, content.length());
     }
 
     @Transactional
@@ -97,6 +98,7 @@ public class AiChatService {
         msg.setRole("ASSISTANT");
         msg.setContent(content);
         chatMessageRepository.save(msg);
+        log.debug("Saved ASSISTANT message for session={}, userId={}, length={}", sessionId, userId, content.length());
     }
 
     /**
@@ -108,8 +110,11 @@ public class AiChatService {
         Objects.requireNonNull(sessionId, "sessionId must not be null");
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(userMessage, "userMessage must not be null");
+        log.info("startStream called: session={}, userId={}, messageLength={}", sessionId, userId, userMessage.length());
         List<ChatMessageEntity> allMessages = chatMessageRepository.findBySessionIdAndUserIdOrderByCreatedAtAsc(sessionId, userId);
         int fromIndex = Math.max(0, allMessages.size() - 20);
+        log.debug("startStream loaded {} history message(s) for session={}, using last {}",
+                allMessages.size(), sessionId, allMessages.size() - fromIndex);
         List<Message> history = allMessages.subList(fromIndex, allMessages.size())
                 .stream()
                 .map(m -> switch (m.getRole()) {

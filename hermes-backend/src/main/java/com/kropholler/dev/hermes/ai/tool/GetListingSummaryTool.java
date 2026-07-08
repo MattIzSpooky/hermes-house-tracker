@@ -36,11 +36,18 @@ public class GetListingSummaryTool {
                 params.street(), params.houseNumber(), params.city());
         callCounter.increment();
         return listingService.findByAddress(params.street(), params.houseNumber(), params.city())
-                .map(dto -> listingSummaryService.findByListingId(dto.id())
+                .map(dto -> {
+                    log.debug("getListingSummary resolved listing {} for address", dto.id());
+                    return listingSummaryService.findByListingId(dto.id())
                         .map(ListingSummaryDto::summary)
                         .orElseGet(() -> dto.description() != null && !dto.description().isBlank()
                                 ? dto.description()
-                                : "No description is available for this property yet."))
-                .orElse("Property not found at this address. Call searchListings to locate the property first.");
+                                : "No description is available for this property yet.");
+                })
+                .orElseGet(() -> {
+                    log.warn("getListingSummary found no listing for street={}, houseNumber={}, city={}",
+                            params.street(), params.houseNumber(), params.city());
+                    return "Property not found at this address. Call searchListings to locate the property first.";
+                });
     }
 }

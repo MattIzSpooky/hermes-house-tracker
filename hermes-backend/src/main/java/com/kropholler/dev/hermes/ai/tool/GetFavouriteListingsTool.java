@@ -45,6 +45,7 @@ public class GetFavouriteListingsTool {
         callCounter.increment();
 
         List<FavoriteDto> favourites = favoriteService.findByUserId(userId);
+        log.debug("getFavouriteListings found {} favourite(s) for user {}", favourites.size(), userId);
         if (favourites.isEmpty()) {
             return "You have no saved listings yet. You can save a listing by clicking the heart icon on its detail page.";
         }
@@ -55,6 +56,7 @@ public class GetFavouriteListingsTool {
                 .map(opt -> mapper.toChatListingCard(opt.get()))
                 .toList();
         resultHolder.set(cards);
+        log.info("getFavouriteListings returned {} listing(s) for user {}", cards.size(), userId);
 
         if (cards.isEmpty()) {
             return "Your saved listings could not be found — they may have been removed.";

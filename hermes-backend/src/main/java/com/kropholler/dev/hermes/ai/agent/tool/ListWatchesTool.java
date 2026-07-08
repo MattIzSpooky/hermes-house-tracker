@@ -2,12 +2,14 @@ package com.kropholler.dev.hermes.ai.agent.tool;
 
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskDto;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 class ListWatchesTool extends TaskTool {
 
     protected ListWatchesTool(UUID userId, AgentTaskService agentTaskService, String email) {
@@ -20,12 +22,15 @@ class ListWatchesTool extends TaskTool {
     public String listWatches(
         @ToolParam(required = false, description = "ID of the watch to cancel. Omit to just list watches.") UUID cancelId
     ) {
+        log.info("listWatches called: userId={}, cancelId={}", userId, cancelId);
         if (cancelId != null) {
             agentTaskService.delete(cancelId, userId);
+            log.info("Watch {} cancelled for user {}", cancelId, userId);
             return "Watch " + cancelId + " cancelled.";
         }
 
         List<AgentTaskDto> tasks = agentTaskService.findByUserId(userId);
+        log.debug("listWatches found {} watch(es) for user {}", tasks.size(), userId);
         if (tasks.isEmpty()) {
             return "You have no active watches. Ask me to set one up — for example: 'Alert me when a 3-bed house in Utrecht appears under €400,000.'";
         }

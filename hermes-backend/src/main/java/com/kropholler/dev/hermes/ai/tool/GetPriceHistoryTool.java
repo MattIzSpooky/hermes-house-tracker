@@ -32,6 +32,7 @@ public class GetPriceHistoryTool {
                             .stream()
                             .filter(e -> "asking_price".equals(e.status()))
                             .toList();
+                    log.debug("getPriceHistory found {} price entries for listing {}", history.size(), dto.id());
                     if (history.isEmpty()) return "No price history found for this property.";
                     StringBuilder sb = new StringBuilder("Price history for ")
                             .append(dto.street()).append(" ").append(dto.houseNumber())
@@ -43,6 +44,10 @@ public class GetPriceHistoryTool {
                     }
                     return sb.toString();
                 })
-                .orElse("Property not found. Call searchListings to locate the property first.");
+                .orElseGet(() -> {
+                    log.warn("getPriceHistory found no listing for street={}, houseNumber={}, city={}",
+                            params.street(), params.houseNumber(), params.city());
+                    return "Property not found. Call searchListings to locate the property first.";
+                });
     }
 }

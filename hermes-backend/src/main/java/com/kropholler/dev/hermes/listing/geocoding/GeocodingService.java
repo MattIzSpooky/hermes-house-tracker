@@ -21,9 +21,13 @@ public class GeocodingService {
     @Transactional
     public Optional<CityEntity> findOrFetchCity(String cityName) {
         Optional<CityEntity> cached = cityRepository.findByNameIgnoreCase(cityName);
-        if (cached.isPresent()) return cached;
+        if (cached.isPresent()) {
+            log.debug("findOrFetchCity cache hit for '{}'", cityName);
+            return cached;
+        }
 
-        return nominatimClient.geocodeCity(cityName).map(response -> {
+        log.info("findOrFetchCity cache miss for '{}', fetching from Nominatim", cityName);
+        Optional<CityEntity> fetched = nominatimClient.geocodeCity(cityName).map(response -> {
             CityEntity city = new CityEntity();
             city.setName(cityName);
             city.setLongitude(Double.parseDouble(response.lon()));
@@ -31,11 +35,20 @@ public class GeocodingService {
             city.setFetchedAt(Instant.now());
             return cityRepository.save(city);
         });
+        if (fetched.isEmpty()) {
+            log.warn("findOrFetchCity: Nominatim returned no result for '{}'", cityName);
+        }
+        return fetched;
     }
 
     public Optional<GeocodeResult> geocodeAddress(String houseNumber, String street, String city) {
-        return nominatimClient.geocodeAddress(houseNumber, street, city)
+        log.debug("geocodeAddress called: houseNumber={}, street={}, city={}", houseNumber, street, city);
+        Optional<GeocodeResult> result = nominatimClient.geocodeAddress(houseNumber, street, city)
             .map(r -> new GeocodeResult(Double.parseDouble(r.lon()), Double.parseDouble(r.lat()), r.boundingbox()));
+        if (result.isEmpty()) {
+            log.warn("geocodeAddress: no result for houseNumber={}, street={}, city={}", houseNumber, street, city);
+        }
+        return result;
     }
 
     @Transactional

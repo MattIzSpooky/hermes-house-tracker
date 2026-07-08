@@ -52,6 +52,8 @@ public class CompareListingsTool {
         }
 
         resultHolder.set(found.stream().map(mapper::toChatListingCard).toList());
+        log.info("compareListings resolved {} of {} addresses ({} not found)",
+                found.size(), params.addresses().size(), notFound.size());
 
         if (found.isEmpty()) return "None of the requested properties were found in the database.";
 

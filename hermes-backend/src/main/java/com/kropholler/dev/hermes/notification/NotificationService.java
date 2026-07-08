@@ -27,6 +27,7 @@ public class NotificationService {
 
     @Transactional
     public NotificationDto save(UUID taskId, UUID userId, NotificationContent content) {
+        log.info("Saving notification for task={}, user={}, title='{}'", taskId, userId, content.title());
         NotificationEntity notification = new NotificationEntity();
         notification.setTaskId(taskId);
         notification.setUserId(userId);
@@ -38,6 +39,7 @@ public class NotificationService {
         NotificationDto dto = toDto(saved, content.listingIds());
         messaging.convertAndSendToUser(userId.toString(), "/queue/notifications", dto);
         emailSender.sendAsync(dto);
+        log.debug("Notification {} saved and dispatched (ws + email) for user {}", saved.getId(), userId);
         return dto;
     }
 
@@ -62,12 +64,14 @@ public class NotificationService {
         }
         notification.setRead(true);
         notificationRepository.save(notification);
+        log.debug("Notification {} marked read by user {}", notificationId, userId);
     }
 
     private String serializeIds(List<UUID> ids) {
         try {
             return objectMapper.writeValueAsString(ids);
         } catch (JacksonException e) {
+            log.warn("Failed to serialize listing ids {}: {}", ids, e.getMessage());
             return "[]";
         }
     }
@@ -77,6 +81,7 @@ public class NotificationService {
         try {
             return objectMapper.readValue(json, new TypeReference<List<UUID>>() {});
         } catch (JacksonException e) {
+            log.warn("Failed to deserialize listing ids from '{}': {}", json, e.getMessage());
             return List.of();
         }
     }

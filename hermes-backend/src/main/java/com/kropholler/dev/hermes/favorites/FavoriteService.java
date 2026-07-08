@@ -1,12 +1,14 @@
 package com.kropholler.dev.hermes.favorites;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FavoriteService {
@@ -15,9 +17,11 @@ public class FavoriteService {
 
     @Transactional(readOnly = true)
     public List<FavoriteDto> findByUserId(UUID userId) {
-        return repository.findByUserId(userId).stream()
+        List<FavoriteDto> favorites = repository.findByUserId(userId).stream()
                 .map(f -> new FavoriteDto(f.getListingId(), f.getSavedAt()))
                 .toList();
+        log.debug("findByUserId returned {} favorite(s) for user {}", favorites.size(), userId);
+        return favorites;
     }
 
     @Transactional
@@ -27,12 +31,16 @@ public class FavoriteService {
             f.setUserId(userId);
             f.setListingId(listingId);
             repository.save(f);
+            log.info("Added favorite: user={}, listing={}", userId, listingId);
+        } else {
+            log.debug("addFavorite skipped, already favorited: user={}, listing={}", userId, listingId);
         }
     }
 
     @Transactional
     public void removeFavorite(UUID userId, UUID listingId) {
         repository.deleteByUserIdAndListingId(userId, listingId);
+        log.info("Removed favorite: user={}, listing={}", userId, listingId);
     }
 
     @Transactional(readOnly = true)

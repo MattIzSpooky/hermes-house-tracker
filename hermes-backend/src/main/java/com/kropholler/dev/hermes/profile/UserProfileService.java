@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.profile;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserProfileService {
@@ -29,9 +31,13 @@ public class UserProfileService {
     @Transactional
     public AddressDto updateAddress(UUID userId, String street, String houseNumber,
             String houseNumberAddition, String zipCode, String city, String province) {
+        log.info("updateAddress called: userId={}, street={}, houseNumber={}, city={}", userId, street, houseNumber, city);
         GeocodeResult geocodeResult = geocodingService.geocodeAddress(houseNumber, street, city)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                "Address could not be geocoded"));
+            .orElseThrow(() -> {
+                log.warn("updateAddress: geocoding failed for userId={}, street={}, houseNumber={}, city={}", userId, street, houseNumber, city);
+                return new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Address could not be geocoded");
+            });
 
         UserProfileEntity entity = repository.findById(userId).orElseGet(() -> {
             UserProfileEntity e = new UserProfileEntity();
@@ -48,7 +54,9 @@ public class UserProfileService {
         entity.setLongitude(geocodeResult.lon());
         entity.setUpdatedAt(Instant.now());
 
-        return toDto(repository.save(entity));
+        AddressDto dto = toDto(repository.save(entity));
+        log.info("Address updated for user {}", userId);
+        return dto;
     }
 
     @Transactional
@@ -62,9 +70,11 @@ public class UserProfileService {
             entity.setUpdatedAt(Instant.now());
             try {
                 repository.save(entity);
+                log.debug("syncEmail created new profile row for user {}", userId);
             } catch (DataIntegrityViolationException e) {
                 // Lost a race with a concurrent syncEmail call for the same new user — the row
                 // now exists, so retry as an update instead of failing the request.
+                log.debug("syncEmail lost race creating profile for user {}, retrying as update", userId);
                 repository.updateEmail(userId, email);
             }
         }
