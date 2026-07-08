@@ -50,6 +50,18 @@ class AgentTaskExecutorTest {
     }
 
     @Test
+    void executeAsync_delegatesToExecute() {
+        AgentTaskEntity task = task(AgentTaskType.WATCH);
+        NotificationContent content = new NotificationContent("title", "body", List.of());
+        when(watchHandler.handle(task)).thenReturn(Optional.of(content));
+
+        executor.executeAsync(task);
+
+        verify(notificationService).save(task.getId(), task.getUserId(), content);
+        verify(agentTaskService).markRan(task);
+    }
+
+    @Test
     void doesNotSaveNotificationWhenHandlerReturnsEmpty() {
         AgentTaskEntity task = task(AgentTaskType.WATCH);
         when(watchHandler.handle(task)).thenReturn(Optional.empty());

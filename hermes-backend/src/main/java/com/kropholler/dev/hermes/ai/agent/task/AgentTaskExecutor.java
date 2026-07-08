@@ -3,6 +3,7 @@ package com.kropholler.dev.hermes.ai.agent.task;
 import com.kropholler.dev.hermes.notification.NotificationService;
 import com.kropholler.dev.hermes.ai.agent.task.handler.AgentTaskHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -43,5 +44,10 @@ class AgentTaskExecutor {
         } finally {
             agentTaskService.markRan(task);
         }
+    }
+
+    @Async
+    public void executeAsync(AgentTaskEntity task) {
+        execute(task);
     }
 }
