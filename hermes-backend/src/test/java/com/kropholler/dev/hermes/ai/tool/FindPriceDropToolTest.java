@@ -2,7 +2,6 @@ package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
-import com.kropholler.dev.hermes.ai.tool.json.PriceDropParams;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -48,7 +47,7 @@ class FindPriceDropToolTest {
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        String result = tool(holder).execute(new PriceDropParams("Utrecht", 5.0));
+        String result = tool(holder).execute("Utrecht", 5.0);
 
         assertThat(holder.get()).hasSize(1);
         assertThat(result).contains("1 listing(s) with price drops");
@@ -60,7 +59,7 @@ class FindPriceDropToolTest {
         when(listingService.findPriceDropListings(null, 1.0)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        String result = tool(holder).execute(new PriceDropParams(null, null));
+        String result = tool(holder).execute(null, null);
 
         assertThat(result).contains("No listings found");
         assertThat(holder.get()).isEmpty();
@@ -71,7 +70,7 @@ class FindPriceDropToolTest {
         when(listingService.findPriceDropListings(null, 1.0)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        tool(holder).execute(new PriceDropParams(null, null));
+        tool(holder).execute(null, null);
     }
 
     @Test
@@ -79,7 +78,7 @@ class FindPriceDropToolTest {
         when(listingService.findPriceDropListings(null, 1.0)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        tool(holder).execute(new PriceDropParams("  ", null));
+        tool(holder).execute("  ", null);
     }
 
     @Test
@@ -88,7 +87,7 @@ class FindPriceDropToolTest {
         when(listingService.findPriceDropListings("Amsterdam", 1.0)).thenReturn(List.of());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        String result = tool(holder).execute(new PriceDropParams("Amsterdam", null));
+        String result = tool(holder).execute("Amsterdam", null);
 
         assertThat(result).contains("No listings found");
         assertThat(result).contains("in Amsterdam");
@@ -108,7 +107,7 @@ class FindPriceDropToolTest {
         when(mapper.toChatListingCard(withAddition)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        String result = tool(holder).execute(new PriceDropParams(null, null));
+        String result = tool(holder).execute(null, null);
 
         assertThat(result).contains("Straat 1B");
     }

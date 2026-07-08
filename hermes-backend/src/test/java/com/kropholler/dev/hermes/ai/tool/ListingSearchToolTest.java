@@ -2,7 +2,6 @@ package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
-import com.kropholler.dev.hermes.ai.tool.json.ListingSearchToolParams;
 import com.kropholler.dev.hermes.listing.ListingChatSearchCriteria;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
@@ -44,13 +43,6 @@ class ListingSearchToolTest {
                 3, "A", null, null);
     }
 
-    private static ListingSearchToolParams params(String city, String province, Integer minPrice, Integer maxPrice,
-            Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String keywords, String priceSort,
-            String nearAddress, String nearCity, Integer radiusKm, Integer limit) {
-        return new ListingSearchToolParams(city, province, minPrice, maxPrice, minBedrooms, minRooms,
-                minLivingAreaM2, keywords, priceSort, nearAddress, nearCity, radiusKm, limit);
-    }
-
     @Test
     void searchListings_returnsCardsAndPopulatesHolder() {
         UUID id = UUID.randomUUID();
@@ -67,7 +59,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params("Amsterdam", null, null, 500000, 3, null, null, null, "asc", null, null, null, null));
+                "Amsterdam", null, null, 500000, 3, null, null, null, "asc", null, null, null, null);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).id()).isEqualTo(id);
@@ -90,7 +82,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params(null, null, null, null, null, null, null, null, "desc", null, null, null, null));
+                null, null, null, null, null, null, null, null, "desc", null, null, null, null);
 
         assertThat(result).hasSize(1);
     }
@@ -104,7 +96,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params(null, null, null, null, null, null, null, null, null, null, null, null, null));
+                null, null, null, null, null, null, null, null, null, null, null, null, null);
 
         assertThat(result).isEmpty();
     }
@@ -118,7 +110,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params(null, null, null, null, null, null, null, "south-facing garden", null, null, null, null, null));
+                null, null, null, null, null, null, null, "south-facing garden", null, null, null, null, null);
 
         assertThat(result).isEmpty();
         assertThat(holder.get()).isEmpty();
@@ -134,7 +126,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         assertThatThrownBy(() -> tool.searchListings(
-                params(null, null, null, null, null, null, null, null, null, null, null, null, null)))
+                null, null, null, null, null, null, null, null, null, null, null, null, null))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB error");
         assertThat(holder.get()).isEmpty();
@@ -150,7 +142,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params("  ", "  ", null, null, null, null, null, "  ", null, "  ", "  ", null, null));
+                "  ", "  ", null, null, null, null, null, "  ", null, "  ", "  ", null, null);
 
         assertThat(result).isEmpty();
     }
@@ -168,7 +160,7 @@ class ListingSearchToolTest {
         ListingSearchTool tool = new ListingSearchTool(listingService, mapper, holder, new SimpleMeterRegistry());
 
         List<ChatListingCard> result = tool.searchListings(
-                params(null, null, null, null, null, null, null, null, null, null, null, null, 10));
+                null, null, null, null, null, null, null, null, null, null, null, null, 10);
 
         assertThat(result).hasSize(1);
         verify(listingService).findForChat(ListingChatSearchCriteria.builder().limit(10).build());

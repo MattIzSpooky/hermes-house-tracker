@@ -3,13 +3,13 @@ package com.kropholler.dev.hermes.ai.tool;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.ai.tool.json.AddressEntry;
-import com.kropholler.dev.hermes.ai.tool.json.AddressList;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,13 +36,14 @@ public class CompareListingsTool {
     @Tool(description = "Compare two or more specific properties side by side. "
             + "Call this when the user wants to compare listings they have already discussed or searched for. "
             + "Provide the address of each property to compare.")
-    public String compareListings(AddressList params) {
-        log.info("compareListings called for {} addresses", params.addresses().size());
+    public String compareListings(
+            @ToolParam(description = "List of properties to compare, each with street, houseNumber, and city") List<AddressEntry> addresses) {
+        log.info("compareListings called for {} addresses", addresses.size());
         callCounter.increment();
 
         List<ListingDto> found = new ArrayList<>();
         List<String> notFound = new ArrayList<>();
-        for (AddressEntry a : params.addresses()) {
+        for (AddressEntry a : addresses) {
             Optional<ListingDto> dto = listingService.findByAddress(a.street(), a.houseNumber(), a.city());
             if (dto.isPresent()) {
                 found.add(dto.get());
@@ -53,7 +54,7 @@ public class CompareListingsTool {
 
         resultHolder.set(found.stream().map(mapper::toChatListingCard).toList());
         log.info("compareListings resolved {} of {} addresses ({} not found)",
-                found.size(), params.addresses().size(), notFound.size());
+                found.size(), addresses.size(), notFound.size());
 
         if (found.isEmpty()) return "None of the requested properties were found in the database.";
 

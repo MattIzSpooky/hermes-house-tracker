@@ -1,6 +1,5 @@
 package com.kropholler.dev.hermes.ai.tool;
 
-import com.kropholler.dev.hermes.ai.tool.json.AddressParams;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -46,7 +45,7 @@ class GetPriceHistoryToolTest {
         when(listingService.findByAddress("Dorpstraat", "10", "Utrecht")).thenReturn(Optional.of(dto(id)));
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of(priceEntry(300000), priceEntry(280000)));
 
-        String result = tool().getPriceHistory(new AddressParams("Dorpstraat", "10", "Utrecht"));
+        String result = tool().getPriceHistory("Dorpstraat", "10", "Utrecht");
 
         assertThat(result).contains("Price history for Dorpstraat 10");
         assertThat(result).contains("300.000");
@@ -62,7 +61,7 @@ class GetPriceHistoryToolTest {
         when(listingService.findByAddress("Dorpstraat", "10", "Utrecht")).thenReturn(Optional.of(dto(id)));
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of(nonAsking));
 
-        String result = tool().getPriceHistory(new AddressParams("Dorpstraat", "10", "Utrecht"));
+        String result = tool().getPriceHistory("Dorpstraat", "10", "Utrecht");
 
         assertThat(result).contains("No price history found");
     }
@@ -71,7 +70,7 @@ class GetPriceHistoryToolTest {
     void getPriceHistory_propertyNotFound_returnsNotFoundMessage() {
         when(listingService.findByAddress("Unknown", "1", "Nowhere")).thenReturn(Optional.empty());
 
-        String result = tool().getPriceHistory(new AddressParams("Unknown", "1", "Nowhere"));
+        String result = tool().getPriceHistory("Unknown", "1", "Nowhere");
 
         assertThat(result).contains("Property not found");
     }

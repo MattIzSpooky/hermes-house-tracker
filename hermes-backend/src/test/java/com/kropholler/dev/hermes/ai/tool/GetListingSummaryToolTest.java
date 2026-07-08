@@ -1,6 +1,5 @@
 package com.kropholler.dev.hermes.ai.tool;
 
-import com.kropholler.dev.hermes.ai.tool.json.AddressParams;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -42,7 +41,7 @@ class GetListingSummaryToolTest {
         when(listingSummaryService.findByListingId(id))
             .thenReturn(Optional.of(new ListingSummaryDto(id, "AI-generated summary.", Instant.now())));
 
-        String result = tool().getListingSummary(new AddressParams("Hoofdstraat", "7", "Tilburg"));
+        String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
         assertThat(result).isEqualTo("AI-generated summary.");
     }
@@ -54,7 +53,7 @@ class GetListingSummaryToolTest {
             .thenReturn(Optional.of(dto(id, "Original listing description.")));
         when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
 
-        String result = tool().getListingSummary(new AddressParams("Hoofdstraat", "7", "Tilburg"));
+        String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
         assertThat(result).isEqualTo("Original listing description.");
     }
@@ -66,7 +65,7 @@ class GetListingSummaryToolTest {
             .thenReturn(Optional.of(dto(id, null)));
         when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
 
-        String result = tool().getListingSummary(new AddressParams("Hoofdstraat", "7", "Tilburg"));
+        String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
         assertThat(result).contains("No description is available");
     }
@@ -75,7 +74,7 @@ class GetListingSummaryToolTest {
     void getListingSummary_propertyNotFound_returnsNotFoundMessage() {
         when(listingService.findByAddress("Unknown", "1", "Nowhere")).thenReturn(Optional.empty());
 
-        String result = tool().getListingSummary(new AddressParams("Unknown", "1", "Nowhere"));
+        String result = tool().getListingSummary("Unknown", "1", "Nowhere");
 
         assertThat(result).contains("Property not found");
     }
@@ -88,7 +87,7 @@ class GetListingSummaryToolTest {
             .thenReturn(Optional.of(dto(id, "   ")));
         when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
 
-        String result = tool().getListingSummary(new AddressParams("Hoofdstraat", "7", "Tilburg"));
+        String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
         assertThat(result).contains("No description is available");
     }

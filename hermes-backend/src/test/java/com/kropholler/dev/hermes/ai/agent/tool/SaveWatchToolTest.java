@@ -5,7 +5,6 @@ import com.kropholler.dev.hermes.ai.agent.task.AgentTaskService;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskStatus;
 import com.kropholler.dev.hermes.ai.agent.task.AgentTaskType;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
-import com.kropholler.dev.hermes.ai.agent.tool.json.SaveWatchToolParams;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,13 +22,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SaveWatchToolTest {
 
-    private static SaveWatchToolParams params(String name, String city, String province, Integer minPrice,
-            Integer maxPrice, Integer minBedrooms, Integer minRooms, Integer minLivingAreaM2, String keywords,
-            String nearCity, Integer radiusKm) {
-        return new SaveWatchToolParams(name, city, province, minPrice, maxPrice, minBedrooms, minRooms,
-                minLivingAreaM2, keywords, nearCity, radiusKm);
-    }
-
     @Test
     void createsWatchWithExtractedCriteria() {
         AgentTaskService agentTaskService = mock(AgentTaskService.class);
@@ -39,7 +31,7 @@ class SaveWatchToolTest {
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(dto);
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
-        String result = tool.saveWatch(params("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null));
+        String result = tool.saveWatch("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null);
 
         ArgumentCaptor<WatchPayload> cap = ArgumentCaptor.forClass(WatchPayload.class);
         verify(agentTaskService).createWatch(eq(clientId), eq("Utrecht 3-bed"), cap.capture());
@@ -56,7 +48,7 @@ class SaveWatchToolTest {
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
-        String result = tool.saveWatch(params(null, "Amsterdam", null, null, 300000, 3, null, null, null, null, null));
+        String result = tool.saveWatch(null, "Amsterdam", null, null, 300000, 3, null, null, null, null, null);
 
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
         verify(agentTaskService).createWatch(eq(clientId), nameCaptor.capture(), any());
@@ -72,7 +64,7 @@ class SaveWatchToolTest {
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
-        String result = tool.saveWatch(params("  ", null, null, null, null, null, null, null, null, null, null));
+        String result = tool.saveWatch("  ", null, null, null, null, null, null, null, null, null, null);
 
         ArgumentCaptor<String> nameCaptor = ArgumentCaptor.forClass(String.class);
         verify(agentTaskService).createWatch(eq(clientId), nameCaptor.capture(), any());
@@ -88,7 +80,7 @@ class SaveWatchToolTest {
         when(agentTaskService.createWatch(any(), anyString(), any())).thenReturn(null);
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, "user@hermes.local");
-        tool.saveWatch(params("My watch", "  ", "  ", null, null, null, null, null, "  ", "  ", null));
+        tool.saveWatch("My watch", "  ", "  ", null, null, null, null, null, "  ", "  ", null);
 
         ArgumentCaptor<WatchPayload> cap = ArgumentCaptor.forClass(WatchPayload.class);
         verify(agentTaskService).createWatch(eq(clientId), eq("My watch"), cap.capture());
@@ -102,7 +94,7 @@ class SaveWatchToolTest {
         UUID clientId = UUID.randomUUID();
 
         SaveWatchTool tool = new SaveWatchTool(clientId, agentTaskService, null);
-        String result = tool.saveWatch(params("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null));
+        String result = tool.saveWatch("Utrecht 3-bed", "Utrecht", null, null, 400000, 3, null, null, null, null, null);
 
         assertThat(result).contains("email address");
         verify(agentTaskService, never()).createWatch(any(), anyString(), any());

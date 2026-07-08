@@ -3,7 +3,6 @@ package com.kropholler.dev.hermes.ai.tool;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
 import com.kropholler.dev.hermes.ai.tool.json.AddressEntry;
-import com.kropholler.dev.hermes.ai.tool.json.AddressList;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -53,12 +52,12 @@ class CompareListingsToolTest {
         when(mapper.toChatListingCard(dto2)).thenReturn(card2);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        AddressList params = new AddressList(List.of(
+        List<AddressEntry> addresses = List.of(
             new AddressEntry("Dorpstraat", "1", "Amsterdam"),
             new AddressEntry("Kerkstraat", "1", "Amsterdam")
-        ));
+        );
 
-        String result = tool(holder).compareListings(params);
+        String result = tool(holder).compareListings(addresses);
 
         assertThat(holder.get()).hasSize(2);
         assertThat(result).contains("Comparison of 2 properties");
@@ -71,9 +70,9 @@ class CompareListingsToolTest {
         when(listingService.findByAddress("Unknown", "1", "X")).thenReturn(Optional.empty());
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        AddressList params = new AddressList(List.of(new AddressEntry("Unknown", "1", "X")));
+        List<AddressEntry> addresses = List.of(new AddressEntry("Unknown", "1", "X"));
 
-        String result = tool(holder).compareListings(params);
+        String result = tool(holder).compareListings(addresses);
 
         assertThat(result).contains("None of the requested properties were found in the database");
     }
@@ -89,12 +88,12 @@ class CompareListingsToolTest {
         when(mapper.toChatListingCard(dto)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        AddressList params = new AddressList(List.of(
+        List<AddressEntry> addresses = List.of(
             new AddressEntry("Dorpstraat", "1", "Amsterdam"),
             new AddressEntry("Missing", "99", "Utrecht")
-        ));
+        );
 
-        String result = tool(holder).compareListings(params);
+        String result = tool(holder).compareListings(addresses);
 
         assertThat(result).contains("Not found");
         assertThat(result).contains("Missing 99");
@@ -115,9 +114,9 @@ class CompareListingsToolTest {
         when(mapper.toChatListingCard(sparse)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
-        AddressList params = new AddressList(List.of(new AddressEntry("Sparsestraat", "3", "Utrecht")));
+        List<AddressEntry> addresses = List.of(new AddressEntry("Sparsestraat", "3", "Utrecht"));
 
-        String result = tool(holder).compareListings(params);
+        String result = tool(holder).compareListings(addresses);
 
         assertThat(result).contains("Sparsestraat 3A");
         assertThat(result).contains("50 m²");
