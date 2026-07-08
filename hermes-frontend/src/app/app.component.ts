@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import Keycloak from 'keycloak-js';
 import { ChatBubbleComponent } from './shared/chat-bubble.component';
 import { NotificationBellComponent } from './shared/notification-bell.component';
+import { isAdminUser } from './core/is-admin';
 
 @Component({
   selector: 'app-root',
@@ -19,8 +20,7 @@ export class AppComponent {
   }
 
   get isAdmin(): boolean {
-    const roles = this.keycloak.tokenParsed?.['realm_access'] as { roles?: string[] } | undefined;
-    return roles?.roles?.includes('admin') ?? false;
+    return isAdminUser(this.keycloak);
   }
 
   logout(): void {
