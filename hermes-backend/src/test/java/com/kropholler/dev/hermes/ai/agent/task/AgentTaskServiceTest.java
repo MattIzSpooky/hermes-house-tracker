@@ -191,6 +191,43 @@ class AgentTaskServiceTest {
     }
 
     @Test
+    void findOwned_ownerReturnsEntity() {
+        UUID userId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        AgentTaskEntity task = new AgentTaskEntity();
+        task.setUserId(userId);
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
+
+        AgentTaskEntity result = service.findOwned(taskId, userId);
+
+        assertThat(result).isSameAs(task);
+    }
+
+    @Test
+    void findOwned_throws404WhenNotFound() {
+        UUID userId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.empty());
+
+        assertThatThrownBy(() -> service.findOwned(taskId, userId))
+            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .hasMessageContaining("Agent task " + taskId + " not found");
+    }
+
+    @Test
+    void findOwned_throws403WhenNotOwnedByCaller() {
+        UUID ownerId = UUID.randomUUID();
+        UUID callerId = UUID.randomUUID();
+        UUID taskId = UUID.randomUUID();
+        AgentTaskEntity task = new AgentTaskEntity();
+        task.setUserId(ownerId);
+        when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
+
+        assertThatThrownBy(() -> service.findOwned(taskId, callerId))
+            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+    }
+
+    @Test
     void findDueTasks_delegatesToRepository() {
         when(repo.findAllByStatusAndNextRunAtLessThanEqual(eq(AgentTaskStatus.ACTIVE), any(Instant.class)))
             .thenReturn(List.of());

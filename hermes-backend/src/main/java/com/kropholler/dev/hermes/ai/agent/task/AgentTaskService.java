@@ -95,14 +95,20 @@ public class AgentTaskService {
 
     @Transactional
     public void delete(UUID taskId, UUID userId) {
+        AgentTaskEntity task = findOwned(taskId, userId);
+        agentTaskRepository.delete(task);
+        log.info("Deleted task {} for user {}", taskId, userId);
+    }
+
+    @Transactional(readOnly = true)
+    public AgentTaskEntity findOwned(UUID taskId, UUID userId) {
         AgentTaskEntity task = agentTaskRepository.findById(taskId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Agent task " + taskId + " not found"));
         if (!task.getUserId().equals(userId)) {
-            throw new AccessDeniedException("Not authorized to delete this agent task");
+            throw new AccessDeniedException("Not authorized to access this agent task");
         }
-        agentTaskRepository.delete(task);
-        log.info("Deleted task {} for user {}", taskId, userId);
+        return task;
     }
 
     @Transactional
