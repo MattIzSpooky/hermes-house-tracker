@@ -2,6 +2,7 @@ package com.kropholler.dev.hermes.listing;
 
 import com.kropholler.dev.hermes.listing.geocoding.ListingGeocodingBackfillService;
 import com.kropholler.dev.hermes.listing.openapi.*;
+import com.kropholler.dev.hermes.listing.summary.ListingSummaryDto;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.scraping.ScrapingQueueService;
 import com.kropholler.dev.hermes.scraping.ScrapingSessionDto;
@@ -12,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -49,38 +49,30 @@ public class ListingController implements ListingsApi {
 
     @Override
     public ResponseEntity<ListingDetailResponse> getListing(UUID id) {
-        return listingService.findById(id)
-            .map(dto -> ResponseEntity.ok(listingApiMapper.toDetailResponse(dto)))
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Listing " + id + " not found"));
+        ListingDto listing = listingService.findById(id);
+        return ResponseEntity.ok(listingApiMapper.toDetailResponse(listing));
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScrapingSessionResponse> rescrapeListing(UUID id) {
-        ListingDto listing = listingService.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Listing " + id + " not found"));
+        ListingDto listing = listingService.findById(id);
         ScrapingSessionDto session = queueService.enqueueRescrape(listing.url(), listing.city());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(rescrapeMapper.toResponse(session));
     }
 
     @Override
     public ResponseEntity<AiSummaryResponse> getListingSummary(UUID id) {
-        return summaryService.findByListingId(id)
-            .map(dto -> ResponseEntity.ok(new AiSummaryResponse()
-                .listingId(dto.listingId())
-                .summary(dto.summary())
-                .generatedAt(dto.generatedAt().atOffset(ZoneOffset.UTC))))
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "No summary available for listing " + id));
+        ListingSummaryDto summary = summaryService.findByListingId(id);
+        return ResponseEntity.ok(new AiSummaryResponse()
+            .listingId(summary.listingId())
+            .summary(summary.summary())
+            .generatedAt(summary.generatedAt().atOffset(ZoneOffset.UTC)));
     }
 
     @Override
     public ResponseEntity<Void> requestListingSummaryGeneration(UUID id) {
-        listingService.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Listing " + id + " not found"));
+        listingService.findById(id);
         summaryService.requestGeneration(id);
         return ResponseEntity.accepted().build();
     }

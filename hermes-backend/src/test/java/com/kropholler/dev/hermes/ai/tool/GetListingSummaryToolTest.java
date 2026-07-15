@@ -39,7 +39,7 @@ class GetListingSummaryToolTest {
         UUID id = UUID.randomUUID();
         when(listingService.findByAddress("Hoofdstraat", "7", "Tilburg")).thenReturn(Optional.of(dto(id, "raw desc")));
         when(listingSummaryService.findByListingId(id))
-            .thenReturn(Optional.of(new ListingSummaryDto(id, "AI-generated summary.", Instant.now())));
+            .thenReturn(new ListingSummaryDto(id, "AI-generated summary.", Instant.now()));
 
         String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
@@ -51,7 +51,8 @@ class GetListingSummaryToolTest {
         UUID id = UUID.randomUUID();
         when(listingService.findByAddress("Hoofdstraat", "7", "Tilburg"))
             .thenReturn(Optional.of(dto(id, "Original listing description.")));
-        when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
+        when(listingSummaryService.findByListingId(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("No summary available for listing " + id));
 
         String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
@@ -63,7 +64,8 @@ class GetListingSummaryToolTest {
         UUID id = UUID.randomUUID();
         when(listingService.findByAddress("Hoofdstraat", "7", "Tilburg"))
             .thenReturn(Optional.of(dto(id, null)));
-        when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
+        when(listingSummaryService.findByListingId(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("No summary available for listing " + id));
 
         String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 
@@ -85,7 +87,8 @@ class GetListingSummaryToolTest {
         UUID id = UUID.randomUUID();
         when(listingService.findByAddress("Hoofdstraat", "7", "Tilburg"))
             .thenReturn(Optional.of(dto(id, "   ")));
-        when(listingSummaryService.findByListingId(id)).thenReturn(Optional.empty());
+        when(listingSummaryService.findByListingId(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("No summary available for listing " + id));
 
         String result = tool().getListingSummary("Hoofdstraat", "7", "Tilburg");
 

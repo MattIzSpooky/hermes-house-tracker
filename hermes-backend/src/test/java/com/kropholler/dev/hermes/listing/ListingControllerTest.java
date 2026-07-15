@@ -19,7 +19,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -57,7 +56,7 @@ class ListingControllerTest {
         response.setId(id);
         response.setStreet("Dorpstraat");
 
-        when(listingService.findById(id)).thenReturn(Optional.of(dto));
+        when(listingService.findById(id)).thenReturn(dto);
         when(listingApiMapper.toDetailResponse(dto)).thenReturn(response);
 
         mockMvc.perform(get("/api/listings/{id}", id).with(jwt()))
@@ -69,7 +68,8 @@ class ListingControllerTest {
     @Test
     void getListing_returns404WhenNotFound() throws Exception {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.empty());
+        when(listingService.findById(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + id + " not found"));
 
         mockMvc.perform(get("/api/listings/{id}", id).with(jwt()))
             .andExpect(status().isNotFound());
@@ -87,7 +87,7 @@ class ListingControllerTest {
         sessionResponse.setId(sessionId);
         sessionResponse.setStatus(ScrapingSessionResponse.StatusEnum.PENDING);
 
-        when(listingService.findById(id)).thenReturn(Optional.of(dto));
+        when(listingService.findById(id)).thenReturn(dto);
         when(queueService.enqueueRescrape(any(), any())).thenReturn(sessionDto);
         when(rescrapeMapper.toResponse(sessionDto)).thenReturn(sessionResponse);
 
@@ -100,7 +100,8 @@ class ListingControllerTest {
     @Test
     void rescrapeListing_asAdmin_returns404WhenListingNotFound() throws Exception {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.empty());
+        when(listingService.findById(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + id + " not found"));
 
         mockMvc.perform(post("/api/listings/{id}/rescrape", id)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
@@ -122,7 +123,7 @@ class ListingControllerTest {
         Instant generatedAt = Instant.parse("2026-05-01T10:00:00Z");
         ListingSummaryDto summaryDto = new ListingSummaryDto(id, "A great house.", generatedAt);
 
-        when(summaryService.findByListingId(id)).thenReturn(Optional.of(summaryDto));
+        when(summaryService.findByListingId(id)).thenReturn(summaryDto);
 
         mockMvc.perform(get("/api/listings/{id}/summary", id).with(jwt()))
             .andExpect(status().isOk())
@@ -133,7 +134,8 @@ class ListingControllerTest {
     @Test
     void getListingSummary_returns404WhenNoSummary() throws Exception {
         UUID id = UUID.randomUUID();
-        when(summaryService.findByListingId(id)).thenReturn(Optional.empty());
+        when(summaryService.findByListingId(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("No summary available for listing " + id));
 
         mockMvc.perform(get("/api/listings/{id}/summary", id).with(jwt()))
             .andExpect(status().isNotFound());
@@ -142,7 +144,7 @@ class ListingControllerTest {
     @Test
     void requestListingSummaryGeneration_returns202WhenListingExists() throws Exception {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.of(minimalDto(id)));
+        when(listingService.findById(id)).thenReturn(minimalDto(id));
 
         mockMvc.perform(post("/api/listings/{id}/summary/generate", id).with(jwt()))
             .andExpect(status().isAccepted());
@@ -153,7 +155,8 @@ class ListingControllerTest {
     @Test
     void requestListingSummaryGeneration_returns404WhenListingNotFound() throws Exception {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.empty());
+        when(listingService.findById(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + id + " not found"));
 
         mockMvc.perform(post("/api/listings/{id}/summary/generate", id).with(jwt()))
             .andExpect(status().isNotFound());

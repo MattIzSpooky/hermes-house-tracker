@@ -168,7 +168,7 @@ class NotificationServiceTest {
         when(repo.findById(notificationId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.markRead(notificationId, userId))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
             .hasMessageContaining("Notification " + notificationId + " not found");
 
         verify(repo, never()).save(any());
@@ -185,7 +185,7 @@ class NotificationServiceTest {
         when(repo.findById(notificationId)).thenReturn(Optional.of(entity));
 
         assertThatThrownBy(() -> service.markRead(notificationId, callerId))
-            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+            .isInstanceOf(com.kropholler.dev.hermes.exception.ForbiddenException.class);
 
         verify(repo, never()).save(any());
     }

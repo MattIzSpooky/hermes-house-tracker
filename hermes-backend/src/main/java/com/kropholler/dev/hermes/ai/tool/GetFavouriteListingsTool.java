@@ -2,8 +2,10 @@ package com.kropholler.dev.hermes.ai.tool;
 
 import com.kropholler.dev.hermes.ai.chat.ChatListingCard;
 import com.kropholler.dev.hermes.ai.chat.ChatListingCardMapper;
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.favorites.FavoriteDto;
 import com.kropholler.dev.hermes.favorites.FavoriteService;
+import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -11,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -51,9 +54,9 @@ public class GetFavouriteListingsTool {
         }
 
         List<ChatListingCard> cards = favourites.stream()
-                .map(f -> listingService.findById(f.listingId()))
-                .filter(opt -> opt.isPresent())
-                .map(opt -> mapper.toChatListingCard(opt.get()))
+                .map(f -> findListingOrNull(f.listingId()))
+                .filter(Objects::nonNull)
+                .map(mapper::toChatListingCard)
                 .toList();
         resultHolder.set(cards);
         log.info("getFavouriteListings returned {} listing(s) for user {}", cards.size(), userId);
@@ -71,5 +74,13 @@ public class GetFavouriteListingsTool {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    private ListingDto findListingOrNull(UUID listingId) {
+        try {
+            return listingService.findById(listingId);
+        } catch (NotFoundException e) {
+            return null;
+        }
     }
 }

@@ -1,14 +1,13 @@
 package com.kropholler.dev.hermes.profile;
 
+import com.kropholler.dev.hermes.exception.UnprocessableEntityException;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -35,8 +34,7 @@ public class UserProfileService {
         GeocodeResult geocodeResult = geocodingService.geocodeAddress(houseNumber, street, city)
             .orElseThrow(() -> {
                 log.warn("updateAddress: geocoding failed for userId={}, street={}, houseNumber={}, city={}", userId, street, houseNumber, city);
-                return new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Address could not be geocoded");
+                return new UnprocessableEntityException("Address could not be geocoded");
             });
 
         UserProfileEntity entity = repository.findById(userId).orElseGet(() -> {

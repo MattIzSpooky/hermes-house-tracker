@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing;
 
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import com.kropholler.dev.hermes.listing.data.ListingEntity;
@@ -84,8 +85,9 @@ public class ListingService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ListingDto> findById(UUID id) {
-        return listingRepository.findById(id).map(this::toDto);
+    public ListingDto findById(UUID id) {
+        return listingRepository.findById(id).map(this::toDto)
+            .orElseThrow(() -> new NotFoundException("Listing " + id + " not found"));
     }
 
     @Transactional(readOnly = true)

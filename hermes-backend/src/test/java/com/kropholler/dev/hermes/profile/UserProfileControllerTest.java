@@ -85,8 +85,7 @@ class UserProfileControllerTest {
     void updateAddress_returns422WhenGeocodingFails() throws Exception {
         UUID subject = UUID.randomUUID();
         when(userProfileService.updateAddress(eq(subject), eq("Nonexistent"), eq("999"), eq(null), eq(null), eq("Nowhereville"), eq(null)))
-            .thenThrow(new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY, "Address could not be geocoded"));
+            .thenThrow(new com.kropholler.dev.hermes.exception.UnprocessableEntityException("Address could not be geocoded"));
 
         mockMvc.perform(put("/api/profile/address")
                 .with(jwt().jwt(builder -> builder.subject(subject.toString())))

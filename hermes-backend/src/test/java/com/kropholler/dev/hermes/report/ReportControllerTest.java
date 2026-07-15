@@ -12,7 +12,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.when;
@@ -41,7 +40,7 @@ class ReportControllerTest {
         response.setPriceChangePct(-6.7);
         response.setCurrentStatus("FOR_SALE");
 
-        when(reportService.generateReport(id)).thenReturn(Optional.of(report));
+        when(reportService.generateReport(id)).thenReturn(report);
         when(reportApiMapper.toReportResponse(report)).thenReturn(response);
 
         mockMvc.perform(get("/api/listings/{id}/report", id))
@@ -56,7 +55,8 @@ class ReportControllerTest {
     @Test
     void getListingReport_returnsNotFoundWhenAbsent() throws Exception {
         UUID id = UUID.randomUUID();
-        when(reportService.generateReport(id)).thenReturn(Optional.empty());
+        when(reportService.generateReport(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + id + " not found"));
 
         mockMvc.perform(get("/api/listings/{id}/report", id))
             .andExpect(status().isNotFound());

@@ -39,18 +39,17 @@ class ListingSummaryServiceTest {
 
         when(repository.findByListingId(listingId)).thenReturn(Optional.of(summary));
 
-        Optional<ListingSummaryDto> result = service.findByListingId(listingId);
-
-        assertThat(result).isPresent();
-        assertThat(result.get().summary()).isEqualTo("A lovely apartment in Amsterdam.");
+        assertThat(service.findByListingId(listingId).summary()).isEqualTo("A lovely apartment in Amsterdam.");
     }
 
     @Test
-    void findByListingId_returnsEmptyWhenNotFound() {
+    void findByListingId_throwsNotFoundExceptionWhenNotFound() {
         UUID listingId = UUID.randomUUID();
         when(repository.findByListingId(listingId)).thenReturn(Optional.empty());
 
-        assertThat(service.findByListingId(listingId)).isEmpty();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.findByListingId(listingId))
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
+            .hasMessageContaining("No summary available for listing " + listingId);
     }
 
     @Test

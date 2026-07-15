@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing.summary;
 
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.PriceHistoryEntryDto;
@@ -24,14 +25,20 @@ public class ListingSummaryGenerationService {
 
     @Transactional
     public void generate(UUID listingId) {
-        listingService.findById(listingId).ifPresentOrElse(listing -> {
-            log.info("Generating AI summary for listing {}", listingId);
-            List<PriceHistoryEntryDto> priceHistory = listingService.findPriceHistoryByListingId(listingId)
-                    .stream().filter(e -> "asking_price".equals(e.status())).toList();
-            String text = callLlm(listing, priceHistory);
-            upsertSummary(listingId, text);
-            log.info("AI summary saved for listing {}", listingId);
-        }, () -> log.warn("Cannot generate summary — listing {} not found", listingId));
+        ListingDto listing;
+        try {
+            listing = listingService.findById(listingId);
+        } catch (NotFoundException e) {
+            log.warn("Cannot generate summary — listing {} not found", listingId);
+            return;
+        }
+
+        log.info("Generating AI summary for listing {}", listingId);
+        List<PriceHistoryEntryDto> priceHistory = listingService.findPriceHistoryByListingId(listingId)
+                .stream().filter(e -> "asking_price".equals(e.status())).toList();
+        String text = callLlm(listing, priceHistory);
+        upsertSummary(listingId, text);
+        log.info("AI summary saved for listing {}", listingId);
     }
 
     private String callLlm(ListingDto listing, List<PriceHistoryEntryDto> priceHistory) {

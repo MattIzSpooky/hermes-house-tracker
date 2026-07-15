@@ -1,6 +1,6 @@
 package com.kropholler.dev.hermes.ai.tool;
 
-import com.kropholler.dev.hermes.listing.summary.ListingSummaryDto;
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.listing.summary.ListingSummaryService;
 import com.kropholler.dev.hermes.listing.ListingService;
 import io.micrometer.core.instrument.Counter;
@@ -40,11 +40,13 @@ public class GetListingSummaryTool {
         return listingService.findByAddress(street, houseNumber, city)
                 .map(dto -> {
                     log.debug("getListingSummary resolved listing {} for address", dto.id());
-                    return listingSummaryService.findByListingId(dto.id())
-                        .map(ListingSummaryDto::summary)
-                        .orElseGet(() -> dto.description() != null && !dto.description().isBlank()
+                    try {
+                        return listingSummaryService.findByListingId(dto.id()).summary();
+                    } catch (NotFoundException e) {
+                        return dto.description() != null && !dto.description().isBlank()
                                 ? dto.description()
-                                : "No description is available for this property yet.");
+                                : "No description is available for this property yet.";
+                    }
                 })
                 .orElseGet(() -> {
                     log.warn("getListingSummary found no listing for street={}, houseNumber={}, city={}",

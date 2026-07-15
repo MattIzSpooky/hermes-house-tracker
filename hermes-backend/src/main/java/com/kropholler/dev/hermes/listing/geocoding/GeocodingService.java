@@ -20,6 +20,26 @@ public class GeocodingService {
 
     @Transactional
     public Optional<CityEntity> findOrFetchCity(String cityName) {
+        return findOrFetchCityEntity(cityName);
+    }
+
+    public Optional<GeocodeResult> geocodeAddress(String houseNumber, String street, String city) {
+        log.debug("geocodeAddress called: houseNumber={}, street={}, city={}", houseNumber, street, city);
+        Optional<GeocodeResult> result = nominatimClient.geocodeAddress(houseNumber, street, city)
+            .map(r -> new GeocodeResult(Double.parseDouble(r.lon()), Double.parseDouble(r.lat()), r.boundingbox()));
+        if (result.isEmpty()) {
+            log.warn("geocodeAddress: no result for houseNumber={}, street={}, city={}", houseNumber, street, city);
+        }
+        return result;
+    }
+
+    @Transactional
+    public Optional<GeocodeResult> geocodeCity(String cityName) {
+        return findOrFetchCityEntity(cityName)
+            .map(c -> new GeocodeResult(c.getLongitude(), c.getLatitude(), null));
+    }
+
+    private Optional<CityEntity> findOrFetchCityEntity(String cityName) {
         Optional<CityEntity> cached = cityRepository.findByNameIgnoreCase(cityName);
         if (cached.isPresent()) {
             log.debug("findOrFetchCity cache hit for '{}'", cityName);
@@ -39,22 +59,6 @@ public class GeocodingService {
             log.warn("findOrFetchCity: Nominatim returned no result for '{}'", cityName);
         }
         return fetched;
-    }
-
-    public Optional<GeocodeResult> geocodeAddress(String houseNumber, String street, String city) {
-        log.debug("geocodeAddress called: houseNumber={}, street={}, city={}", houseNumber, street, city);
-        Optional<GeocodeResult> result = nominatimClient.geocodeAddress(houseNumber, street, city)
-            .map(r -> new GeocodeResult(Double.parseDouble(r.lon()), Double.parseDouble(r.lat()), r.boundingbox()));
-        if (result.isEmpty()) {
-            log.warn("geocodeAddress: no result for houseNumber={}, street={}, city={}", houseNumber, street, city);
-        }
-        return result;
-    }
-
-    @Transactional
-    public Optional<GeocodeResult> geocodeCity(String cityName) {
-        return findOrFetchCity(cityName)
-            .map(c -> new GeocodeResult(c.getLongitude(), c.getLatitude(), null));
     }
 
 }

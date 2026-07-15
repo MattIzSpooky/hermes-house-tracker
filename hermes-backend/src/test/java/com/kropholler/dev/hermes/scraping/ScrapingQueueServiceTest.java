@@ -125,17 +125,18 @@ class ScrapingQueueServiceTest {
         session.setType(ScrapingSessionType.SEARCH);
         when(repository.findById(id)).thenReturn(Optional.of(session));
 
-        Optional<ScrapingSessionDto> result = service.findById(id);
+        ScrapingSessionDto result = service.findById(id);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().type()).isEqualTo(ScrapingSessionType.SEARCH);
+        assertThat(result.type()).isEqualTo(ScrapingSessionType.SEARCH);
     }
 
     @Test
-    void findById_returnsEmptyWhenNotFound() {
+    void findById_throwsNotFoundExceptionWhenNotFound() {
         UUID id = UUID.randomUUID();
         when(repository.findById(id)).thenReturn(Optional.empty());
 
-        assertThat(service.findById(id)).isEmpty();
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.findById(id))
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
+            .hasMessageContaining("Scraping session " + id + " not found");
     }
 }

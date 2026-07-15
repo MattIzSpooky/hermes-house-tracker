@@ -78,16 +78,17 @@ class ListingServiceTest {
         when(listingRepository.findById(id)).thenReturn(Optional.of(e));
         stubToDto(e, expected);
 
-        assertThat(service.findById(id)).contains(expected);
+        assertThat(service.findById(id)).isEqualTo(expected);
     }
 
     @Test
-    void findById_notFound_returnsEmpty() {
+    void findById_notFound_throwsNotFoundException() {
         UUID id = UUID.randomUUID();
         when(listingRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThat(service.findById(id)).isEmpty();
-        verifyNoInteractions(mapper);
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.findById(id))
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
+            .hasMessageContaining("Listing " + id + " not found");
     }
 
     // ── findByFundaId ─────────────────────────────────────────────────────────
@@ -433,9 +434,9 @@ class ListingServiceTest {
         ListingDto expected = dto(id);
         when(mapper.toDto(e, null, null)).thenReturn(expected);
 
-        Optional<ListingDto> result = service.findById(id);
+        ListingDto result = service.findById(id);
 
-        assertThat(result).contains(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -476,9 +477,9 @@ class ListingServiceTest {
         ListingDto expected = dto(id);
         when(mapper.toDto(e, null, expectedLocation)).thenReturn(expected);
 
-        Optional<ListingDto> result = service.findById(id);
+        ListingDto result = service.findById(id);
 
-        assertThat(result).contains(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.report;
 
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.listing.ListingDto;
 import com.kropholler.dev.hermes.listing.ListingService;
 import com.kropholler.dev.hermes.listing.ListingStatus;
@@ -14,10 +15,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,28 +46,30 @@ class ReportServiceTest {
             entry(now.minus(10, ChronoUnit.DAYS), 380000, "asking_price")
         );
 
-        when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
+        when(listingService.findById(listingId)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(listingId)).thenReturn(history);
 
-        Optional<ListingReport> result = service.generateReport(listingId);
+        ListingReport result = service.generateReport(listingId);
 
-        assertThat(result).isPresent();
-        assertThat(result.get().initialPrice()).isEqualTo(400000);
-        assertThat(result.get().currentPrice()).isEqualTo(380000);
-        assertThat(result.get().priceChangePct()).isEqualTo(-5.0);
-        assertThat(result.get().priceHistory()).hasSize(2);
+        assertThat(result.initialPrice()).isEqualTo(400000);
+        assertThat(result.currentPrice()).isEqualTo(380000);
+        assertThat(result.priceChangePct()).isEqualTo(-5.0);
+        assertThat(result.priceHistory()).hasSize(2);
     }
 
     @Test
-    void generateReport_returnsEmptyWhenListingNotFound() {
+    void generateReport_throwsNotFoundExceptionWhenListingNotFound() {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.empty());
+        when(listingService.findById(id))
+            .thenThrow(new NotFoundException("Listing " + id + " not found"));
 
-        assertThat(service.generateReport(id)).isEmpty();
+        assertThatThrownBy(() -> service.generateReport(id))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("Listing " + id + " not found");
     }
 
     @Test
-    void generateReport_returnsEmptyWhenNoPriceHistory() {
+    void generateReport_throwsNotFoundExceptionWhenNoPriceHistory() {
         UUID listingId = UUID.randomUUID();
         Instant now = Instant.now();
 
@@ -77,10 +80,12 @@ class ReportServiceTest {
             null, null, null, null, null, null, null
         );
 
-        when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
+        when(listingService.findById(listingId)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(listingId)).thenReturn(List.of());
 
-        assertThat(service.generateReport(listingId)).isEmpty();
+        assertThatThrownBy(() -> service.generateReport(listingId))
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining("No report available for listing " + listingId);
     }
 
     @Test
@@ -95,11 +100,11 @@ class ReportServiceTest {
             null, null, null, null, null, null, null
         );
 
-        when(listingService.findById(listingId)).thenReturn(Optional.of(listing));
+        when(listingService.findById(listingId)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(listingId))
             .thenReturn(List.of(entry(now.minus(10, ChronoUnit.DAYS), 400000, "asking_price")));
 
-        ListingReport report = service.generateReport(listingId).orElseThrow();
+        ListingReport report = service.generateReport(listingId);
 
         assertThat(report.currentStatus()).isEqualTo(ListingStatus.SOLD);
     }

@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -81,7 +80,7 @@ class ScrapingSessionControllerTest {
         response.setId(sessionId);
         response.setStatus(ScrapingSessionResponse.StatusEnum.COMPLETED);
 
-        when(queueService.findById(sessionId)).thenReturn(Optional.of(dto));
+        when(queueService.findById(sessionId)).thenReturn(dto);
         when(scrapingSessionApiMapper.toResponse(dto)).thenReturn(response);
 
         mockMvc.perform(get("/api/scraping-sessions/{id}", sessionId)
@@ -94,7 +93,8 @@ class ScrapingSessionControllerTest {
     @Test
     void getScrapingSession_asAdmin_returns404WhenNotFound() throws Exception {
         UUID sessionId = UUID.randomUUID();
-        when(queueService.findById(sessionId)).thenReturn(Optional.empty());
+        when(queueService.findById(sessionId))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Scraping session " + sessionId + " not found"));
 
         mockMvc.perform(get("/api/scraping-sessions/{id}", sessionId)
                 .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))

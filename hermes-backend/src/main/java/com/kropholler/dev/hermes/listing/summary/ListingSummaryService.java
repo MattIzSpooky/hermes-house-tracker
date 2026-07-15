@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.listing.summary;
 
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.listing.async.JmsQueues;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,7 +8,6 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -19,11 +19,10 @@ public class ListingSummaryService {
     private final JmsTemplate jmsTemplate;
 
     @Transactional(readOnly = true)
-    public Optional<ListingSummaryDto> findByListingId(UUID listingId) {
-        Optional<ListingSummaryDto> dto = repository.findByListingId(listingId)
-            .map(s -> new ListingSummaryDto(s.getListingId(), s.getSummary(), s.getGeneratedAt()));
-        log.debug("findByListingId({}) found={}", listingId, dto.isPresent());
-        return dto;
+    public ListingSummaryDto findByListingId(UUID listingId) {
+        return repository.findByListingId(listingId)
+            .map(s -> new ListingSummaryDto(s.getListingId(), s.getSummary(), s.getGeneratedAt()))
+            .orElseThrow(() -> new NotFoundException("No summary available for listing " + listingId));
     }
 
     public void requestGeneration(UUID listingId) {

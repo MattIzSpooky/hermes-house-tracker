@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.profile;
 
+import com.kropholler.dev.hermes.exception.UnprocessableEntityException;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodeResult;
 import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +122,7 @@ class UserProfileServiceTest {
 
         assertThatThrownBy(() -> service.updateAddress(
                 userId, "Nonexistent Street", "999", null, "0000ZZ", "Nowhereville", "Utrecht"))
-            .isInstanceOf(ResponseStatusException.class)
+            .isInstanceOf(UnprocessableEntityException.class)
             .hasMessageContaining("could not be geocoded");
 
         verify(repository, never()).findById(any());

@@ -6,14 +6,13 @@ import com.kropholler.dev.hermes.ai.agent.task.handler.json.AreaResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.DigestPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.ResearchPayload;
 import com.kropholler.dev.hermes.ai.agent.task.handler.json.WatchPayload;
+import com.kropholler.dev.hermes.exception.ForbiddenException;
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.support.CronExpression;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -95,18 +94,21 @@ public class AgentTaskService {
 
     @Transactional
     public void delete(UUID taskId, UUID userId) {
-        AgentTaskEntity task = findOwned(taskId, userId);
+        AgentTaskEntity task = findOwnedEntity(taskId, userId);
         agentTaskRepository.delete(task);
         log.info("Deleted task {} for user {}", taskId, userId);
     }
 
     @Transactional(readOnly = true)
     public AgentTaskEntity findOwned(UUID taskId, UUID userId) {
+        return findOwnedEntity(taskId, userId);
+    }
+
+    private AgentTaskEntity findOwnedEntity(UUID taskId, UUID userId) {
         AgentTaskEntity task = agentTaskRepository.findById(taskId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Agent task " + taskId + " not found"));
+            .orElseThrow(() -> new NotFoundException("Agent task " + taskId + " not found"));
         if (!task.getUserId().equals(userId)) {
-            throw new AccessDeniedException("Not authorized to access this agent task");
+            throw new ForbiddenException("Not authorized to access this agent task");
         }
         return task;
     }

@@ -1,5 +1,8 @@
 package com.kropholler.dev.hermes.config;
 
+import com.kropholler.dev.hermes.exception.ForbiddenException;
+import com.kropholler.dev.hermes.exception.NotFoundException;
+import com.kropholler.dev.hermes.exception.UnprocessableEntityException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +20,33 @@ public class GlobalExceptionHandler {
         body.setTitle(ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString());
         body.setDetail(ex.getReason() != null ? ex.getReason() : ex.getMessage());
         return ResponseEntity.status(ex.getStatusCode()).body(body);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<ProblemDetail> handleNotFound(NotFoundException ex) {
+        return problemResponse(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(UnprocessableEntityException.class)
+    ResponseEntity<ProblemDetail> handleUnprocessableEntity(UnprocessableEntityException ex) {
+        return problemResponse(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    // Mirrors ProblemDetailAccessDeniedHandler's body shape so a domain-level authorization
+    // failure looks identical to one Spring Security's filter chain produces (e.g. @PreAuthorize).
+    @ExceptionHandler(ForbiddenException.class)
+    ResponseEntity<ProblemDetail> handleForbidden(ForbiddenException ex) {
+        ProblemDetail body = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        body.setTitle("FORBIDDEN");
+        body.setDetail(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    private ResponseEntity<ProblemDetail> problemResponse(HttpStatus status, String message) {
+        ProblemDetail body = ProblemDetail.forStatus(status);
+        body.setTitle(message != null ? message : status.toString());
+        body.setDetail(message);
+        return ResponseEntity.status(status).body(body);
     }
 
     // Let Spring Security's ExceptionTranslationFilter/AccessDeniedHandler handle authorization

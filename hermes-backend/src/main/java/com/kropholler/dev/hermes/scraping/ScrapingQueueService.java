@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.scraping;
 
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionEntity;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionMapper;
 import com.kropholler.dev.hermes.scraping.schedule.session.ScrapingSessionRepository;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -63,8 +63,9 @@ public class ScrapingQueueService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<ScrapingSessionDto> findById(UUID id) {
-        return sessionRepository.findById(id).map(mapper::toDto);
+    public ScrapingSessionDto findById(UUID id) {
+        return sessionRepository.findById(id).map(mapper::toDto)
+            .orElseThrow(() -> new NotFoundException("Scraping session " + id + " not found"));
     }
 
     private String buildSearchUrl(String city, Integer minPrice, Integer maxPrice,

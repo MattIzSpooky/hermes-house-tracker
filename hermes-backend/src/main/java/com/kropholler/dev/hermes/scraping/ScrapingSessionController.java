@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -37,10 +36,8 @@ public class ScrapingSessionController implements ScrapingSessionsApi {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ScrapingSessionResponse> getScrapingSession(UUID id) {
-        return queueService.findById(id)
-            .map(dto -> ResponseEntity.ok(scrapingSessionApiMapper.toResponse(dto)))
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Scraping session " + id + " not found"));
+        ScrapingSessionDto dto = queueService.findById(id);
+        return ResponseEntity.ok(scrapingSessionApiMapper.toResponse(dto));
     }
 
 }

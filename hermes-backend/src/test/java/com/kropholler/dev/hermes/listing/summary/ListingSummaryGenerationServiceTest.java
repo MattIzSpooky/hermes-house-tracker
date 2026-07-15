@@ -57,7 +57,7 @@ class ListingSummaryGenerationServiceTest {
         PriceHistoryEntryDto entry = new PriceHistoryEntryDto(
             UUID.randomUUID(), 450000, "asking_price", null, LocalDate.now(), Instant.now());
 
-        when(listingService.findById(id)).thenReturn(Optional.of(listing));
+        when(listingService.findById(id)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of(entry));
         when(summaryRepository.findByListingId(id)).thenReturn(Optional.empty());
         stubLlm("AI-generated summary.");
@@ -77,7 +77,7 @@ class ListingSummaryGenerationServiceTest {
             "Straat", "1", null, "5678CD", "Utrecht", "Utrecht",
             Instant.now(), Instant.now(), null, null, "   ", null, null, null, null, null, null);
         // empty price history covers L73 false branch
-        when(listingService.findById(id)).thenReturn(Optional.of(listing));
+        when(listingService.findById(id)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of());
 
         ListingSummaryEntity existing = new ListingSummaryEntity();
@@ -95,7 +95,8 @@ class ListingSummaryGenerationServiceTest {
     @Test
     void generate_listingNotFound_skipsLlmAndSave() {
         UUID id = UUID.randomUUID();
-        when(listingService.findById(id)).thenReturn(Optional.empty());
+        when(listingService.findById(id))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + id + " not found"));
 
         service.generate(id);
 
@@ -112,7 +113,7 @@ class ListingSummaryGenerationServiceTest {
             Instant.now(), Instant.now(), 300000, ListingStatus.FOR_SALE,
             null, 80, 4, 2, "B", null, null);
 
-        when(listingService.findById(id)).thenReturn(Optional.of(listing));
+        when(listingService.findById(id)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of());
         when(summaryRepository.findByListingId(id)).thenReturn(Optional.empty());
         when(chatClientBuilder.build()).thenReturn(chatClient);
@@ -138,7 +139,7 @@ class ListingSummaryGenerationServiceTest {
         PriceHistoryEntryDto nullPriceEntry = new PriceHistoryEntryDto(
             UUID.randomUUID(), null, "asking_price", null, LocalDate.now(), Instant.now());
 
-        when(listingService.findById(id)).thenReturn(Optional.of(listing));
+        when(listingService.findById(id)).thenReturn(listing);
         when(listingService.findPriceHistoryByListingId(id)).thenReturn(List.of(nullPriceEntry));
         when(summaryRepository.findByListingId(id)).thenReturn(Optional.empty());
         stubLlm("Summary for null price listing.");

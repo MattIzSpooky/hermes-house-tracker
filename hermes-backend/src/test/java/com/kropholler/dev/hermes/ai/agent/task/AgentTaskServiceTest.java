@@ -169,7 +169,7 @@ class AgentTaskServiceTest {
         when(repo.findById(taskId)).thenReturn(java.util.Optional.empty());
 
         assertThatThrownBy(() -> service.delete(taskId, userId))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
             .hasMessageContaining("Agent task " + taskId + " not found");
 
         verify(repo, org.mockito.Mockito.never()).delete(any());
@@ -185,7 +185,7 @@ class AgentTaskServiceTest {
         when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
 
         assertThatThrownBy(() -> service.delete(taskId, callerId))
-            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+            .isInstanceOf(com.kropholler.dev.hermes.exception.ForbiddenException.class);
 
         verify(repo, org.mockito.Mockito.never()).delete(any());
     }
@@ -210,7 +210,7 @@ class AgentTaskServiceTest {
         when(repo.findById(taskId)).thenReturn(java.util.Optional.empty());
 
         assertThatThrownBy(() -> service.findOwned(taskId, userId))
-            .isInstanceOf(org.springframework.web.server.ResponseStatusException.class)
+            .isInstanceOf(com.kropholler.dev.hermes.exception.NotFoundException.class)
             .hasMessageContaining("Agent task " + taskId + " not found");
     }
 
@@ -224,7 +224,7 @@ class AgentTaskServiceTest {
         when(repo.findById(taskId)).thenReturn(java.util.Optional.of(task));
 
         assertThatThrownBy(() -> service.findOwned(taskId, callerId))
-            .isInstanceOf(org.springframework.security.access.AccessDeniedException.class);
+            .isInstanceOf(com.kropholler.dev.hermes.exception.ForbiddenException.class);
     }
 
     @Test

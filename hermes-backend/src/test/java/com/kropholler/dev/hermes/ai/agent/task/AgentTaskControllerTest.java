@@ -6,13 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
@@ -100,7 +97,7 @@ class AgentTaskControllerTest {
         UUID taskId = UUID.randomUUID();
         UUID callerId = UUID.randomUUID();
 
-        doThrow(new AccessDeniedException("Not authorized to delete this agent task"))
+        doThrow(new com.kropholler.dev.hermes.exception.ForbiddenException("Not authorized to delete this agent task"))
             .when(agentTaskService).delete(any(), any());
 
         mockMvc.perform(delete("/api/agent-tasks/{id}", taskId)
@@ -130,7 +127,7 @@ class AgentTaskControllerTest {
     void runAgentTask_asAdmin_returns404WhenNotFound() throws Exception {
         UUID taskId = UUID.randomUUID();
         UUID callerId = UUID.randomUUID();
-        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "Agent task " + taskId + " not found"))
+        doThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Agent task " + taskId + " not found"))
             .when(agentTaskService).findOwned(taskId, callerId);
 
         mockMvc.perform(post("/api/agent-tasks/{id}/run", taskId)
@@ -145,7 +142,7 @@ class AgentTaskControllerTest {
     void runAgentTask_asAdmin_ownershipDenied_returns403ProblemDetail() throws Exception {
         UUID taskId = UUID.randomUUID();
         UUID callerId = UUID.randomUUID();
-        doThrow(new AccessDeniedException("Not authorized to access this agent task"))
+        doThrow(new com.kropholler.dev.hermes.exception.ForbiddenException("Not authorized to access this agent task"))
             .when(agentTaskService).findOwned(taskId, callerId);
 
         mockMvc.perform(post("/api/agent-tasks/{id}/run", taskId)

@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -60,7 +59,7 @@ class GetFavouriteListingsToolTest {
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", null, "Rotterdam", "Zuid-Holland", 400000, 3, 100, "A", "FOR_SALE");
 
         when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
-        when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
+        when(listingService.findById(listingId)).thenReturn(listingDto);
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
@@ -77,7 +76,8 @@ class GetFavouriteListingsToolTest {
         FavoriteDto fav = new FavoriteDto(listingId, Instant.now());
 
         when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
-        when(listingService.findById(listingId)).thenReturn(Optional.empty());
+        when(listingService.findById(listingId))
+            .thenThrow(new com.kropholler.dev.hermes.exception.NotFoundException("Listing " + listingId + " not found"));
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());
         String result = tool(holder).getFavouriteListings();
@@ -94,7 +94,7 @@ class GetFavouriteListingsToolTest {
         ChatListingCard card = new ChatListingCard(listingId, "Straat", "5", "C", "Rotterdam", "Zuid-Holland", null, 3, 100, "A", "FOR_SALE");
 
         when(favoriteService.findByUserId(clientId)).thenReturn(List.of(fav));
-        when(listingService.findById(listingId)).thenReturn(Optional.of(listingDto));
+        when(listingService.findById(listingId)).thenReturn(listingDto);
         when(mapper.toChatListingCard(listingDto)).thenReturn(card);
 
         AtomicReference<List<ChatListingCard>> holder = new AtomicReference<>(List.of());

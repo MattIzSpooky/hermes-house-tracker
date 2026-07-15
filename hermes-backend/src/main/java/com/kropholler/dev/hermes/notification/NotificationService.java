@@ -3,14 +3,13 @@ package com.kropholler.dev.hermes.notification;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import com.kropholler.dev.hermes.exception.ForbiddenException;
+import com.kropholler.dev.hermes.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -57,10 +56,9 @@ public class NotificationService {
     @Transactional
     public void markRead(UUID notificationId, UUID userId) {
         NotificationEntity notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Notification " + notificationId + " not found"));
+            .orElseThrow(() -> new NotFoundException("Notification " + notificationId + " not found"));
         if (!notification.getUserId().equals(userId)) {
-            throw new AccessDeniedException("Not authorized to mark this notification read");
+            throw new ForbiddenException("Not authorized to mark this notification read");
         }
         notification.setRead(true);
         notificationRepository.save(notification);
