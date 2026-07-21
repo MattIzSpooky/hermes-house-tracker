@@ -70,7 +70,9 @@ Sensitive columns (user profile address/email, chat message content, agent task 
 
 ### AI Chat
 
-The AI module exposes a WebSocket endpoint (`/ws/chat`) that streams responses from a locally running Ollama LLM. Chat history is persisted per user/session (`ChatHistoryService`) so conversations survive a page reload and are listed in a session sidebar. The backend provides the model with a set of function-calling tools:
+The AI module exposes a WebSocket endpoint (`/ws/chat`) that streams responses from a locally running Ollama LLM. Chat history is persisted per user/session (`ChatHistoryService`) so conversations survive a page reload and are listed in a session sidebar. The backend provides the model with two sets of function-calling tools.
+
+**Listing tools** (`ai.tool`):
 
 | Tool | What it does |
 |---|---|
@@ -80,6 +82,16 @@ The AI module exposes a WebSocket endpoint (`/ws/chat`) that streams responses f
 | `GetPriceHistoryTool` | Returns price history for a listing |
 | `CompareListingsTool` | Side-by-side comparison of multiple listings |
 | `GetFavouriteListingsTool` | Fetches the user's saved favorites |
+
+**Agent task tools** (`ai.agent.tool`, contributed via `AgentChatToolProvider`):
+
+| Tool | What it does |
+|---|---|
+| `SaveWatchTool` | Creates a daily watch alert for matching listings |
+| `ListWatchesTool` | Lists active watches; optionally cancels one by id |
+| `TriggerDigestTool` | Schedules a weekly market digest for one or more cities |
+| `TriggerResearchTool` | Queues a one-off background research task |
+| `SaveAreaResearchTool` | Queues an area research task for a specific city |
 
 Additional tools can be contributed by implementing the `ChatToolProvider` interface.
 
@@ -111,7 +123,7 @@ Listings are geocoded on ingest (via Nominatim) and stored as PostGIS `geometry(
 | Observability | Micrometer + OpenTelemetry + Grafana LGTM |
 | API contract | OpenAPI 3 (code-generated interfaces via openapi-generator-maven-plugin) |
 | Build | Maven |
-| Testing | JUnit 5 + Mockito + Testcontainers + JaCoCo |
+| Testing | JUnit 5 + Mockito + Testcontainers + Cucumber + JaCoCo |
 
 ### Frontend
 
@@ -178,6 +190,10 @@ hermes-house-tracker/
 │   │   ├── openapi/                OpenAPI specs (one per module, source of truth)
 │   │   ├── db/migration/           Flyway migrations (V1–V16)
 │   │   └── application.properties
+│   ├── src/test/
+│   │   ├── java/.../cucumber/      Cucumber step definitions + Spring config
+│   │   └── resources/features/     Feature files (favorites, listing-search, listing-report,
+│   │                               notifications, watches, profile, scraping)
 │   ├── keycloak/realm-export.json  Dev realm (clients, roles, test users)
 │   └── pom.xml
 ├── funda-proxy/                    Python/FastAPI proxy for Funda.nl
@@ -272,7 +288,12 @@ cd hermes-backend
 ./mvnw test
 ```
 
-Spring Modulith's module structure verification is part of the test suite — module dependency violations fail the build. Some repository/context tests use Testcontainers and require Docker to be running. JaCoCo coverage reports are generated under `target/site/jacoco/`.
+The test suite has two layers:
+
+- **Unit / slice tests** — JUnit 5 + Mockito covering services, mappers, controllers, and repository queries. Spring Modulith's module structure verification runs here too — module dependency violations fail the build.
+- **End-to-end Cucumber tests** — 62 scenarios across 7 feature files (`favorites`, `listing-search`, `listing-report`, `notifications`, `watches`, `profile`, `scraping`) run against a real Spring Boot context with a PostGIS Testcontainer and MockMvc. Each scenario exercises the full HTTP → service → database path, including auth (JWT via `SecurityMockMvcRequestPostProcessors`), ownership checks, and error responses.
+
+Repository/context tests and Cucumber tests require Docker to be running. JaCoCo coverage reports are generated under `target/site/jacoco/`.
 
 ## Key Design Decisions
 
