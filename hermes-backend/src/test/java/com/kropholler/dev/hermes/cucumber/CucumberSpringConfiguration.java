@@ -7,10 +7,12 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import com.kropholler.dev.hermes.listing.geocoding.GeocodingService;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -42,4 +44,7 @@ public class CucumberSpringConfiguration {
 
     @MockitoBean
     JavaMailSender javaMailSender;
+
+    @MockitoSpyBean
+    GeocodingService geocodingService;
 }
