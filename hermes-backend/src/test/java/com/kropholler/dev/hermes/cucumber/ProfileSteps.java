@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,10 +56,7 @@ public class ProfileSteps {
 
     @When("the user retrieves their profile")
     public void userRetrievesProfile() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/profile")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/profile"))));
     }
 
     @When("the user saves their address as street {string} number {string} in {string}")
@@ -68,12 +64,11 @@ public class ProfileSteps {
         String body = """
             {"street":"%s","houseNumber":"%s","city":"%s"}
             """.formatted(street, number, city);
-        context.setLastResponse(mockMvc.perform(
+        context.setLastResponse(mockMvc.perform(context.withAuth(
             put("/api/profile/address")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        )));
     }
 
     @Then("the profile has no saved address")
@@ -84,5 +79,10 @@ public class ProfileSteps {
     @Then("the profile city is {string}")
     public void profileCityIs(String expected) throws Exception {
         context.getLastResponse().andExpect(jsonPath("$.city").value(expected));
+    }
+
+    @Then("the profile latitude is not null")
+    public void profileLatitudeIsNotNull() throws Exception {
+        context.getLastResponse().andExpect(jsonPath("$.latitude").isNotEmpty());
     }
 }

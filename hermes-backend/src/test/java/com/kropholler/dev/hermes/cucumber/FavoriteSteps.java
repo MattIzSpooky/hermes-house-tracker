@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -49,34 +48,23 @@ public class FavoriteSteps {
 
     @When("the user adds the listing to their favourites")
     public void userAddsFavourite() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            put("/api/favorites/{id}", listingId)
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(put("/api/favorites/{id}", listingId))));
     }
 
     @When("the user removes the listing from their favourites")
     public void userRemovesFavourite() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            delete("/api/favorites/{id}", listingId)
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(delete("/api/favorites/{id}", listingId))));
     }
 
     @When("the user retrieves their favourites")
     public void userRetrievesFavourites() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/favorites")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/favorites"))));
     }
 
     @Then("the user has exactly {int} favourite(s)")
     public void userHasExactlyNFavourites(int expected) throws Exception {
-        mockMvc.perform(
-            get("/api/favorites")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ).andExpect(jsonPath("$.length()").value(expected));
+        mockMvc.perform(context.withAuth(get("/api/favorites")))
+            .andExpect(jsonPath("$.length()").value(expected));
     }
 
     @Then("the response body contains {int} favourite(s)")

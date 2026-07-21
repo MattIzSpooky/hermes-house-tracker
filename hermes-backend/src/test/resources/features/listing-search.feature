@@ -12,6 +12,11 @@ Feature: Searching for and retrieving property listings
     Then the response status is 200
     And the response contains 3 listings
 
+  Scenario: Search returns an empty page when no listings exist
+    When the user searches for listings with no filters
+    Then the response status is 200
+    And the response contains 0 listings
+
   Scenario: Filtering by city returns only matching listings
     Given a listing in "Amsterdam" and a listing in "Rotterdam" exist
     When the user searches for listings in "Amsterdam"
@@ -24,6 +29,14 @@ Feature: Searching for and retrieving property listings
     Then the response status is 200
     And the response contains 1 listing
 
+  Scenario: Combining city and bedroom filters narrows the results
+    Given a listing with 4 bedrooms in "Amsterdam" exists
+    And a listing with 2 bedrooms in "Amsterdam" exists
+    And a listing with 4 bedrooms in "Rotterdam" exists
+    When the user searches for listings in "Amsterdam" with at least 3 bedrooms
+    Then the response status is 200
+    And the response contains 1 listing
+
   Scenario: Radius search returns only listings within range
     Given a listing in Amsterdam at coordinates 4.9041 52.3676
     And a listing in Groningen at coordinates 6.5665 53.2194
@@ -31,6 +44,12 @@ Feature: Searching for and retrieving property listings
     When the user searches within 50 km of city "Amsterdam"
     Then the response status is 200
     And the response contains 1 listing
+
+  Scenario: Radius search returns no results when no listings are nearby
+    Given the city Amsterdam is known at coordinates 4.9041 52.3676
+    When the user searches within 5 km of city "Amsterdam"
+    Then the response status is 200
+    And the response contains 0 listings
 
   Scenario: Retrieving a listing by id returns the details
     Given a listing in "Utrecht" exists
@@ -40,3 +59,13 @@ Feature: Searching for and retrieving property listings
   Scenario: Retrieving a non-existent listing returns 404
     When the user retrieves a listing with an unknown id
     Then the response status is 404
+
+  Scenario: Unauthenticated user cannot search listings
+    Given the user is not authenticated
+    When the user searches for listings with no filters
+    Then the response status is 401
+
+  Scenario: Unauthenticated user cannot retrieve a listing by id
+    Given the user is not authenticated
+    When the user retrieves a listing with an unknown id
+    Then the response status is 401

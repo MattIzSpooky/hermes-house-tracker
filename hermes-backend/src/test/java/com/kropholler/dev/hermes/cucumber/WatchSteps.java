@@ -7,19 +7,17 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ScenarioScope
 public class WatchSteps {
@@ -73,6 +71,11 @@ public class WatchSteps {
         context.setLastResponse(mockMvc.perform(withAuth(post("/api/agent-tasks/{id}/run", watchId))));
     }
 
+    @When("the user tries to trigger an unknown watch")
+    public void userTriesToTriggerUnknownWatch() throws Exception {
+        context.setLastResponse(mockMvc.perform(withAuth(post("/api/agent-tasks/{id}/run", UUID.randomUUID()))));
+    }
+
     @Then("the response contains {int} watch(es)")
     public void responseContainsNWatches(int expected) throws Exception {
         context.getLastResponse().andExpect(jsonPath("$.length()").value(expected));
@@ -87,6 +90,7 @@ public class WatchSteps {
     // ── helpers ───────────────────────────────────────────────────────────────
 
     private MockHttpServletRequestBuilder withAuth(MockHttpServletRequestBuilder req) {
+        if (!context.isAuthenticated()) return req;
         if (admin) {
             return req.with(jwt()
                 .jwt(b -> b
@@ -94,6 +98,6 @@ public class WatchSteps {
                     .claim("realm_access", Map.of("roles", List.of("ADMIN"))))
                 .authorities(new SimpleGrantedAuthority("ROLE_ADMIN")));
         }
-        return req.with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())));
+        return context.withAuth(req);
     }
 }

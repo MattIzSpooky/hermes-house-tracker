@@ -10,7 +10,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -25,6 +24,11 @@ public class NotificationSteps {
     @Given("the user has an unread notification")
     public void userHasUnreadNotification() {
         context.setNotificationId(saveNotification(context.getCurrentUserId(), false).getId());
+    }
+
+    @Given("the user has a read notification")
+    public void userHasReadNotification() {
+        context.setNotificationId(saveNotification(context.getCurrentUserId(), true).getId());
     }
 
     @Given("the user has {int} unread notifications")
@@ -43,46 +47,48 @@ public class NotificationSteps {
     @When("the user marks the notification as read")
     public void userMarksNotificationAsRead() throws Exception {
         context.setLastResponse(mockMvc.perform(
-            patch("/api/notifications/{id}/read", context.getNotificationId())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
+            context.withAuth(patch("/api/notifications/{id}/read", context.getNotificationId()))
         ));
     }
 
     @When("the current user tries to mark it as read")
     public void currentUserTriesToMarkItAsRead() throws Exception {
         context.setLastResponse(mockMvc.perform(
-            patch("/api/notifications/{id}/read", context.getNotificationId())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
+            context.withAuth(patch("/api/notifications/{id}/read", context.getNotificationId()))
         ));
     }
 
     @When("the user tries to mark an unknown notification as read")
     public void userTriesToMarkUnknownNotificationAsRead() throws Exception {
         context.setLastResponse(mockMvc.perform(
-            patch("/api/notifications/{id}/read", UUID.randomUUID())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
+            context.withAuth(patch("/api/notifications/{id}/read", UUID.randomUUID()))
         ));
+    }
+
+    @When("the user retrieves their notifications")
+    public void userRetrievesNotifications() throws Exception {
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/notifications"))));
     }
 
     @When("the user requests their unread count")
     public void userRequestsUnreadCount() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/notifications/unread-count")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/notifications/unread-count"))));
     }
 
     @Then("the user now has {int} unread notifications")
     public void userNowHasNUnreadNotificationsAssertion(int expected) throws Exception {
-        mockMvc.perform(
-            get("/api/notifications/unread-count")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ).andExpect(jsonPath("$.count").value(expected));
+        mockMvc.perform(context.withAuth(get("/api/notifications/unread-count")))
+            .andExpect(jsonPath("$.count").value(expected));
     }
 
     @Then("the unread count is {int}")
     public void unreadCountIs(int expected) throws Exception {
         context.getLastResponse().andExpect(jsonPath("$.count").value(expected));
+    }
+
+    @Then("the response contains {int} notification(s)")
+    public void responseContainsNNotifications(int expected) throws Exception {
+        context.getLastResponse().andExpect(jsonPath("$.length()").value(expected));
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

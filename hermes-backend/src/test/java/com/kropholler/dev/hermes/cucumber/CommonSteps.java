@@ -16,6 +16,11 @@ public class CommonSteps {
         // currentUserId is already set in ScenarioContext
     }
 
+    @Given("the user is not authenticated")
+    public void theUserIsNotAuthenticated() {
+        context.setAuthenticated(false);
+    }
+
     @Then("the response status is {int}")
     public void responseStatusIs(int expected) throws Exception {
         context.getLastResponse().andExpect(status().is(expected));

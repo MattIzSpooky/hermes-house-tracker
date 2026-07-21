@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -44,16 +43,14 @@ public class ListingReportSteps {
     @When("the user requests the report for that listing")
     public void userRequestsReport() throws Exception {
         context.setLastResponse(mockMvc.perform(
-            get("/api/listings/{id}/report", context.getListingId())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
+            context.withAuth(get("/api/listings/{id}/report", context.getListingId()))
         ));
     }
 
     @When("the user requests a report for an unknown listing id")
     public void userRequestsReportForUnknownId() throws Exception {
         context.setLastResponse(mockMvc.perform(
-            get("/api/listings/{id}/report", UUID.randomUUID())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
+            context.withAuth(get("/api/listings/{id}/report", UUID.randomUUID()))
         ));
     }
 

@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.Instant;
 import java.util.UUID;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -52,6 +51,13 @@ public class ListingSearchSteps {
         save(e2);
     }
 
+    @Given("a listing with {int} bedrooms in {string} exists")
+    public void listingWithBedroomsInCityExists(int bedrooms, String city) {
+        ListingEntity e = listing("funda-" + UUID.randomUUID(), city);
+        e.setBedrooms(bedrooms);
+        save(e);
+    }
+
     @Given("a listing in Amsterdam at coordinates {double} {double}")
     public void listingInAmsterdamAtCoordinates(double lon, double lat) {
         ListingEntity e = listing("funda-ams-" + UUID.randomUUID(), "Amsterdam");
@@ -79,52 +85,43 @@ public class ListingSearchSteps {
 
     @When("the user searches for listings with no filters")
     public void userSearchesWithNoFilters() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/listings")
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings"))));
     }
 
     @When("the user searches for listings in {string}")
     public void userSearchesForListingsInCity(String city) throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/listings").param("city", city)
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings").param("city", city))));
     }
 
     @When("the user searches for listings with at least {int} bedrooms")
     public void userSearchesWithMinBedrooms(int minBedrooms) throws Exception {
-        context.setLastResponse(mockMvc.perform(
+        context.setLastResponse(mockMvc.perform(context.withAuth(
             get("/api/listings").param("minBedrooms", String.valueOf(minBedrooms))
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        )));
+    }
+
+    @When("the user searches for listings in {string} with at least {int} bedrooms")
+    public void userSearchesInCityWithMinBedrooms(String city, int minBedrooms) throws Exception {
+        context.setLastResponse(mockMvc.perform(context.withAuth(
+            get("/api/listings").param("city", city).param("minBedrooms", String.valueOf(minBedrooms))
+        )));
     }
 
     @When("the user searches within {int} km of city {string}")
     public void userSearchesWithinKmOfCity(int radiusKm, String city) throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/listings")
-                .param("city", city)
-                .param("radiusKm", String.valueOf(radiusKm))
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(
+            get("/api/listings").param("city", city).param("radiusKm", String.valueOf(radiusKm))
+        )));
     }
 
     @When("the user retrieves that listing by id")
     public void userRetrievesThatListingById() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/listings/{id}", context.getListingId())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings/{id}", context.getListingId()))));
     }
 
     @When("the user retrieves a listing with an unknown id")
     public void userRetrievesUnknownListing() throws Exception {
-        context.setLastResponse(mockMvc.perform(
-            get("/api/listings/{id}", UUID.randomUUID())
-                .with(jwt().jwt(b -> b.subject(context.getCurrentUserId().toString())))
-        ));
+        context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings/{id}", UUID.randomUUID()))));
     }
 
     @Then("the response contains {int} listing(s)")
