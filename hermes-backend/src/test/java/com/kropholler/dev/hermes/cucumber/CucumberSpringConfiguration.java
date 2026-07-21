@@ -1,5 +1,6 @@
 package com.kropholler.dev.hermes.cucumber;
 
+import com.kropholler.dev.hermes.funda.FundaClient;
 import io.cucumber.spring.CucumberContextConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -44,6 +45,9 @@ public class CucumberSpringConfiguration {
 
     @MockitoBean
     JavaMailSender javaMailSender;
+
+    @MockitoBean
+    FundaClient fundaClient;
 
     @MockitoSpyBean
     GeocodingService geocodingService;

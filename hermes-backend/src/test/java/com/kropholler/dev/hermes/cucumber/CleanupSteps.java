@@ -23,6 +23,7 @@ public class CleanupSteps {
         jdbcTemplate.execute("DELETE FROM favorites");
         jdbcTemplate.execute("DELETE FROM notifications");
         jdbcTemplate.execute("DELETE FROM agent_tasks");
+        jdbcTemplate.execute("DELETE FROM scraping_sessions");
         jdbcTemplate.execute("DELETE FROM listings");
         jdbcTemplate.execute("DELETE FROM cities");
     }

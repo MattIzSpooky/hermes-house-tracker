@@ -21,6 +21,11 @@ public class CommonSteps {
         context.setAuthenticated(false);
     }
 
+    @Given("the user has admin privileges")
+    public void theUserHasAdminPrivileges() {
+        context.setAdmin(true);
+    }
+
     @Then("the response status is {int}")
     public void responseStatusIs(int expected) throws Exception {
         context.getLastResponse().andExpect(status().is(expected));
