@@ -5,6 +5,24 @@ import { ErrorAlertComponent } from '../../shared/error-alert.component';
 import { SectionCardComponent } from '../../shared/section-card.component';
 import { SpinnerComponent } from '../../shared/spinner.component';
 
+interface AddressForm {
+  street: string;
+  houseNumber: string;
+  houseNumberAddition: string;
+  zipCode: string;
+  city: string;
+  province: string;
+}
+
+const EMPTY_FORM: AddressForm = {
+  street: '',
+  houseNumber: '',
+  houseNumberAddition: '',
+  zipCode: '',
+  city: '',
+  province: '',
+};
+
 @Component({
   selector: 'app-profile-page',
   standalone: true,
@@ -14,37 +32,35 @@ import { SpinnerComponent } from '../../shared/spinner.component';
 export class ProfilePageComponent {
   protected readonly svc = inject(ProfileService);
 
-  street = '';
-  houseNumber = '';
-  houseNumberAddition = '';
-  zipCode = '';
-  city = '';
-  province = '';
+  protected form: AddressForm = { ...EMPTY_FORM };
 
   constructor() {
     this.svc.loadProfile();
     effect(() => {
       const address = this.svc.address();
       if (address) {
-        this.street = address.street ?? '';
-        this.houseNumber = address.houseNumber ?? '';
-        this.houseNumberAddition = address.houseNumberAddition ?? '';
-        this.zipCode = address.zipCode ?? '';
-        this.city = address.city ?? '';
-        this.province = address.province ?? '';
+        this.form = {
+          street: address.street ?? '',
+          houseNumber: address.houseNumber ?? '',
+          houseNumberAddition: address.houseNumberAddition ?? '',
+          zipCode: address.zipCode ?? '',
+          city: address.city ?? '',
+          province: address.province ?? '',
+        };
       }
     });
   }
 
   submit(): void {
-    if (!this.street || !this.houseNumber || !this.city) return;
+    const { street, houseNumber, city, houseNumberAddition, zipCode, province } = this.form;
+    if (!street || !houseNumber || !city) return;
     this.svc.updateAddress({
-      street: this.street,
-      houseNumber: this.houseNumber,
-      city: this.city,
-      ...(this.houseNumberAddition && { houseNumberAddition: this.houseNumberAddition }),
-      ...(this.zipCode && { zipCode: this.zipCode }),
-      ...(this.province && { province: this.province }),
+      street,
+      houseNumber,
+      city,
+      ...(houseNumberAddition && { houseNumberAddition }),
+      ...(zipCode && { zipCode }),
+      ...(province && { province }),
     });
   }
 }

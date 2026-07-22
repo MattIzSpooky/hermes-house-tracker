@@ -50,17 +50,7 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
     this.viewMode = mode;
   }
 
-  protected street = '';
-  protected houseNumber = '';
-  protected houseNumberAddition = '';
-  protected zipCode = '';
-  protected province = '';
-  protected minBedrooms: number | null = null;
-  protected minRooms: number | null = null;
-  protected minLivingAreaM2: number | null = null;
-  protected city = '';
-  protected energyLabel = '';
-  protected radiusKm: number | null = null;
+  protected filter: ListingSearchFilter = {};
 
   private readonly filterChange$ = new Subject<void>();
   private filterSub?: Subscription;
@@ -82,17 +72,7 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.street = '';
-    this.houseNumber = '';
-    this.houseNumberAddition = '';
-    this.zipCode = '';
-    this.province = '';
-    this.minBedrooms = null;
-    this.minRooms = null;
-    this.minLivingAreaM2 = null;
-    this.city = '';
-    this.energyLabel = '';
-    this.radiusKm = null;
+    this.filter = {};
     this.currentPage = 0;
     this.svc.loadListings(0, this.pageSize);
   }
@@ -118,23 +98,7 @@ export class ListingsPageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/listings', id]);
   }
 
-  private get currentFilter(): ListingSearchFilter {
-    return {
-      street: this.street || undefined,
-      houseNumber: this.houseNumber || undefined,
-      houseNumberAddition: this.houseNumberAddition || undefined,
-      zipCode: this.zipCode || undefined,
-      province: this.province || undefined,
-      minBedrooms: this.minBedrooms,
-      minRooms: this.minRooms,
-      minLivingAreaM2: this.minLivingAreaM2,
-      city: this.city || undefined,
-      energyLabel: this.energyLabel || undefined,
-      radiusKm: this.radiusKm,
-    };
-  }
-
   private loadWithFilters(): void {
-    this.svc.loadListings(this.currentPage, this.pageSize, this.currentFilter);
+    this.svc.loadListings(this.currentPage, this.pageSize, this.filter);
   }
 }
