@@ -142,6 +142,14 @@ export interface ProblemDetail {
 
 export const TERMINAL_STATUSES: SessionStatus[] = ['COMPLETED', 'FAILED', 'TIMED_OUT'];
 
+export function isSessionPolling(session: { status: SessionStatus } | null): boolean {
+  return session !== null && !TERMINAL_STATUSES.includes(session.status);
+}
+
+export function isSessionTerminal(session: { status: SessionStatus } | null): boolean {
+  return session !== null && TERMINAL_STATUSES.includes(session.status);
+}
+
 export interface ChatListingCard {
   id: string;
   street?: string;

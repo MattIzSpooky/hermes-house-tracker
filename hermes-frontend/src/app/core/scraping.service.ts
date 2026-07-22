@@ -5,7 +5,7 @@ import {
   CreateScrapingSessionRequest,
   GeocodingBackfillResponse,
   ScrapingSessionResponse,
-  TERMINAL_STATUSES,
+  isSessionTerminal,
 } from './api.types';
 import { pollUntil } from './poll';
 import { defaultErrorMessage, runRequest } from './request-state';
@@ -41,7 +41,7 @@ export class ScrapingService {
     this.pollSub = pollUntil(() => this.http.get<ScrapingSessionResponse>(`/api/scraping-sessions/${id}`), {
       maxConsecutiveErrors: MAX_POLL_ERRORS,
       onNext: data => this.session.set(data),
-      isTerminal: data => TERMINAL_STATUSES.includes(data.status),
+      isTerminal: isSessionTerminal,
     });
   }
 

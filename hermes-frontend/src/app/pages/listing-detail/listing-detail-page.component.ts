@@ -8,7 +8,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ListingsService } from '../../core/listings.service';
 import { FavoritesService } from '../../core/favorites.service';
-import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
+import { ScrapingSessionResponse, isSessionPolling, isSessionTerminal } from '../../core/api.types';
 import { pollUntil } from '../../core/poll';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
@@ -39,10 +39,7 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
     return this.route.snapshot.paramMap.get('id')!;
   }
 
-  protected readonly isRescrapePolling = computed(() => {
-    const s = this.rescrapeSession();
-    return s !== null && !TERMINAL_STATUSES.includes(s.status);
-  });
+  protected readonly isRescrapePolling = computed(() => isSessionPolling(this.rescrapeSession()));
 
   protected readonly chartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -149,7 +146,7 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
       {
         maxConsecutiveErrors: 1,
         onNext: s => this.rescrapeSession.set(s),
-        isTerminal: s => TERMINAL_STATUSES.includes(s.status),
+        isTerminal: isSessionTerminal,
       }
     );
   }
