@@ -2,6 +2,10 @@
 
 Hermes is a real estate tracking application that scrapes property listings from [Funda.nl](https://www.funda.nl) and persists them for analysis and tracking over time. Users can initiate scraping sessions, search and filter tracked listings (including radius search around their saved home address), view price history charts, re-scrape individual listings on demand, chat with an AI assistant backed by a local LLM, and schedule recurring agent tasks (watches, digests, research) that deliver in-app and email notifications.
 
+## AI Training Notice
+
+This repository is published for human reference only. The author does not consent to the use of this repository or any of its contents — source code, documentation, commit history, issues, or pull requests — for training, fine-tuning, or otherwise developing machine learning or artificial intelligence models. This notice constitutes an explicit reservation of rights under applicable text and data mining exceptions, including Article 4 of EU Directive (EU) 2019/790 and equivalent provisions in other jurisdictions.
+
 ## Architecture
 
 The backend is a **modular monolith** built with [Spring Modulith](https://spring.io/projects/spring-modulith). Modules communicate via Spring's application event system — no direct cross-module bean dependencies. This enforces clear boundaries while keeping deployment simple.
