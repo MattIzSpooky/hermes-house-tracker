@@ -8,6 +8,7 @@ import {
   TERMINAL_STATUSES,
 } from './api.types';
 import { pollUntil } from './poll';
+import { defaultErrorMessage, runRequest } from './request-state';
 const MAX_POLL_ERRORS = 3;
 
 @Injectable({ providedIn: 'root' })
@@ -24,21 +25,15 @@ export class ScrapingService {
   readonly backfillError = signal<string | null>(null);
 
   createSession(req: CreateScrapingSessionRequest): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.http
-      .post<ScrapingSessionResponse>('/api/scraping-sessions', req)
-      .subscribe({
-        next: data => {
-          this.session.set(data);
-          this.loading.set(false);
-          this.startPolling(data.id);
-        },
-        error: err => {
-          this.error.set(err.error?.detail ?? 'Failed to create scraping session');
-          this.loading.set(false);
-        },
-      });
+    runRequest(
+      this.http.post<ScrapingSessionResponse>('/api/scraping-sessions', req),
+      this,
+      data => {
+        this.session.set(data);
+        this.startPolling(data.id);
+      },
+      defaultErrorMessage('Failed to create scraping session')
+    );
   }
 
   private startPolling(id: string): void {
@@ -56,18 +51,12 @@ export class ScrapingService {
   }
 
   backfillGeocoding(): void {
-    this.backfillLoading.set(true);
-    this.backfillError.set(null);
     this.backfillResult.set(null);
-    this.http.post<GeocodingBackfillResponse>('/api/listings/geocoding/backfill', {}).subscribe({
-      next: data => {
-        this.backfillResult.set(data);
-        this.backfillLoading.set(false);
-      },
-      error: err => {
-        this.backfillError.set(err.error?.detail ?? 'Failed to queue geocoding backfill');
-        this.backfillLoading.set(false);
-      },
-    });
+    runRequest(
+      this.http.post<GeocodingBackfillResponse>('/api/listings/geocoding/backfill', {}),
+      { loading: this.backfillLoading, error: this.backfillError },
+      data => this.backfillResult.set(data),
+      defaultErrorMessage('Failed to queue geocoding backfill')
+    );
   }
 }

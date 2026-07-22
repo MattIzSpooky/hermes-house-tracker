@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, catchError, of, switchMap } from 'rxjs';
 import {
   AiSummaryResponse,
   ListingDetailResponse,
@@ -10,6 +10,7 @@ import {
   ScrapingSessionResponse,
 } from './api.types';
 import { pollUntil } from './poll';
+import { defaultErrorMessage, runRequest } from './request-state';
 
 @Injectable({ providedIn: 'root' })
 export class ListingsService {
@@ -29,9 +30,11 @@ export class ListingsService {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
+  private notFoundOr(fallback: string): (err: any) => string {
+    return err => (err.status === 404 ? '404' : (err.error?.detail ?? fallback));
+  }
+
   loadListings(page: number, size: number, filter?: ListingSearchFilter): void {
-    this.loading.set(true);
-    this.error.set(null);
     let params = new HttpParams().set('page', page).set('size', size);
     if (filter?.street) params = params.set('street', filter.street);
     if (filter?.houseNumber) params = params.set('houseNumber', filter.houseNumber);
@@ -44,55 +47,36 @@ export class ListingsService {
     if (filter?.minLivingAreaM2) params = params.set('minLivingAreaM2', filter.minLivingAreaM2);
     if (filter?.energyLabel?.trim()) params = params.set('energyLabel', filter.energyLabel.trim());
     if (filter?.radiusKm) params = params.set('radiusKm', filter.radiusKm);
-    this.http.get<ListingPage>('/api/listings', { params }).subscribe({
-      next: data => {
-        this.listings.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err.error?.detail ?? 'Failed to load listings');
-        this.loading.set(false);
-      },
-    });
+    runRequest(
+      this.http.get<ListingPage>('/api/listings', { params }),
+      this,
+      data => this.listings.set(data),
+      defaultErrorMessage('Failed to load listings')
+    );
   }
 
   loadReport(id: string): void {
-    this.loading.set(true);
-    this.error.set(null);
     this.report.set(null);
-    this.http.get<ListingReportResponse>(`/api/listings/${id}/report`).subscribe({
-      next: data => {
-        this.report.set(data);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load report'));
-        this.loading.set(false);
-      },
-    });
+    runRequest(
+      this.http.get<ListingReportResponse>(`/api/listings/${id}/report`),
+      this,
+      data => this.report.set(data),
+      this.notFoundOr('Failed to load report')
+    );
   }
 
   loadListingAndReport(id: string): void {
-    this.loading.set(true);
-    this.error.set(null);
     this.currentListing.set(null);
     this.report.set(null);
-    this.http.get<ListingDetailResponse>(`/api/listings/${id}`).subscribe({
-      next: listing => {
+    const listingThenReport$ = this.http.get<ListingDetailResponse>(`/api/listings/${id}`).pipe(
+      switchMap(listing => {
         this.currentListing.set(listing);
-        this.http.get<ListingReportResponse>(`/api/listings/${id}/report`).subscribe({
-          next: report => {
-            this.report.set(report);
-            this.loading.set(false);
-          },
-          error: () => this.loading.set(false),
-        });
-      },
-      error: err => {
-        this.error.set(err.status === 404 ? '404' : (err.error?.detail ?? 'Failed to load listing'));
-        this.loading.set(false);
-      },
-    });
+        return this.http
+          .get<ListingReportResponse>(`/api/listings/${id}/report`)
+          .pipe(catchError(() => of(null)));
+      })
+    );
+    runRequest(listingThenReport$, this, report => this.report.set(report), this.notFoundOr('Failed to load listing'));
   }
 
   readonly summaryGenerating = signal(false);
