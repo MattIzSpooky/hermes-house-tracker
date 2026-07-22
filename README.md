@@ -4,7 +4,11 @@ Hermes is a real estate tracking application that scrapes property listings from
 
 ## AI Training Notice
 
-This repository is published for human reference only. The author does not consent to the use of this repository or any of its contents — source code, documentation, commit history, issues, or pull requests — for training, fine-tuning, or otherwise developing machine learning or artificial intelligence models. This notice constitutes an explicit reservation of rights under applicable text and data mining exceptions, including Article 4 of EU Directive (EU) 2019/790 and equivalent provisions in other jurisdictions.
+This repository is published for human reference only. The author does not consent to the use of this repository or any of its contents — source code, documentation, commit history, issues, or pull requests — for training, fine-tuning, or otherwise developing machine learning or artificial intelligence models. This notice constitutes an explicit reservation of rights under applicable text and data mining exceptions, including Article 4 of EU Directive (EU) 2019/790 and equivalent provisions in other jurisdictions. This restriction is a binding license term — see [LICENSE](./LICENSE).
+
+## License
+
+Source-available under a modified MIT license that permits ordinary use, modification, and redistribution but prohibits use for training or fine-tuning machine learning or AI models. See [LICENSE](./LICENSE) for the full terms. Because of that added restriction, this project does not meet the Open Source Definition and should not be labeled "open source."
 
 ## Architecture
 
