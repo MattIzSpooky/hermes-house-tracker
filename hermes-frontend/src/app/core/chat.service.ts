@@ -4,6 +4,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { catchError, of } from 'rxjs';
 import Keycloak from 'keycloak-js';
 import { ChatListingCard, ChatMessageResponse, ChatSessionSummaryResponse, ResultFrame, TokenFrame } from './api.types';
+import { createAuthenticatedStompClient } from './stomp-client';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -37,16 +38,7 @@ export class ChatService {
   constructor() {
     this._sessionId = localStorage.getItem('hermes-chat-session') ?? this.generateSessionId();
 
-    this.client = new Client({
-      brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
-      reconnectDelay: 5000,
-      beforeConnect: async () => {
-        await this.keycloak.updateToken(30);
-        this.client.connectHeaders = { Authorization: `Bearer ${this.keycloak.token}` };
-      },
-      onConnect: () => this.subscribe(),
-    });
-
+    this.client = createAuthenticatedStompClient(this.keycloak, () => this.subscribe());
     this.client.activate();
 
     effect(() => {

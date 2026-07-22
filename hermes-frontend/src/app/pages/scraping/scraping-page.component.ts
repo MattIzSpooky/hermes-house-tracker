@@ -3,7 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ScrapingService } from '../../core/scraping.service';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
-import { CreateScrapingSessionRequest, TERMINAL_STATUSES } from '../../core/api.types';
+import { CreateScrapingSessionRequest, isSessionPolling, isSessionTerminal } from '../../core/api.types';
 import { SpinnerComponent } from '../../shared/spinner.component';
 import { ErrorAlertComponent } from '../../shared/error-alert.component';
 import { SectionCardComponent } from '../../shared/section-card.component';
@@ -24,15 +24,8 @@ export class ScrapingPageComponent implements OnDestroy {
   maxArea: number | null = null;
   pageLimit = 3;
 
-  protected readonly isPolling = computed(() => {
-    const s = this.svc.session();
-    return s !== null && !TERMINAL_STATUSES.includes(s.status);
-  });
-
-  protected readonly isTerminal = computed(() => {
-    const s = this.svc.session();
-    return s !== null && TERMINAL_STATUSES.includes(s.status);
-  });
+  protected readonly isPolling = computed(() => isSessionPolling(this.svc.session()));
+  protected readonly isTerminal = computed(() => isSessionTerminal(this.svc.session()));
 
   ngOnDestroy(): void {
     this.svc.stopPolling();

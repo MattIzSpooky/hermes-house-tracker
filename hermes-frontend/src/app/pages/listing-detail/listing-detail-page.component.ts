@@ -3,11 +3,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { ListingsService } from '../../core/listings.service';
 import { FavoritesService } from '../../core/favorites.service';
-import { ScrapingSessionResponse, TERMINAL_STATUSES } from '../../core/api.types';
+import { ScrapingSessionResponse, isSessionPolling, isSessionTerminal } from '../../core/api.types';
+import { pollUntil } from '../../core/poll';
 import { EuroPricePipe } from '../../shared/euro-price.pipe';
 import { StatusBadgeComponent } from '../../shared/status-badge.component';
 import { SpinnerComponent } from '../../shared/spinner.component';
@@ -31,16 +33,13 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
 
   protected readonly rescrapeSession = signal<ScrapingSessionResponse | null>(null);
   protected readonly rescrapeLoading = signal(false);
-  private pollInterval?: ReturnType<typeof setInterval>;
+  private pollSub?: Subscription;
 
   protected get id(): string {
     return this.route.snapshot.paramMap.get('id')!;
   }
 
-  protected readonly isRescrapePolling = computed(() => {
-    const s = this.rescrapeSession();
-    return s !== null && !TERMINAL_STATUSES.includes(s.status);
-  });
+  protected readonly isRescrapePolling = computed(() => isSessionPolling(this.rescrapeSession()));
 
   protected readonly chartOptions: ChartOptions<'line'> = {
     responsive: true,
@@ -142,25 +141,18 @@ export class ListingDetailPageComponent implements OnInit, OnDestroy {
 
   private startRescrapePoll(sessionId: string): void {
     this.clearPoll();
-    this.pollInterval = setInterval(() => {
-      this.http
-        .get<ScrapingSessionResponse>(`/api/scraping-sessions/${sessionId}`)
-        .subscribe({
-          next: s => {
-            this.rescrapeSession.set(s);
-            if (TERMINAL_STATUSES.includes(s.status)) {
-              this.clearPoll();
-            }
-          },
-          error: () => this.clearPoll(),
-        });
-    }, 3000);
+    this.pollSub = pollUntil(
+      () => this.http.get<ScrapingSessionResponse>(`/api/scraping-sessions/${sessionId}`),
+      {
+        maxConsecutiveErrors: 1,
+        onNext: s => this.rescrapeSession.set(s),
+        isTerminal: isSessionTerminal,
+      }
+    );
   }
 
   private clearPoll(): void {
-    if (this.pollInterval !== undefined) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = undefined;
-    }
+    this.pollSub?.unsubscribe();
+    this.pollSub = undefined;
   }
 }

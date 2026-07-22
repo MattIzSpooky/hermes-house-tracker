@@ -31,8 +31,8 @@ describe('ProfilePageComponent', () => {
     req.flush({ street: 'Dorpstraat', houseNumber: '10', city: 'Utrecht' });
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.street).toBe('Dorpstraat');
-    expect(fixture.componentInstance.houseNumber).toBe('10');
-    expect(fixture.componentInstance.city).toBe('Utrecht');
+    expect((fixture.componentInstance as any).form.street).toBe('Dorpstraat');
+    expect((fixture.componentInstance as any).form.houseNumber).toBe('10');
+    expect((fixture.componentInstance as any).form.city).toBe('Utrecht');
   });
 });

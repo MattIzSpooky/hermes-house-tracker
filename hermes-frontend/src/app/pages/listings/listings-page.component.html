@@ -5,39 +5,39 @@
 
 <app-section-card padding="p-4" class="mb-4">
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3">
-    <input [(ngModel)]="street" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.street" (input)="onFilterChange()"
       placeholder="Street"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="houseNumber" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.houseNumber" (input)="onFilterChange()"
       placeholder="House number"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="houseNumberAddition" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.houseNumberAddition" (input)="onFilterChange()"
       placeholder="Addition"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="zipCode" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.zipCode" (input)="onFilterChange()"
       placeholder="Zip code"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="province" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.province" (input)="onFilterChange()"
       placeholder="Province"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
   </div>
   <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
-    <input type="number" [(ngModel)]="minBedrooms" (input)="onFilterChange()"
+    <input type="number" [(ngModel)]="filter.minBedrooms" (input)="onFilterChange()"
       placeholder="Min bedrooms"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input type="number" [(ngModel)]="minRooms" (input)="onFilterChange()"
+    <input type="number" [(ngModel)]="filter.minRooms" (input)="onFilterChange()"
       placeholder="Min rooms"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input type="number" [(ngModel)]="minLivingAreaM2" (input)="onFilterChange()"
+    <input type="number" [(ngModel)]="filter.minLivingAreaM2" (input)="onFilterChange()"
       placeholder="Min area (m²)"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="energyLabel" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.energyLabel" (input)="onFilterChange()"
       placeholder="Energy label"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input [(ngModel)]="city" (input)="onFilterChange()"
+    <input [(ngModel)]="filter.city" (input)="onFilterChange()"
       placeholder="City"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />
-    <input type="number" [(ngModel)]="radiusKm" (input)="onFilterChange()"
+    <input type="number" [(ngModel)]="filter.radiusKm" (input)="onFilterChange()"
       placeholder="Radius (km)"
       min="1"
       class="rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none" />

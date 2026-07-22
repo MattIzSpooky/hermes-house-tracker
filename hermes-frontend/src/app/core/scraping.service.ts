@@ -1,19 +1,20 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   CreateScrapingSessionRequest,
   GeocodingBackfillResponse,
   ScrapingSessionResponse,
-  SessionStatus,
-  TERMINAL_STATUSES,
+  isSessionTerminal,
 } from './api.types';
+import { pollUntil } from './poll';
+import { defaultErrorMessage, runRequest } from './request-state';
 const MAX_POLL_ERRORS = 3;
 
 @Injectable({ providedIn: 'root' })
 export class ScrapingService {
   private readonly http = inject(HttpClient);
-  private pollInterval?: ReturnType<typeof setInterval>;
-  private consecutivePollErrors = 0;
+  private pollSub?: Subscription;
 
   readonly session = signal<ScrapingSessionResponse | null>(null);
   readonly loading = signal(false);
@@ -24,69 +25,38 @@ export class ScrapingService {
   readonly backfillError = signal<string | null>(null);
 
   createSession(req: CreateScrapingSessionRequest): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.http
-      .post<ScrapingSessionResponse>('/api/scraping-sessions', req)
-      .subscribe({
-        next: data => {
-          this.session.set(data);
-          this.loading.set(false);
-          this.startPolling(data.id);
-        },
-        error: err => {
-          this.error.set(err.error?.detail ?? 'Failed to create scraping session');
-          this.loading.set(false);
-        },
-      });
-  }
-
-  pollSession(id: string): void {
-    this.http
-      .get<ScrapingSessionResponse>(`/api/scraping-sessions/${id}`)
-      .subscribe({
-        next: data => {
-          this.consecutivePollErrors = 0;
-          this.session.set(data);
-          if (TERMINAL_STATUSES.includes(data.status)) {
-            this.stopPolling();
-          }
-        },
-        error: () => {
-          this.consecutivePollErrors++;
-          if (this.consecutivePollErrors >= MAX_POLL_ERRORS) {
-            this.stopPolling();
-          }
-        },
-      });
+    runRequest(
+      this.http.post<ScrapingSessionResponse>('/api/scraping-sessions', req),
+      this,
+      data => {
+        this.session.set(data);
+        this.startPolling(data.id);
+      },
+      defaultErrorMessage('Failed to create scraping session')
+    );
   }
 
   private startPolling(id: string): void {
     this.stopPolling();
-    this.consecutivePollErrors = 0;
-    this.pollInterval = setInterval(() => this.pollSession(id), 3000);
+    this.pollSub = pollUntil(() => this.http.get<ScrapingSessionResponse>(`/api/scraping-sessions/${id}`), {
+      maxConsecutiveErrors: MAX_POLL_ERRORS,
+      onNext: data => this.session.set(data),
+      isTerminal: isSessionTerminal,
+    });
   }
 
   stopPolling(): void {
-    if (this.pollInterval !== undefined) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = undefined;
-    }
+    this.pollSub?.unsubscribe();
+    this.pollSub = undefined;
   }
 
   backfillGeocoding(): void {
-    this.backfillLoading.set(true);
-    this.backfillError.set(null);
     this.backfillResult.set(null);
-    this.http.post<GeocodingBackfillResponse>('/api/listings/geocoding/backfill', {}).subscribe({
-      next: data => {
-        this.backfillResult.set(data);
-        this.backfillLoading.set(false);
-      },
-      error: err => {
-        this.backfillError.set(err.error?.detail ?? 'Failed to queue geocoding backfill');
-        this.backfillLoading.set(false);
-      },
-    });
+    runRequest(
+      this.http.post<GeocodingBackfillResponse>('/api/listings/geocoding/backfill', {}),
+      { loading: this.backfillLoading, error: this.backfillError },
+      data => this.backfillResult.set(data),
+      defaultErrorMessage('Failed to queue geocoding backfill')
+    );
   }
 }
