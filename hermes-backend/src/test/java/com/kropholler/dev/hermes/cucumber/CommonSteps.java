@@ -26,8 +26,43 @@ public class CommonSteps {
         context.setAdmin(true);
     }
 
-    @Then("the response status is {int}")
-    public void responseStatusIs(int expected) throws Exception {
-        context.getLastResponse().andExpect(status().is(expected));
+    @Then("the request succeeds")
+    public void theRequestSucceeds() throws Exception {
+        context.getLastResponse().andExpect(status().isOk());
+    }
+
+    @Then("the request succeeds and creates a new resource")
+    public void theRequestSucceedsAndCreatesANewResource() throws Exception {
+        context.getLastResponse().andExpect(status().isCreated());
+    }
+
+    @Then("the request is accepted for processing")
+    public void theRequestIsAcceptedForProcessing() throws Exception {
+        context.getLastResponse().andExpect(status().isAccepted());
+    }
+
+    @Then("the request succeeds with no content")
+    public void theRequestSucceedsWithNoContent() throws Exception {
+        context.getLastResponse().andExpect(status().isNoContent());
+    }
+
+    @Then("the request is rejected because the user is not signed in")
+    public void theRequestIsRejectedBecauseTheUserIsNotSignedIn() throws Exception {
+        context.getLastResponse().andExpect(status().isUnauthorized());
+    }
+
+    @Then("the request is rejected because the user is not allowed to do this")
+    public void theRequestIsRejectedBecauseTheUserIsNotAllowedToDoThis() throws Exception {
+        context.getLastResponse().andExpect(status().isForbidden());
+    }
+
+    @Then("the request fails because the resource cannot be found")
+    public void theRequestFailsBecauseTheResourceCannotBeFound() throws Exception {
+        context.getLastResponse().andExpect(status().isNotFound());
+    }
+
+    @Then("the request is rejected because the input is invalid")
+    public void theRequestIsRejectedBecauseTheInputIsInvalid() throws Exception {
+        context.getLastResponse().andExpect(status().isUnprocessableEntity());
     }
 }

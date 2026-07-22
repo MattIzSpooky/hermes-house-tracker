@@ -8,6 +8,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
@@ -22,11 +23,15 @@ public class WatchSteps {
     @Autowired ScenarioContext context;
 
     private UUID watchId;
+    private UUID myWatchId;
+    private String myWatchName;
 
     @Given("the user has an active watch named {string}")
     public void userHasActiveWatch(String name) {
         WatchPayload payload = new WatchPayload(null, null, null, null, null, null, null, null, null, null);
         watchId = agentTaskService.createWatch(context.getCurrentUserId(), name, payload).id();
+        myWatchId = watchId;
+        myWatchName = name;
     }
 
     @Given("another user has an active watch")
@@ -67,7 +72,14 @@ public class WatchSteps {
 
     @Then("the response contains {int} watch(es)")
     public void responseContainsNWatches(int expected) throws Exception {
-        context.getLastResponse().andExpect(jsonPath("$.length()").value(expected));
+        ResultActions result = context.getLastResponse()
+            .andExpect(jsonPath("$.length()").value(expected));
+        if (expected > 0) {
+            result.andExpect(jsonPath("$[0].id").value(myWatchId.toString()))
+                .andExpect(jsonPath("$[0].name").value(myWatchName))
+                .andExpect(jsonPath("$[0].type").value("WATCH"))
+                .andExpect(jsonPath("$[0].status").exists());
+        }
     }
 
     @Then("the user has {int} watches")

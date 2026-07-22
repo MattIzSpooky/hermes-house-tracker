@@ -7,6 +7,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.UUID;
 
@@ -88,7 +89,14 @@ public class NotificationSteps {
 
     @Then("the response contains {int} notification(s)")
     public void responseContainsNNotifications(int expected) throws Exception {
-        context.getLastResponse().andExpect(jsonPath("$.length()").value(expected));
+        ResultActions result = context.getLastResponse()
+            .andExpect(jsonPath("$.length()").value(expected));
+        if (expected > 0) {
+            result.andExpect(jsonPath("$[0].id").value(context.getNotificationId().toString()))
+                .andExpect(jsonPath("$[0].title").value("Test notification"))
+                .andExpect(jsonPath("$[0].body").value("Test body"))
+                .andExpect(jsonPath("$[0].read").value(false));
+        }
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import io.cucumber.java.en.When;
 import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -63,13 +64,20 @@ public class FavoriteSteps {
 
     @Then("the user has exactly {int} favourite(s)")
     public void userHasExactlyNFavourites(int expected) throws Exception {
-        mockMvc.perform(context.withAuth(get("/api/favorites")))
-            .andExpect(jsonPath("$.length()").value(expected));
+        assertFavourites(mockMvc.perform(context.withAuth(get("/api/favorites"))), expected);
     }
 
     @Then("the response body contains {int} favourite(s)")
     public void responseBodyContainsNFavourites(int expected) throws Exception {
-        context.getLastResponse().andExpect(jsonPath("$.length()").value(expected));
+        assertFavourites(context.getLastResponse(), expected);
+    }
+
+    private void assertFavourites(ResultActions result, int expected) throws Exception {
+        result.andExpect(jsonPath("$.length()").value(expected));
+        if (expected > 0) {
+            result.andExpect(jsonPath("$[0].listingId").value(listingId.toString()))
+                .andExpect(jsonPath("$[0].savedAt").exists());
+        }
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

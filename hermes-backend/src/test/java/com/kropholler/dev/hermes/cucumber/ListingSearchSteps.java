@@ -12,6 +12,7 @@ import io.cucumber.spring.ScenarioScope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -27,6 +28,8 @@ public class ListingSearchSteps {
     @Autowired CityRepository cityRepository;
     @Autowired JdbcTemplate jdbcTemplate;
     @Autowired ScenarioContext context;
+
+    private String searchedCity;
 
     @Given("{int} listings exist in the database")
     public void nListingsExistInDatabase(int count) {
@@ -85,16 +88,19 @@ public class ListingSearchSteps {
 
     @When("the user searches for listings with no filters")
     public void userSearchesWithNoFilters() throws Exception {
+        searchedCity = null;
         context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings"))));
     }
 
     @When("the user searches for listings in {string}")
     public void userSearchesForListingsInCity(String city) throws Exception {
+        searchedCity = city;
         context.setLastResponse(mockMvc.perform(context.withAuth(get("/api/listings").param("city", city))));
     }
 
     @When("the user searches for listings with at least {int} bedrooms")
     public void userSearchesWithMinBedrooms(int minBedrooms) throws Exception {
+        searchedCity = null;
         context.setLastResponse(mockMvc.perform(context.withAuth(
             get("/api/listings").param("minBedrooms", String.valueOf(minBedrooms))
         )));
@@ -102,6 +108,7 @@ public class ListingSearchSteps {
 
     @When("the user searches for listings in {string} with at least {int} bedrooms")
     public void userSearchesInCityWithMinBedrooms(String city, int minBedrooms) throws Exception {
+        searchedCity = city;
         context.setLastResponse(mockMvc.perform(context.withAuth(
             get("/api/listings").param("city", city).param("minBedrooms", String.valueOf(minBedrooms))
         )));
@@ -109,6 +116,7 @@ public class ListingSearchSteps {
 
     @When("the user searches within {int} km of city {string}")
     public void userSearchesWithinKmOfCity(int radiusKm, String city) throws Exception {
+        searchedCity = city;
         context.setLastResponse(mockMvc.perform(context.withAuth(
             get("/api/listings").param("city", city).param("radiusKm", String.valueOf(radiusKm))
         )));
@@ -126,7 +134,14 @@ public class ListingSearchSteps {
 
     @Then("the response contains {int} listing(s)")
     public void responseContainsNListings(int expected) throws Exception {
-        context.getLastResponse().andExpect(jsonPath("$.totalElements").value(expected));
+        ResultActions result = context.getLastResponse()
+            .andExpect(jsonPath("$.totalElements").value(expected))
+            .andExpect(jsonPath("$.content.length()").value(expected));
+        if (searchedCity != null) {
+            for (int i = 0; i < expected; i++) {
+                result.andExpect(jsonPath("$.content[%d].city".formatted(i)).value(searchedCity));
+            }
+        }
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
