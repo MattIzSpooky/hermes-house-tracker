@@ -4,6 +4,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { catchError, of } from 'rxjs';
 import Keycloak from 'keycloak-js';
 import { NotificationResponse } from './api.types';
+import { createAuthenticatedStompClient } from './stomp-client';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService implements OnDestroy {
@@ -18,15 +19,7 @@ export class NotificationsService implements OnDestroy {
   readonly unreadCount = computed(() => this._notifications().filter(n => !n.read).length);
 
   constructor() {
-    this.stompClient = new Client({
-      brokerURL: `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws/chat`,
-      reconnectDelay: 5000,
-      beforeConnect: async () => {
-        await this.keycloak.updateToken(30);
-        this.stompClient.connectHeaders = { Authorization: `Bearer ${this.keycloak.token}` };
-      },
-      onConnect: () => this.subscribeAndLoad(),
-    });
+    this.stompClient = createAuthenticatedStompClient(this.keycloak, () => this.subscribeAndLoad());
     this.stompClient.activate();
   }
 
