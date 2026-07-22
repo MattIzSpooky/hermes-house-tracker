@@ -1,19 +1,19 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Subscription } from 'rxjs';
 import {
   CreateScrapingSessionRequest,
   GeocodingBackfillResponse,
   ScrapingSessionResponse,
-  SessionStatus,
   TERMINAL_STATUSES,
 } from './api.types';
+import { pollUntil } from './poll';
 const MAX_POLL_ERRORS = 3;
 
 @Injectable({ providedIn: 'root' })
 export class ScrapingService {
   private readonly http = inject(HttpClient);
-  private pollInterval?: ReturnType<typeof setInterval>;
-  private consecutivePollErrors = 0;
+  private pollSub?: Subscription;
 
   readonly session = signal<ScrapingSessionResponse | null>(null);
   readonly loading = signal(false);
@@ -41,37 +41,18 @@ export class ScrapingService {
       });
   }
 
-  pollSession(id: string): void {
-    this.http
-      .get<ScrapingSessionResponse>(`/api/scraping-sessions/${id}`)
-      .subscribe({
-        next: data => {
-          this.consecutivePollErrors = 0;
-          this.session.set(data);
-          if (TERMINAL_STATUSES.includes(data.status)) {
-            this.stopPolling();
-          }
-        },
-        error: () => {
-          this.consecutivePollErrors++;
-          if (this.consecutivePollErrors >= MAX_POLL_ERRORS) {
-            this.stopPolling();
-          }
-        },
-      });
-  }
-
   private startPolling(id: string): void {
     this.stopPolling();
-    this.consecutivePollErrors = 0;
-    this.pollInterval = setInterval(() => this.pollSession(id), 3000);
+    this.pollSub = pollUntil(() => this.http.get<ScrapingSessionResponse>(`/api/scraping-sessions/${id}`), {
+      maxConsecutiveErrors: MAX_POLL_ERRORS,
+      onNext: data => this.session.set(data),
+      isTerminal: data => TERMINAL_STATUSES.includes(data.status),
+    });
   }
 
   stopPolling(): void {
-    if (this.pollInterval !== undefined) {
-      clearInterval(this.pollInterval);
-      this.pollInterval = undefined;
-    }
+    this.pollSub?.unsubscribe();
+    this.pollSub = undefined;
   }
 
   backfillGeocoding(): void {

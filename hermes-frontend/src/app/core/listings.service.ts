@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import {
   AiSummaryResponse,
   ListingDetailResponse,
@@ -9,6 +9,7 @@ import {
   ListingSearchFilter,
   ScrapingSessionResponse,
 } from './api.types';
+import { pollUntil } from './poll';
 
 @Injectable({ providedIn: 'root' })
 export class ListingsService {
@@ -95,7 +96,7 @@ export class ListingsService {
   }
 
   readonly summaryGenerating = signal(false);
-  private summaryPollInterval?: ReturnType<typeof setInterval>;
+  private summaryPollSub?: Subscription;
 
   loadSummary(id: string): void {
     this.summary.set(null);
@@ -119,23 +120,18 @@ export class ListingsService {
 
   private startSummaryPoll(id: string): void {
     this.clearSummaryPoll();
-    this.summaryPollInterval = setInterval(() => {
-      this.http.get<AiSummaryResponse>(`/api/listings/${id}/summary`).subscribe({
-        next: data => {
-          this.summary.set(data);
-          this.summaryGenerating.set(false);
-          this.clearSummaryPoll();
-        },
-        error: () => {},
-      });
-    }, 3000);
+    this.summaryPollSub = pollUntil(() => this.http.get<AiSummaryResponse>(`/api/listings/${id}/summary`), {
+      isTerminal: () => true,
+      onNext: data => {
+        this.summary.set(data);
+        this.summaryGenerating.set(false);
+      },
+    });
   }
 
   clearSummaryPoll(): void {
-    if (this.summaryPollInterval !== undefined) {
-      clearInterval(this.summaryPollInterval);
-      this.summaryPollInterval = undefined;
-    }
+    this.summaryPollSub?.unsubscribe();
+    this.summaryPollSub = undefined;
   }
 
   rescrape(id: string): Observable<ScrapingSessionResponse> {
